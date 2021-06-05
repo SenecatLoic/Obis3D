@@ -7,7 +7,7 @@ import java.util.Date;
 public abstract class LoaderZoneSpecies {
 
     public static LoaderZoneSpecies createLoaderSpecies(){
-        return new LoaderZoneSpeciesFile();
+        return new HttpLoaderZoneSpecies();
     }
 
     public abstract ApiZoneSpeciesResponse getZoneSpeciesByName(String name);
