@@ -2,8 +2,20 @@ package com.geosis.api.response;
 
 import com.geosis.api.object.Observation;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public class ApiObservationResponse extends ApiResponse {
-    private List<Observation> data;
+    private ArrayList<Observation> data;
+
+    public ApiObservationResponse(){
+        data = new ArrayList<>();
+    }
+
+    public void addObservation(Observation observation){
+        data.add(observation);
+    }
+
+    public ArrayList<Observation> getData() {
+        return data;
+    }
 }

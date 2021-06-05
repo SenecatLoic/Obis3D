@@ -6,9 +6,15 @@ public class Zone {
     /**
      * X Latitude, Y Longitude
      */
-    private Point2D coords1;
-    private Point2D coords2;
-    private Point2D coords3;
-    private Point2D coords4;
-    private Point2D coords5;
+    private Point2D[] coords;
+    private int index;
+
+    public Zone(){
+        coords = new Point2D[5];
+        index = 0;
+    }
+
+    public void addCoords(double lat, double lon){
+        coords[index] = new Point2D(lat,lon);
+    }
 }
