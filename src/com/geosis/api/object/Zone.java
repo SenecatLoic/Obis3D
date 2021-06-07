@@ -16,5 +16,6 @@ public class Zone {
 
     public void addCoords(double lat, double lon){
         coords[index] = new Point2D(lat,lon);
+        index++;
     }
 }
