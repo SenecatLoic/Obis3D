@@ -5,6 +5,7 @@ import com.geosis.api.object.Observation;
 import java.util.ArrayList;
 
 public class ApiObservationResponse extends ApiResponse {
+
     private ArrayList<Observation> data;
 
     public ApiObservationResponse(){

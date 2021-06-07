@@ -1,14 +1,19 @@
 package com.geosis.api.object;
 
-public class ZoneSpecies {
-    private ZoneSpecies zoneSpecies;
+public class ZoneSpecies{
+
+    private Zone zone;
 
     private String name;
 
     private int nbSignals;
 
-    public void setZoneSpecies(ZoneSpecies zoneSpecies) {
-        this.zoneSpecies = zoneSpecies;
+    public void setZone(Zone zone) {
+        this.zone = zone;
+    }
+
+    public Zone getZone(){
+        return this.zone;
     }
 
     public void setName(String name) {

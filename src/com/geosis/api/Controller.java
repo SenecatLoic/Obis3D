@@ -1,5 +1,11 @@
 package com.geosis.api;
 
+import com.geosis.api.loader.HttpLoaderSpecies;
+import com.geosis.api.loader.LoaderSpecies;
+import com.geosis.api.loader.LoaderZoneSpecies;
+import com.geosis.api.object.ZoneSpecies;
+import com.geosis.api.response.ApiNameResponse;
+import com.geosis.api.response.ApiZoneSpeciesResponse;
 import com.interactivemesh.jfx.importer.ImportException;
 import com.interactivemesh.jfx.importer.obj.ObjModelImporter;
 import javafx.animation.AnimationTimer;
@@ -14,12 +20,14 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
+import javafx.scene.shape.CullFace;
 import javafx.scene.shape.MeshView;
 import javafx.scene.control.Button;
-import javafx.scene.control.*;
+import javafx.scene.shape.TriangleMesh;
 
-import java.awt.*;
+import javafx.geometry.Point2D;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
@@ -51,34 +59,98 @@ public class Controller implements Initializable {
 
     public Group earth;
 
-    public Controller(){
-
-    }
+    public Controller(){ }
 
     @Override
-    public void initialize(URL location, ResourceBundle resource){
+    public void initialize(URL location, ResourceBundle resource) {
 
-/*
-        RangeSlider rangeSlider = new RangeSlider(1900, 2021, 1900, 2021);
-        rangeSlider.setShowTickLabels(true);
-        rangeSlider.setShowTickMarks(true);
-        rangeSlider.setMajorTickUnit(25);
-        rangeSlider.setBlockIncrement(10);
-        rangeSlider.setPrefWidth(280);
+        //Create a Pane et graph scene root for the 3D content
+        Group root3D = new Group();
+        createEarth(root3D);
 
-        paneInterval.getChildren().add(rangeSlider);
- */
-
+        LoaderSpecies loader = LoaderSpecies.createLoaderSpecies();
 
         btnSearch.setOnAction(actionEvent -> {
             String s = scientificName.getText();
             System.out.println(s);
+            afficheZoneByName(s);
         });
 
+    }
 
-        //Create a Pane et graph scene root for the 3D content
-        Group root3D = new Group();
 
+    public void afficheZoneByName(String name){
+
+        LoaderZoneSpecies loaderZoneSpecies = LoaderZoneSpecies.createLoaderSpecies();
+
+        ApiZoneSpeciesResponse apiZoneSpeciesResponse = loaderZoneSpecies.getZoneSpeciesByName(name);
+
+        System.out.println(apiZoneSpeciesResponse.getData());
+
+        final PhongMaterial quadriMaterialRED = new PhongMaterial();
+        quadriMaterialRED.setDiffuseColor(Color.RED);
+
+        for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponse.getData()) {
+            addPolygon(earth, zoneSpecies.getZone().getCoords(), quadriMaterialRED);
+        }
+
+    }
+
+    public void addPolygon(Group parent, Point2D[] coords, PhongMaterial material){
+
+        final TriangleMesh triangleMesh = new TriangleMesh();
+
+        Point3D coord1 = geoCoordTo3dCoord((float)coords[0].getX(), (float)coords[0].getY());
+        Point3D coord2 = geoCoordTo3dCoord((float)coords[1].getX(), (float)coords[1].getY());
+        Point3D coord3 = geoCoordTo3dCoord((float)coords[2].getX(), (float)coords[2].getY());
+        Point3D coord4 = geoCoordTo3dCoord((float)coords[3].getX(), (float)coords[3].getY());
+        Point3D coord5 = geoCoordTo3dCoord((float)coords[4].getX(), (float)coords[4].getY());
+
+        final float[] points = {
+                (float)coord1.getX(), (float) coord1.getY(), (float)coord1.getZ(),
+                (float)coord2.getX(), (float) coord2.getY(), (float)coord2.getZ(),
+                (float)coord3.getX(), (float) coord3.getY(), (float)coord3.getZ(),
+                (float)coord4.getX(), (float) coord4.getY(), (float)coord4.getZ(),
+                (float)coord5.getX(), (float) coord5.getY(), (float)coord5.getZ(),
+        };
+
+        final float[] texCoords = {
+                1, 1,
+                1, 0,
+                1, -1,
+                0, 1,
+                0, 0
+        };
+
+        final int[] faces = {
+                0, 0, 1, 1, 2, 2,
+                0, 0, 2, 2, 3, 3,
+                0, 0, 3, 3, 4, 4
+        };
+
+        triangleMesh.getPoints().setAll(points);
+        triangleMesh.getTexCoords().setAll(texCoords);
+        triangleMesh.getFaces().setAll(faces);
+
+        final MeshView meshView = new MeshView(triangleMesh);
+        meshView.setMaterial(material);
+        meshView.setCullFace(CullFace.NONE);
+        parent.getChildren().addAll(meshView);
+    }
+
+    public static Point3D geoCoordTo3dCoord(float lat, float lon) {
+        float lat_cor = lat + TEXTURE_LAT_OFFSET;
+        float lon_cor = lon + TEXTURE_LON_OFFSET;
+        return new Point3D(
+                -java.lang.Math.sin(java.lang.Math.toRadians(lon_cor))
+                        * java.lang.Math.cos(java.lang.Math.toRadians(lat_cor)),
+                -java.lang.Math.sin(java.lang.Math.toRadians(lat_cor)),
+                java.lang.Math.cos(java.lang.Math.toRadians(lon_cor))
+                        * java.lang.Math.cos(java.lang.Math.toRadians(lat_cor)));
+    }
+
+
+    public void createEarth(Group root3D){
         // Load geometry
         ObjModelImporter objImporter = new ObjModelImporter();
         try {
@@ -110,10 +182,7 @@ public class Controller implements Initializable {
         subScene.translateXProperty().setValue(25);
         subScene.translateYProperty().setValue(100);
         anchorPane.getChildren().addAll(subScene);
-
     }
-
-
 
 
 }
