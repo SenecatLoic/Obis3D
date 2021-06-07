@@ -19,14 +19,12 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
-import javafx.scene.shape.Box;
-import javafx.scene.shape.CullFace;
-import javafx.scene.shape.MeshView;
+import javafx.scene.shape.*;
 import javafx.scene.control.Button;
-import javafx.scene.shape.TriangleMesh;
 
 import javafx.geometry.Point2D;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -52,6 +50,10 @@ public class Controller implements Initializable {
 
     @FXML
     private TextField anneeDeb1;
+
+    @FXML
+    private Rectangle color1, color2, color3, color4, color5, color6, color7, color8;
+
 
     // for earth
     private static final float TEXTURE_LAT_OFFSET = -0.2f;
@@ -85,18 +87,15 @@ public class Controller implements Initializable {
 
         ApiZoneSpeciesResponse apiZoneSpeciesResponse = loaderZoneSpecies.getZoneSpeciesByName(name);
 
-        System.out.println(apiZoneSpeciesResponse.getData());
 
-        final PhongMaterial quadriMaterialRED = new PhongMaterial();
-        quadriMaterialRED.setDiffuseColor(Color.RED);
 
         for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponse.getData()) {
-            addPolygon(earth, zoneSpecies.getZone().getCoords(), quadriMaterialRED);
+            addPolygon(earth, zoneSpecies.getZone().getCoords(), (Color) color1.getFill());
         }
 
     }
 
-    public void addPolygon(Group parent, Point2D[] coords, PhongMaterial material){
+    public void addPolygon(Group parent, Point2D[] coords, Color color){
 
         final TriangleMesh triangleMesh = new TriangleMesh();
 
@@ -132,8 +131,12 @@ public class Controller implements Initializable {
         triangleMesh.getTexCoords().setAll(texCoords);
         triangleMesh.getFaces().setAll(faces);
 
+        final PhongMaterial material = new PhongMaterial();
+        material.setDiffuseColor(color);
+
         final MeshView meshView = new MeshView(triangleMesh);
         meshView.setMaterial(material);
+        // permet de voir les faces avant et arrière des formes
         meshView.setCullFace(CullFace.NONE);
         parent.getChildren().addAll(meshView);
     }

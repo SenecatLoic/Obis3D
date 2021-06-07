@@ -10,6 +10,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
 <HBox fx:id="hboxRoot" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="670.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1">
@@ -191,42 +192,42 @@
                <children>
                   <HBox fx:id="hbox1" prefHeight="20.0" prefWidth="300.0">
                      <children>
-                        <Pane prefHeight="20.0" prefWidth="20.0" style="-fx-background-color: #F9EBEA;" />
+                        <Rectangle fx:id="color1" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #F9E79F;" width="20.0" />
                      </children>
                   </HBox>
                   <HBox fx:id="hbox2" prefHeight="20.0" prefWidth="300.0">
                      <children>
-                        <Pane prefHeight="20.0" prefWidth="20.0" style="-fx-background-color: #F2D7D5;" />
+                        <Rectangle fx:id="color2" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #F7DC6F;" width="20.0" />
                      </children>
                   </HBox>
                   <HBox fx:id="hbox3" prefHeight="20.0" prefWidth="300.0">
                      <children>
-                        <Pane prefHeight="20.0" prefWidth="20.0" style="-fx-background-color: #E6B0AA;" />
+                        <Rectangle fx:id="color3" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #F5B041;" width="20.0" />
                      </children>
                   </HBox>
                   <HBox fx:id="hbox4" prefHeight="20.0" prefWidth="300.0">
                      <children>
-                        <Pane prefHeight="20.0" prefWidth="20.0" style="-fx-background-color: #D98880;" />
+                        <Rectangle fx:id="color4" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #F39C12;" width="20.0" />
                      </children>
                   </HBox>
                   <HBox fx:id="hbox5" prefHeight="20.0" prefWidth="300.0">
                      <children>
-                        <Pane prefHeight="20.0" prefWidth="20.0" style="-fx-background-color: #CD6155;" />
+                        <Rectangle fx:id="color5" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #E67E22;" width="20.0" />
                      </children>
                   </HBox>
                   <HBox fx:id="hbox6" prefHeight="20.0" prefWidth="300.0">
                      <children>
-                        <Pane prefHeight="20.0" prefWidth="20.0" style="-fx-background-color: #C0392B;" />
+                        <Rectangle fx:id="color6" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #D35400;" width="20.0" />
                      </children>
                   </HBox>
                   <HBox fx:id="hbox7" prefHeight="20.0" prefWidth="300.0">
                      <children>
-                        <Pane prefHeight="20.0" prefWidth="20.0" style="-fx-background-color: #A93226;" />
+                        <Rectangle fx:id="color7" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #A93226;" width="20.0" />
                      </children>
                   </HBox>
                   <HBox fx:id="hbox8" prefHeight="20.0" prefWidth="200.0">
                      <children>
-                        <Pane prefHeight="20.0" prefWidth="20.0" style="-fx-background-color: #922B21;" />
+                        <Rectangle fx:id="color8" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #7B241C;" width="20.0" />
                      </children>
                   </HBox>
                </children>
