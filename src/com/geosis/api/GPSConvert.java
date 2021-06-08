@@ -6,7 +6,6 @@ import com.ludovic.vimont.Location;
 
 public class GPSConvert {
 
-
     public GPSConvert(){
 
     }

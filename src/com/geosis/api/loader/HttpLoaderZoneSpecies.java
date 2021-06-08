@@ -80,6 +80,7 @@ public class HttpLoaderZoneSpecies extends LoaderZoneSpecies{
                 zone.addCoords(coordinates.getJSONArray(j).getDouble(0),coordinates.getJSONArray(j).getDouble(1));
             }
 
+            zoneSpecies.setZone(zone);
             zoneSpecies.setName(name);
             zoneSpecies.setNbSignals(current.getJSONObject("properties").getInt("n"));
 
