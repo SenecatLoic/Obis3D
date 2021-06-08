@@ -16,6 +16,8 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Point3D;
 import javafx.scene.*;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.PickResult;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
@@ -24,6 +26,10 @@ import javafx.scene.shape.*;
 import javafx.geometry.Point2D;
 
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
@@ -52,12 +58,19 @@ public class Controller implements Initializable {
     @FXML
     private Rectangle color1, color2, color3, color4, color5, color6, color7, color8;
 
+    @FXML
+    private Label labelColor1, labelColor2, labelColor3, labelColor4, labelColor5, labelColor6, labelColor7, labelColor8;
 
     // for earth
     private static final float TEXTURE_LAT_OFFSET = -0.2f;
     private static final float TEXTURE_LON_OFFSET = 2.8f;
 
-    public Group earth;
+    private Group earth;
+    private int anneeStart = Integer.MIN_VALUE;
+    private int anneeEnd = Integer.MAX_VALUE;
+
+    ArrayList<String> nameSearch = new ArrayList<>();
+    boolean nameExist = false;
 
     public Controller(){ }
 
@@ -70,6 +83,30 @@ public class Controller implements Initializable {
 
         LoaderSpecies loader = LoaderSpecies.createLoaderSpecies();
 
+        /*
+        root3D.addEventHandler(MouseEvent.ANY, event -> {
+            if (event.getEventType() == MouseEvent.MOUSE_PRESSED && event.isControlDown())
+            {
+                PickResult pickResult = event.getPickResult();
+                System.out.println(pickResult.getIntersectedPoint());
+                Point3D spaceCoord = pickResult.getIntersectedPoint();
+
+                Sphere sphere = new Sphere(0.05);
+                final PhongMaterial sphereMaterial = new PhongMaterial();
+                sphereMaterial.setSpecularColor(Color.RED);
+                sphereMaterial.setDiffuseColor(Color.YELLOW);
+                sphere.setMaterial(sphereMaterial);
+
+                sphere.setTranslateX(spaceCoord.getX());
+                sphere.setTranslateY(spaceCoord.getY());
+                sphere.setTranslateZ(spaceCoord.getZ());
+
+                earth.getChildren().add(sphere);
+
+            }
+        });
+         */
+
         scientificName.textProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable,
@@ -77,52 +114,57 @@ public class Controller implements Initializable {
 
                 ApiNameResponse apiNameResponse = loader.getNames(newValue);
 
+                nameSearch = apiNameResponse.getData();
+
                 System.out.println(apiNameResponse.getData());
 
             }
         });
 
+
         btnSearch.setOnAction(actionEvent -> {
             String s = scientificName.getText();
 
-            // supprime tous les anciens polygones sur le globe
-            while(earth.getChildren().size() > 1){
-                earth.getChildren().remove(1);
+            // vérifie si le contenu du textfield existe dans les data
+            for (String name : nameSearch) {
+                if(name.equalsIgnoreCase(s)){
+                    nameExist = true;
+                }
             }
 
-            // TODO faire ça plus proprement
-            int anneeStart = Integer.MIN_VALUE;
-            int anneeEnd = Integer.MAX_VALUE;
+            if(nameSearch.isEmpty() || !nameExist){
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setContentText("Le nom scientifique n'est pas valide");
+                alert.show();
+            }
+            else {
+                // supprime tous les anciens polygones sur le globe
+                while(earth.getChildren().size() > 1){
+                    earth.getChildren().remove(1);
+                }
 
-            try {
-                anneeStart = Integer.parseInt(anneeDeb1.getText());
-            }
-            catch(NumberFormatException e){
-                anneeStart = Integer.MIN_VALUE;
-            }
-            try {
-                anneeEnd = Integer.parseInt(anneeFin1.getText());
-            }
-            catch(NumberFormatException e){
-                anneeEnd = Integer.MAX_VALUE;
+                if(anneeDeb1.getText().isEmpty() && anneeFin1.getText().isEmpty()){
+                    afficheZoneByName(s);
+                }
+                else{
+                    try{
+                        anneeStart = Integer.parseInt(anneeDeb1.getText());
+                    }
+                    catch (NumberFormatException e){
+
+                    }
+                    try{
+                        anneeEnd = Integer.parseInt(anneeFin1.getText());
+                    }
+                    catch (NumberFormatException e){
+
+                    }
+                    afficheZoneByTime(s, anneeStart, anneeEnd);
+
+                }
             }
 
-            System.out.println(s);
-            afficheZoneByName(s);
-            afficheZoneByTime(s, anneeStart, anneeEnd);
         });
-
-    }
-
-    public void afficheZoneByTime(String name, int anneeStart, int anneeEnd){
-
-        LoaderZoneSpecies loaderZoneSpecies = LoaderZoneSpecies.createLoaderSpecies();
-
-        ApiZoneSpeciesResponse apiZoneSpeciesResponse = loaderZoneSpecies.getZoneSpeciesByTime(name, anneeStart, anneeEnd);
-
-        for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponse.getData()) {
-            addPolygon(earth, zoneSpecies.getZone().getCoords(), (Color) color3.getFill());
-        }
 
     }
 
@@ -132,9 +174,82 @@ public class Controller implements Initializable {
 
         ApiZoneSpeciesResponse apiZoneSpeciesResponse = loaderZoneSpecies.getZoneSpeciesByName(name);
 
+        int minNbSignals = apiZoneSpeciesResponse.getNbSignalsMin();
+        int maxNbSignals = apiZoneSpeciesResponse.getNbSignalsMax();
+
+        setLegend(minNbSignals, maxNbSignals);
+
         for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponse.getData()) {
-            addPolygon(earth, zoneSpecies.getZone().getCoords(), (Color) color1.getFill());
+            System.out.println(zoneSpecies.getNbSignals());
+            addPolygon(earth, zoneSpecies.getZone().getCoords(), setColor(zoneSpecies, minNbSignals, maxNbSignals));
         }
+    }
+
+    public void afficheZoneByTime(String name, int anneeStart, int anneeEnd){
+
+        LoaderZoneSpecies loaderZoneSpecies = LoaderZoneSpecies.createLoaderSpecies();
+
+        ApiZoneSpeciesResponse apiZoneSpeciesResponse = loaderZoneSpecies.getZoneSpeciesByTime(name, anneeStart, anneeEnd);
+
+        int minNbSignals = apiZoneSpeciesResponse.getNbSignalsMin();
+        int maxNbSignals = apiZoneSpeciesResponse.getNbSignalsMax();
+
+        setLegend(minNbSignals, maxNbSignals);
+
+        for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponse.getData()) {
+            addPolygon(earth, zoneSpecies.getZone().getCoords(), setColor(zoneSpecies, minNbSignals, maxNbSignals));
+        }
+
+    }
+
+    public void setLegend(int minNbSignals, int maxNbSignals){
+
+        int interval = (maxNbSignals - minNbSignals) / 8;
+
+        labelColor1.setText("De " + minNbSignals + " à " + (minNbSignals + interval) + " signalements");
+        labelColor2.setText("De " + (minNbSignals + interval + 1) + " à " + (minNbSignals + 2 * interval) + " signalements");
+        labelColor3.setText("De " + (minNbSignals + 2 * interval + 1) + " à " + (minNbSignals + 3 * interval) + " signalements");
+        labelColor4.setText("De " + (minNbSignals + 3 * interval + 1) + " à " + (minNbSignals + 4 * interval) + " signalements");
+        labelColor5.setText("De " + (minNbSignals + 4 * interval + 1) + " à " + (minNbSignals + 5 * interval) + " signalements");
+        labelColor6.setText("De " + (minNbSignals + 5 * interval + 1) + " à " + (minNbSignals + 6 * interval) + " signalements");
+        labelColor7.setText("De " + (minNbSignals + 6 * interval + 1) + " à " + (minNbSignals + 7 * interval) + " signalements");
+        labelColor8.setText("De " + (minNbSignals + 7 * interval + 1) + " à " + (maxNbSignals) + " signalements");
+
+    }
+
+    public Color setColor(ZoneSpecies zoneSpecies, int minNbSignals, int maxNbSignals){
+
+        int interval = (maxNbSignals - minNbSignals) / 8;
+
+        int nbSignals = zoneSpecies.getNbSignals();
+
+         if(nbSignals <= minNbSignals + interval && nbSignals >= minNbSignals){
+             return (Color)color1.getFill();
+         }
+         else if(nbSignals <= minNbSignals + 2 * interval && nbSignals > nbSignals + interval){
+             return (Color)color2.getFill();
+         }
+         else if(nbSignals <= minNbSignals + 3 * interval && nbSignals > minNbSignals + 2 * interval){
+             return (Color)color3.getFill();
+         }
+         else if(nbSignals <= minNbSignals + 4 * interval && nbSignals > minNbSignals + 3 * interval){
+             return (Color)color4.getFill();
+         }
+         else if(nbSignals <= minNbSignals + 5 * interval && nbSignals > minNbSignals + 4 * interval){
+             return (Color)color5.getFill();
+         }
+         else if(nbSignals <= minNbSignals + 6 * interval && nbSignals > minNbSignals + 5 * interval){
+             return (Color)color6.getFill();
+         }
+         else if(nbSignals <= minNbSignals + 7 * interval && nbSignals >= minNbSignals + 6 * interval + 1){
+             return (Color)color7.getFill();
+         }
+         else if(nbSignals < maxNbSignals && nbSignals > minNbSignals + 7 * interval + 1){
+             return (Color)color8.getFill();
+         }
+         else {
+             return null;
+         }
 
     }
 
@@ -226,7 +341,7 @@ public class Controller implements Initializable {
         subScene.setCamera(camera);
         //subScene.setFill(Color.GRAY);
         subScene.translateXProperty().setValue(25);
-        subScene.translateYProperty().setValue(100);
+        subScene.translateYProperty().setValue(25);
         anchorPane.getChildren().addAll(subScene);
     }
 

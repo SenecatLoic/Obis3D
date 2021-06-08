@@ -20,15 +20,16 @@ public class ZoneSpecies{
         this.name = name;
     }
 
-    public void setNbSignals(int nbSignals) {
-        this.nbSignals = nbSignals;
-    }
-
     public String getName() {
         return name;
+    }
+
+    public void setNbSignals(int nbSignals) {
+        this.nbSignals = nbSignals;
     }
 
     public int getNbSignals() {
         return nbSignals;
     }
+
 }
