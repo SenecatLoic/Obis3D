@@ -25,6 +25,7 @@ import javafx.scene.control.Button;
 import javafx.geometry.Point2D;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -49,7 +50,7 @@ public class Controller implements Initializable {
     private Button btnSearch;
 
     @FXML
-    private TextField anneeDeb1;
+    private TextField anneeDeb1, anneeFin1;
 
     @FXML
     private Rectangle color1, color2, color3, color4, color5, color6, color7, color8;
@@ -74,9 +75,41 @@ public class Controller implements Initializable {
 
         btnSearch.setOnAction(actionEvent -> {
             String s = scientificName.getText();
+
+            int anneeStart = Integer.MIN_VALUE;
+            int anneeEnd = Integer.MAX_VALUE;
+
+            try {
+                anneeStart = Integer.parseInt(anneeDeb1.getText());
+            }
+            catch(NumberFormatException e){
+                anneeStart = Integer.MIN_VALUE;
+                System.out.println(anneeDeb1.getText() + " n'est pas un entier");
+            }
+            try {
+                anneeEnd = Integer.parseInt(anneeFin1.getText());
+            }
+            catch(NumberFormatException e){
+                anneeEnd = Integer.MAX_VALUE;
+                System.out.println(anneeFin1.getText() + " n'est pas un entier");
+            }
+
             System.out.println(s);
             afficheZoneByName(s);
+            afficheZoneByTime(s, anneeStart, anneeEnd);
         });
+
+    }
+
+    public void afficheZoneByTime(String name, int anneeStart, int anneeEnd){
+
+        LoaderZoneSpecies loaderZoneSpecies = LoaderZoneSpecies.createLoaderSpecies();
+
+        ApiZoneSpeciesResponse apiZoneSpeciesResponse = loaderZoneSpecies.getZoneSpeciesByTime(name, anneeStart, anneeEnd);
+
+        for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponse.getData()) {
+            addPolygon(earth, zoneSpecies.getZone().getCoords(), (Color) color3.getFill());
+        }
 
     }
 
@@ -86,8 +119,6 @@ public class Controller implements Initializable {
         LoaderZoneSpecies loaderZoneSpecies = LoaderZoneSpecies.createLoaderSpecies();
 
         ApiZoneSpeciesResponse apiZoneSpeciesResponse = loaderZoneSpecies.getZoneSpeciesByName(name);
-
-
 
         for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponse.getData()) {
             addPolygon(earth, zoneSpecies.getZone().getCoords(), (Color) color1.getFill());

@@ -44,8 +44,17 @@ public class HttpLoaderZoneSpecies extends LoaderZoneSpecies{
     }
 
     @Override
-    public ApiZoneSpeciesResponse getZoneSpeciesByTime(String name, Date dateStart, Date dateEnd) {
+    public ApiZoneSpeciesResponse getZoneSpeciesByTime(String name, int anneeStart, int anneeEnd) {
         ApiZoneSpeciesResponse response = new ApiZoneSpeciesResponse();
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.YEAR, anneeStart);
+        cal.set(Calendar.MONTH, Calendar.JANUARY);
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+        Date dateStart = cal.getTime();
+        cal.set(Calendar.YEAR, anneeEnd);
+        cal.set(Calendar.MONTH, Calendar.JANUARY);
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+        Date dateEnd = cal.getTime();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
         try{

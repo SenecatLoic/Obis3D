@@ -12,6 +12,6 @@ public abstract class LoaderZoneSpecies {
 
     public abstract ApiZoneSpeciesResponse getZoneSpeciesByName(String name);
 
-    public abstract ApiZoneSpeciesResponse getZoneSpeciesByTime(String name, Date dateStart, Date dateEnd);
+    public abstract ApiZoneSpeciesResponse getZoneSpeciesByTime(String name, int anneeStart, int anneeEnd);
     public abstract ApiZoneSpeciesResponse getZoneSpeciesByInterval(String name,int precision, Date dateStart, int interval,int nbIntervals);
 }
