@@ -9,24 +9,21 @@ import com.geosis.api.response.ApiZoneSpeciesResponse;
 import com.interactivemesh.jfx.importer.ImportException;
 import com.interactivemesh.jfx.importer.obj.ObjModelImporter;
 import javafx.animation.AnimationTimer;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point3D;
 import javafx.scene.*;
-import javafx.scene.control.Control;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.*;
-import javafx.scene.control.Button;
 
 import javafx.geometry.Point2D;
+
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
@@ -73,9 +70,27 @@ public class Controller implements Initializable {
 
         LoaderSpecies loader = LoaderSpecies.createLoaderSpecies();
 
+        scientificName.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable,
+                                String oldValue, String newValue) {
+
+                ApiNameResponse apiNameResponse = loader.getNames(newValue);
+
+                System.out.println(apiNameResponse.getData());
+
+            }
+        });
+
         btnSearch.setOnAction(actionEvent -> {
             String s = scientificName.getText();
 
+            // supprime tous les anciens polygones sur le globe
+            while(earth.getChildren().size() > 1){
+                earth.getChildren().remove(1);
+            }
+
+            // TODO faire ça plus proprement
             int anneeStart = Integer.MIN_VALUE;
             int anneeEnd = Integer.MAX_VALUE;
 
@@ -84,14 +99,12 @@ public class Controller implements Initializable {
             }
             catch(NumberFormatException e){
                 anneeStart = Integer.MIN_VALUE;
-                System.out.println(anneeDeb1.getText() + " n'est pas un entier");
             }
             try {
                 anneeEnd = Integer.parseInt(anneeFin1.getText());
             }
             catch(NumberFormatException e){
                 anneeEnd = Integer.MAX_VALUE;
-                System.out.println(anneeFin1.getText() + " n'est pas un entier");
             }
 
             System.out.println(s);
@@ -112,7 +125,6 @@ public class Controller implements Initializable {
         }
 
     }
-
 
     public void afficheZoneByName(String name){
 
