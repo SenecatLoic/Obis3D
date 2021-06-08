@@ -39,4 +39,20 @@ public class TestHttpLoaderZoneSpeices {
         assertEquals(967,zoneSpecies.getData().size());
 
     }
+
+    @Test
+    public void testGetZoneSpeciesByInterval(){
+        LoaderZoneSpecies loader = LoaderZoneSpecies.createLoaderSpecies();
+
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.YEAR, 2015);
+        cal.set(Calendar.MONTH, Calendar.JANUARY);
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+        Date start = cal.getTime();
+
+        ApiZoneSpeciesResponse zoneSpecies = loader.getZoneSpeciesByInterval("Delphinidae",3,start ,5,1);
+
+        assertEquals(zoneSpecies.getCode(),200);
+        assertEquals(5454,zoneSpecies.getData().get(0).getNbSignals());
+    }
 }

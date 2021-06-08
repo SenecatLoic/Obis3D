@@ -18,4 +18,12 @@ public class ZoneSpecies {
     public void setNbSignals(int nbSignals) {
         this.nbSignals = nbSignals;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getNbSignals() {
+        return nbSignals;
+    }
 }

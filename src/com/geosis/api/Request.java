@@ -14,8 +14,8 @@ import java.util.concurrent.TimeUnit;
 
 public class Request {
 
-    public static String readJsonFromUrl(String url, ApiResponse response){
-        String json = "";
+    public static CompletableFuture<String> readJsonFromUrl(String url, ApiResponse response){
+        CompletableFuture<String> json = null;
         HttpClient client = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_1_1)
                 .followRedirects(HttpClient.Redirect.NORMAL)
@@ -33,12 +33,13 @@ public class Request {
                     .thenApplyAsync(resp -> {
                         response.setCode(resp.statusCode());
                         return resp;
-                    }).thenApply(HttpResponse::body).get(10, TimeUnit.SECONDS);
+                    }).thenApply(HttpResponse::body);
 
         }catch (Exception e){
             e.printStackTrace();
             response.setMessage(e.getMessage());
         }
+
         return json;
     }
 }
