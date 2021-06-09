@@ -1,6 +1,5 @@
 package com.geosis.api;
 
-import com.geosis.api.loader.HttpLoaderSpecies;
 import com.geosis.api.loader.LoaderSpecies;
 import com.geosis.api.loader.LoaderZoneSpecies;
 import com.geosis.api.object.ZoneSpecies;
@@ -8,16 +7,16 @@ import com.geosis.api.response.ApiNameResponse;
 import com.geosis.api.response.ApiZoneSpeciesResponse;
 import com.interactivemesh.jfx.importer.ImportException;
 import com.interactivemesh.jfx.importer.obj.ObjModelImporter;
-import javafx.animation.AnimationTimer;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point3D;
 import javafx.scene.*;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.input.PickResult;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
@@ -26,11 +25,12 @@ import javafx.scene.shape.*;
 import javafx.geometry.Point2D;
 
 import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Controller implements Initializable {
 
@@ -50,10 +50,10 @@ public class Controller implements Initializable {
     private TextField scientificName;
 
     @FXML
-    private Button btnSearch;
+    private Button btnSearch, btnStart, btnBreak, btnStop;
 
     @FXML
-    private TextField anneeDeb1, anneeFin1;
+    private TextField anneeDeb1, anneeFin1, anneeDeb2, anneeFin2;
 
     @FXML
     private Rectangle color1, color2, color3, color4, color5, color6, color7, color8;
@@ -68,6 +68,8 @@ public class Controller implements Initializable {
     private Group earth;
     private int anneeStart = Integer.MIN_VALUE;
     private int anneeEnd = Integer.MAX_VALUE;
+    private int anneeStartEvol = Integer.MIN_VALUE;
+    private int anneeEndEvol = Integer.MAX_VALUE;
 
     ArrayList<String> nameSearch = new ArrayList<>();
     boolean nameExist = false;
@@ -80,6 +82,7 @@ public class Controller implements Initializable {
         //Create a Pane et graph scene root for the 3D content
         Group root3D = new Group();
         createEarth(root3D);
+
 
         LoaderSpecies loader = LoaderSpecies.createLoaderSpecies();
 
@@ -123,49 +126,128 @@ public class Controller implements Initializable {
 
 
         btnSearch.setOnAction(actionEvent -> {
+
             String s = scientificName.getText();
 
+            actionBtnSearch(s);
+
+        });
+
+
+        btnStart.setOnAction(actionEvent -> {
+
+            String s = scientificName.getText();
+
+            System.out.println(s);
+
             // vérifie si le contenu du textfield existe dans les data
-            for (String name : nameSearch) {
-                if(name.equalsIgnoreCase(s)){
+            for (String n : nameSearch) {
+                if (n.equalsIgnoreCase(s)) {
                     nameExist = true;
                 }
             }
 
-            if(nameSearch.isEmpty() || !nameExist){
+            if (nameSearch.isEmpty() || !nameExist) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setContentText("Le nom scientifique n'est pas valide");
                 alert.show();
-            }
-            else {
-                // supprime tous les anciens polygones sur le globe
-                while(earth.getChildren().size() > 1){
-                    earth.getChildren().remove(1);
+            } else if (!anneeDeb2.getText().isEmpty() && !anneeFin2.getText().isEmpty()) {
+                try {
+                    anneeStartEvol = Integer.parseInt(anneeDeb2.getText());
+                } catch (NumberFormatException e) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setContentText("L'année pour l'évolution n'est pas valide");
+                    alert.show();
+                }
+                try {
+                    anneeEndEvol = Integer.parseInt(anneeFin2.getText());
+                } catch (NumberFormatException e) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setContentText("L'année pour l'évolution n'est pas valide");
+                    alert.show();
                 }
 
-                if(anneeDeb1.getText().isEmpty() && anneeFin1.getText().isEmpty()){
-                    afficheZoneByName(s);
+                float nbRep = (((float) anneeEndEvol - (float) anneeStartEvol) / 5) + 1;
+
+                int i = 0;
+                int j = 5;
+                // TODO ne se met pas à jour
+                while (nbRep > 1) {
+
+                    // supprime tous les anciens polygones sur le globe
+                    while (earth.getChildren().size() > 1) {
+                        earth.getChildren().remove(1);
+                    }
+
+                    System.out.println(s + "   " + (anneeStartEvol + i) + "   " + (anneeStartEvol + j));
+
+                    afficheZoneByTime(s, anneeStartEvol + i, anneeStartEvol + j);
+
+                    i += 5;
+                    j += 5;
+                    nbRep--;
+
+                    try {
+                        TimeUnit.SECONDS.sleep(5);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
                 }
-                else{
-                    try{
-                        anneeStart = Integer.parseInt(anneeDeb1.getText());
-                    }
-                    catch (NumberFormatException e){
-
-                    }
-                    try{
-                        anneeEnd = Integer.parseInt(anneeFin1.getText());
-                    }
-                    catch (NumberFormatException e){
-
-                    }
-                    afficheZoneByTime(s, anneeStart, anneeEnd);
-
-                }
+            } else {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setContentText("L'année évolution est vide. Merci de la compléter");
+                alert.show();
             }
 
         });
 
+    }
+
+
+    public void actionBtnSearch(String name){
+
+        // vérifie si le contenu du textfield existe dans les data
+        for (String n : nameSearch) {
+            if(n.equalsIgnoreCase(name)){
+                nameExist = true;
+            }
+        }
+
+        if(nameSearch.isEmpty() || !nameExist){
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Le nom scientifique n'est pas valide");
+            alert.show();
+        }
+        else {
+            // supprime tous les anciens polygones sur le globe
+            while(earth.getChildren().size() > 1){
+                earth.getChildren().remove(1);
+            }
+
+            if(anneeDeb1.getText().isEmpty() && anneeFin1.getText().isEmpty()){
+                afficheZoneByName(name);
+            }
+            else{
+                try{
+                    anneeStart = Integer.parseInt(anneeDeb1.getText());
+                }
+                catch (NumberFormatException e){
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setContentText("L'année n'est pas valide");
+                    alert.show();
+                }
+                try{
+                    anneeEnd = Integer.parseInt(anneeFin1.getText());
+                }
+                catch (NumberFormatException e){
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setContentText("L'année n'est pas valide");
+                    alert.show();
+                }
+                afficheZoneByTime(name, anneeStart, anneeEnd);
+            }
+        }
     }
 
     public void afficheZoneByName(String name){
@@ -180,7 +262,6 @@ public class Controller implements Initializable {
         setLegend(minNbSignals, maxNbSignals);
 
         for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponse.getData()) {
-            System.out.println(zoneSpecies.getNbSignals());
             addPolygon(earth, zoneSpecies.getZone().getCoords(), setColor(zoneSpecies, minNbSignals, maxNbSignals));
         }
     }
