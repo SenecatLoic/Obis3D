@@ -133,7 +133,6 @@ public class Controller implements Initializable {
 
         });
 
-
         btnStart.setOnAction(actionEvent -> {
 
             String s = scientificName.getText();
@@ -172,6 +171,8 @@ public class Controller implements Initializable {
                 int i = 0;
                 int j = 5;
                 // TODO ne se met pas à jour
+
+
                 while (nbRep > 1) {
 
                     // supprime tous les anciens polygones sur le globe
@@ -188,7 +189,7 @@ public class Controller implements Initializable {
                     nbRep--;
 
                     try {
-                        TimeUnit.SECONDS.sleep(5);
+                        Thread.sleep(5000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -199,6 +200,62 @@ public class Controller implements Initializable {
                 alert.setContentText("L'année évolution est vide. Merci de la compléter");
                 alert.show();
             }
+
+        });
+
+        btnStop.setOnAction(actionEvent -> {
+
+            String s = scientificName.getText();
+
+            if(!anneeDeb2.getText().isEmpty() && !anneeFin2.getText().isEmpty()) {
+                try {
+                    anneeStartEvol = Integer.parseInt(anneeDeb2.getText());
+                } catch (NumberFormatException e) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setContentText("L'année pour l'évolution n'est pas valide");
+                    alert.show();
+                }
+                try {
+                    anneeEndEvol = Integer.parseInt(anneeFin2.getText());
+                } catch (NumberFormatException e) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setContentText("L'année pour l'évolution n'est pas valide");
+                    alert.show();
+                }
+            }
+
+            LoaderZoneSpecies loaderZoneSpecies = LoaderZoneSpecies.createLoaderSpecies();
+
+            ApiZoneSpeciesResponse apiZoneSpeciesResponse = loaderZoneSpecies.getZoneSpeciesByTime(s, anneeStart, anneeEnd);
+
+            // Création des séries.
+            final int minX = anneeStartEvol;
+            final int maxX = anneeEndEvol;
+            int minY = 0;
+            int maxY = Integer.MIN_VALUE;
+
+            final LineChart.Series series  = new LineChart.Series<>();
+            for (int x = minX ; x <= maxX ; x+=5) {
+                int value = 0;
+                ApiZoneSpeciesResponse apiZoneSpeciesResponseX = loaderZoneSpecies.getZoneSpeciesByTime(s, x, x);
+                for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponseX.getData()) {
+                    value += zoneSpecies.getNbSignals();
+                }
+                if(value > maxY){ maxY = value;}
+                final LineChart.Data data = new LineChart.Data(x, value);
+                series.getData().add(data);
+            }
+
+            // Création du graphique.
+            final NumberAxis xAxis = new NumberAxis(minX, maxX, 5);
+            xAxis.setLabel("Année");
+            final NumberAxis yAxis = new NumberAxis(minY, maxY, (maxY - minY) / 8);
+            yAxis.setLabel("Nombre de signalements");
+            final LineChart chart = new LineChart(xAxis, yAxis);
+            chart.setLegendVisible(false);
+            chart.setMaxHeight(280);
+            chart.getData().setAll(series);
+            vbox.getChildren().add(chart);
 
         });
 
