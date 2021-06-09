@@ -7,6 +7,7 @@ import com.geosis.api.response.ApiNameResponse;
 import com.geosis.api.response.ApiZoneSpeciesResponse;
 import com.interactivemesh.jfx.importer.ImportException;
 import com.interactivemesh.jfx.importer.obj.ObjModelImporter;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -17,6 +18,8 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.PickResult;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
@@ -41,19 +44,13 @@ public class Controller implements Initializable {
     private VBox vbox;
 
     @FXML
-    private Pane paneInterval;
-
-    @FXML
-    private Pane paneEvolution;
-
-    @FXML
     private TextField scientificName;
 
     @FXML
-    private Button btnSearch, btnStart, btnBreak, btnStop;
+    private Button btnSearch, btnStart, btnBreak, btnStop, btnReset, btnClose;
 
     @FXML
-    private TextField anneeDeb1, anneeFin1, anneeDeb2, anneeFin2;
+    private TextField yearStart, yearEnd;
 
     @FXML
     private Rectangle color1, color2, color3, color4, color5, color6, color7, color8;
@@ -66,11 +63,8 @@ public class Controller implements Initializable {
     private static final float TEXTURE_LON_OFFSET = 2.8f;
 
     private Group earth;
-    private int anneeStart = Integer.MIN_VALUE;
-    private int anneeEnd = Integer.MAX_VALUE;
-    private int anneeStartEvol = Integer.MIN_VALUE;
-    private int anneeEndEvol = Integer.MAX_VALUE;
-
+    private int yearStartInt = Integer.MIN_VALUE;
+    private int yearEndInt = Integer.MAX_VALUE;
     ArrayList<String> nameSearch = new ArrayList<>();
     boolean nameExist = false;
 
@@ -83,10 +77,10 @@ public class Controller implements Initializable {
         Group root3D = new Group();
         createEarth(root3D);
 
-
         LoaderSpecies loader = LoaderSpecies.createLoaderSpecies();
+        LoaderZoneSpecies loaderZoneSpecies = LoaderZoneSpecies.createLoaderSpecies();
 
-        /*
+
         root3D.addEventHandler(MouseEvent.ANY, event -> {
             if (event.getEventType() == MouseEvent.MOUSE_PRESSED && event.isControlDown())
             {
@@ -108,7 +102,7 @@ public class Controller implements Initializable {
 
             }
         });
-         */
+
 
         scientificName.textProperty().addListener(new ChangeListener<String>() {
             @Override
@@ -124,6 +118,13 @@ public class Controller implements Initializable {
             }
         });
 
+        btnClose.setOnAction(actionEvent -> {
+            Platform.exit();
+        });
+
+        btnReset.setOnAction(actionEvent -> {
+            actionBtnReset();
+        });
 
         btnSearch.setOnAction(actionEvent -> {
 
@@ -132,7 +133,25 @@ public class Controller implements Initializable {
             actionBtnSearch(s);
 
         });
+/*
+        btnStop.setOnAction(actionEvent -> {
 
+            String s = scientificName.getText();
+
+            if (!yearStart.getText().isEmpty() && !yearEnd.getText().isEmpty()) {
+                try {
+                    yearStartInt = Integer.parseInt(yearStart.getText());
+                    yearEndInt = Integer.parseInt(yearEnd.getText());
+
+                    createGraph(loaderZoneSpecies, s, yearStartInt, yearEndInt);
+                } catch (NumberFormatException e) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setContentText("L'année pour l'évolution n'est pas valide");
+                    alert.show();
+                }
+            }
+        });
+*/
         btnStart.setOnAction(actionEvent -> {
 
             String s = scientificName.getText();
@@ -150,50 +169,44 @@ public class Controller implements Initializable {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setContentText("Le nom scientifique n'est pas valide");
                 alert.show();
-            } else if (!anneeDeb2.getText().isEmpty() && !anneeFin2.getText().isEmpty()) {
+            } else if (!yearStart.getText().isEmpty() && !yearEnd.getText().isEmpty()) {
                 try {
-                    anneeStartEvol = Integer.parseInt(anneeDeb2.getText());
-                } catch (NumberFormatException e) {
+                    yearStartInt = Integer.parseInt(yearStart.getText());
+                    yearEndInt = Integer.parseInt(yearEnd.getText());
+
+                    float nbRep = (((float) yearStartInt - (float) yearEndInt) / 5) + 1;
+
+                    int i = 0;
+                    int j = 5;
+
+                    // TODO ne se met pas à jour
+                    while (nbRep > 1) {
+
+                        // supprime tous les anciens polygones sur le globe
+                        while (earth.getChildren().size() > 1) {
+                            earth.getChildren().remove(1);
+                        }
+
+                        System.out.println(s + "   " + (yearStartInt + i) + "   " + (yearStartInt + j));
+
+                        afficheZoneByTime(s, yearStartInt + i, yearStartInt + j);
+
+                        i += 5;
+                        j += 5;
+                        nbRep--;
+
+                        try {
+                            Thread.sleep(5000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                }
+                catch (NumberFormatException e) {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.setContentText("L'année pour l'évolution n'est pas valide");
                     alert.show();
-                }
-                try {
-                    anneeEndEvol = Integer.parseInt(anneeFin2.getText());
-                } catch (NumberFormatException e) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setContentText("L'année pour l'évolution n'est pas valide");
-                    alert.show();
-                }
-
-                float nbRep = (((float) anneeEndEvol - (float) anneeStartEvol) / 5) + 1;
-
-                int i = 0;
-                int j = 5;
-                // TODO ne se met pas à jour
-
-
-                while (nbRep > 1) {
-
-                    // supprime tous les anciens polygones sur le globe
-                    while (earth.getChildren().size() > 1) {
-                        earth.getChildren().remove(1);
-                    }
-
-                    System.out.println(s + "   " + (anneeStartEvol + i) + "   " + (anneeStartEvol + j));
-
-                    afficheZoneByTime(s, anneeStartEvol + i, anneeStartEvol + j);
-
-                    i += 5;
-                    j += 5;
-                    nbRep--;
-
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
                 }
             } else {
                 Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -203,64 +216,61 @@ public class Controller implements Initializable {
 
         });
 
-        btnStop.setOnAction(actionEvent -> {
+    }
 
-            String s = scientificName.getText();
+    public void createGraph(LoaderZoneSpecies loaderZoneSpecies, String name, int anneeStart, int anneeEnd){
 
-            if(!anneeDeb2.getText().isEmpty() && !anneeFin2.getText().isEmpty()) {
-                try {
-                    anneeStartEvol = Integer.parseInt(anneeDeb2.getText());
-                } catch (NumberFormatException e) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setContentText("L'année pour l'évolution n'est pas valide");
-                    alert.show();
-                }
-                try {
-                    anneeEndEvol = Integer.parseInt(anneeFin2.getText());
-                } catch (NumberFormatException e) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setContentText("L'année pour l'évolution n'est pas valide");
-                    alert.show();
-                }
+        ApiZoneSpeciesResponse apiZoneSpeciesResponse = loaderZoneSpecies.getZoneSpeciesByTime(name, anneeStart, anneeEnd);
+
+        System.out.println(apiZoneSpeciesResponse.getNbSignalsMax());
+
+        // Création des séries.
+        final int minX = anneeStart;
+        final int maxX = anneeEnd;
+        int minY = apiZoneSpeciesResponse.getNbSignalsMin();
+        int maxY = apiZoneSpeciesResponse.getNbSignalsMax();
+
+        final LineChart.Series series  = new LineChart.Series<>();
+        for (int x = minX ; x <= maxX ; x+=5) {
+            int value = 0;
+            ApiZoneSpeciesResponse apiZoneSpeciesResponseX = loaderZoneSpecies.getZoneSpeciesByTime(name, x, x);
+            for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponseX.getData()) {
+                value += zoneSpecies.getNbSignals();
             }
+            if(value > maxY){maxY = value;}
+            if(value < minY){minY = value;}
+            final LineChart.Data data = new LineChart.Data(x, value);
+            series.getData().add(data);
+        }
 
-            LoaderZoneSpecies loaderZoneSpecies = LoaderZoneSpecies.createLoaderSpecies();
-
-            ApiZoneSpeciesResponse apiZoneSpeciesResponse = loaderZoneSpecies.getZoneSpeciesByTime(s, anneeStart, anneeEnd);
-
-            // Création des séries.
-            final int minX = anneeStartEvol;
-            final int maxX = anneeEndEvol;
-            int minY = 0;
-            int maxY = Integer.MIN_VALUE;
-
-            final LineChart.Series series  = new LineChart.Series<>();
-            for (int x = minX ; x <= maxX ; x+=5) {
-                int value = 0;
-                ApiZoneSpeciesResponse apiZoneSpeciesResponseX = loaderZoneSpecies.getZoneSpeciesByTime(s, x, x);
-                for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponseX.getData()) {
-                    value += zoneSpecies.getNbSignals();
-                }
-                if(value > maxY){ maxY = value;}
-                final LineChart.Data data = new LineChart.Data(x, value);
-                series.getData().add(data);
-            }
-
-            // Création du graphique.
-            final NumberAxis xAxis = new NumberAxis(minX, maxX, 5);
-            xAxis.setLabel("Année");
-            final NumberAxis yAxis = new NumberAxis(minY, maxY, (maxY - minY) / 8);
-            yAxis.setLabel("Nombre de signalements");
-            final LineChart chart = new LineChart(xAxis, yAxis);
-            chart.setLegendVisible(false);
-            chart.setMaxHeight(280);
-            chart.getData().setAll(series);
-            vbox.getChildren().add(chart);
-
-        });
+        // Création du graphique.
+        final NumberAxis xAxis = new NumberAxis(minX, maxX, 5);
+        xAxis.setLabel("Year");
+        final NumberAxis yAxis = new NumberAxis(minY, maxY, (maxY - minY) / 8);
+        yAxis.setLabel("Number of signalements");
+        final LineChart chart = new LineChart(xAxis, yAxis);
+        chart.setLegendVisible(false);
+        chart.setMaxHeight(300);
+        chart.getData().setAll(series);
+        vbox.getChildren().add(chart);
 
     }
 
+    public void actionBtnReset(){
+
+        // supprime tous les anciens polygones sur le globe
+        while (earth.getChildren().size() > 1) {
+            earth.getChildren().remove(1);
+        }
+
+        scientificName.setText("");
+        yearStart.setText("");
+        yearEnd.setText("");
+
+
+        // Todo suppr les résultats + graph
+
+    }
 
     public void actionBtnSearch(String name){
 
@@ -282,12 +292,12 @@ public class Controller implements Initializable {
                 earth.getChildren().remove(1);
             }
 
-            if(anneeDeb1.getText().isEmpty() && anneeFin1.getText().isEmpty()){
+            if(yearStart.getText().isEmpty() && yearEnd.getText().isEmpty()){
                 afficheZoneByName(name);
             }
             else{
                 try{
-                    anneeStart = Integer.parseInt(anneeDeb1.getText());
+                    yearStartInt = Integer.parseInt(yearStart.getText());
                 }
                 catch (NumberFormatException e){
                     Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -295,19 +305,21 @@ public class Controller implements Initializable {
                     alert.show();
                 }
                 try{
-                    anneeEnd = Integer.parseInt(anneeFin1.getText());
+                    yearEndInt = Integer.parseInt(yearEnd.getText());
                 }
                 catch (NumberFormatException e){
                     Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.setContentText("L'année n'est pas valide");
                     alert.show();
                 }
-                afficheZoneByTime(name, anneeStart, anneeEnd);
+                afficheZoneByTime(name, yearStartInt, yearEndInt);
             }
         }
     }
 
     public void afficheZoneByName(String name){
+
+        //ProgressBar progressBar = new ProgressBar();
 
         LoaderZoneSpecies loaderZoneSpecies = LoaderZoneSpecies.createLoaderSpecies();
 
@@ -341,6 +353,15 @@ public class Controller implements Initializable {
     }
 
     public void setLegend(int minNbSignals, int maxNbSignals){
+
+        color1.setVisible(true);
+        color2.setVisible(true);
+        color3.setVisible(true);
+        color4.setVisible(true);
+        color5.setVisible(true);
+        color6.setVisible(true);
+        color7.setVisible(true);
+        color8.setVisible(true);
 
         int interval = (maxNbSignals - minNbSignals) / 8;
 
@@ -437,18 +458,6 @@ public class Controller implements Initializable {
         parent.getChildren().addAll(meshView);
     }
 
-    public static Point3D geoCoordTo3dCoord(float lat, float lon) {
-        float lat_cor = lat + TEXTURE_LAT_OFFSET;
-        float lon_cor = lon + TEXTURE_LON_OFFSET;
-        return new Point3D(
-                -java.lang.Math.sin(java.lang.Math.toRadians(lon_cor))
-                        * java.lang.Math.cos(java.lang.Math.toRadians(lat_cor)),
-                -java.lang.Math.sin(java.lang.Math.toRadians(lat_cor)),
-                java.lang.Math.cos(java.lang.Math.toRadians(lon_cor))
-                        * java.lang.Math.cos(java.lang.Math.toRadians(lat_cor)));
-    }
-
-
     public void createEarth(Group root3D){
         // Load geometry
         ObjModelImporter objImporter = new ObjModelImporter();
@@ -483,5 +492,21 @@ public class Controller implements Initializable {
         anchorPane.getChildren().addAll(subScene);
     }
 
+    /**
+     * Convertir des Coordonnées (méthode du tutoriel)
+     * @param lat
+     * @param lon
+     * @return Point3D créé à partir de latitude et longitude
+     */
+    public static Point3D geoCoordTo3dCoord(float lat, float lon) {
+        float lat_cor = lat + TEXTURE_LAT_OFFSET;
+        float lon_cor = lon + TEXTURE_LON_OFFSET;
+        return new Point3D(
+                -java.lang.Math.sin(java.lang.Math.toRadians(lon_cor))
+                        * java.lang.Math.cos(java.lang.Math.toRadians(lat_cor)),
+                -java.lang.Math.sin(java.lang.Math.toRadians(lat_cor)),
+                java.lang.Math.cos(java.lang.Math.toRadians(lon_cor))
+                        * java.lang.Math.cos(java.lang.Math.toRadians(lat_cor)));
+    }
 
 }
