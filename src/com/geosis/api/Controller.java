@@ -85,8 +85,12 @@ public class Controller implements Initializable {
             if (event.getEventType() == MouseEvent.MOUSE_PRESSED && event.isControlDown())
             {
                 PickResult pickResult = event.getPickResult();
-                System.out.println(pickResult.getIntersectedPoint());
                 Point3D spaceCoord = pickResult.getIntersectedPoint();
+                System.out.println(spaceCoord);
+                Point2D point2D = point3DtoGeoCoord(spaceCoord);
+                System.out.println(point2D.getX() + "    " + point2D.getY());
+                Point3D space = geoCoordTo3dCoord((float)point2D.getX(), (float) point2D.getY());
+                System.out.println(space);
 
                 Sphere sphere = new Sphere(0.05);
                 final PhongMaterial sphereMaterial = new PhongMaterial();
@@ -507,6 +511,15 @@ public class Controller implements Initializable {
                 -java.lang.Math.sin(java.lang.Math.toRadians(lat_cor)),
                 java.lang.Math.cos(java.lang.Math.toRadians(lon_cor))
                         * java.lang.Math.cos(java.lang.Math.toRadians(lat_cor)));
+    }
+
+    public static Point2D point3DtoGeoCoord(Point3D point3D){
+
+        float latitude = (float) Math.acos(point3D.getZ());
+        float longitude = (float) Math.atan2(point3D.getY(), point3D.getX());
+
+        return new Point2D(latitude, longitude);
+
     }
 
 }
