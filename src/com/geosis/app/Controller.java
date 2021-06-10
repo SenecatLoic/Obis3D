@@ -59,6 +59,11 @@ public class Controller implements Initializable {
     @FXML
     private Label labelColor1, labelColor2, labelColor3, labelColor4, labelColor5, labelColor6, labelColor7, labelColor8;
 
+    // for earth
+    private static final float TEXTURE_LAT_OFFSET = -0.2f;
+    private static final float TEXTURE_LON_OFFSET = 2.8f;
+    private static final float TEXTURE_OFFSET = 1.01f;
+
     private Group earth;
     private int yearStartInt = Integer.MIN_VALUE;
     private int yearEndInt = Integer.MAX_VALUE;
@@ -224,11 +229,22 @@ public class Controller implements Initializable {
 
     }
 
+    // todo use ByInterval
+    /**
+     * Crée le graphique d'une espèce entre 2 années
+     * @param loaderZoneSpecies
+     * @param name
+     * @param anneeStart
+     * @param anneeEnd
+     */
     public void createGraph(LoaderZoneSpecies loaderZoneSpecies, String name, int anneeStart, int anneeEnd){
 
         ApiZoneSpeciesResponse apiZoneSpeciesResponse = loaderZoneSpecies.getZoneSpeciesByTime(name, anneeStart, anneeEnd);
 
-        System.out.println(apiZoneSpeciesResponse.getNbSignalsMax());
+        // supprimer le graphe d'avant s'il y en a un
+        if(vbox.getChildren().get(vbox.getChildren().size() - 1) instanceof LineChart){
+            vbox.getChildren().remove(vbox.getChildren().size() - 1);
+        }
 
         // Création des séries.
         final int minX = anneeStart;
@@ -255,29 +271,62 @@ public class Controller implements Initializable {
         final NumberAxis yAxis = new NumberAxis(minY, maxY, (maxY - minY) / 8);
         yAxis.setLabel("Number of signalements");
         final LineChart chart = new LineChart(xAxis, yAxis);
+        chart.setTitle(name);
         chart.setLegendVisible(false);
-        chart.setMaxHeight(300);
+        chart.setMaxHeight(290);
         chart.getData().setAll(series);
         vbox.getChildren().add(chart);
 
     }
 
+    /**
+     * Supprime tous les résultats/ entrées de l'interface
+     */
     public void actionBtnReset(){
+
+        scientificName.setText("");
+        yearStart.setText("");
+        yearEnd.setText("");
 
         // supprime tous les anciens polygones sur le globe
         while (earth.getChildren().size() > 1) {
             earth.getChildren().remove(1);
         }
 
-        scientificName.setText("");
-        yearStart.setText("");
-        yearEnd.setText("");
+        // supprimer le graphe d'avant s'il y en a un
+        if(vbox.getChildren().get(vbox.getChildren().size() - 1) instanceof LineChart){
+            vbox.getChildren().remove(vbox.getChildren().size() - 1);
+        }
+
+        color1.setVisible(false);
+        color2.setVisible(false);
+        color3.setVisible(false);
+        color4.setVisible(false);
+        color5.setVisible(false);
+        color6.setVisible(false);
+        color7.setVisible(false);
+        color8.setVisible(false);
+
+        labelColor1.setText("");
+        labelColor2.setText("");
+        labelColor3.setText("");
+        labelColor4.setText("");
+        labelColor5.setText("");
+        labelColor6.setText("");
+        labelColor7.setText("");
+        labelColor8.setText("");
 
 
-        // Todo suppr les résultats + graph
+        // Todo suppr les résultats
 
     }
 
+    /**
+     * Permet d'appeler les bonnes méthodes selon les entrées
+     * @see #afficheZoneByName(String)
+     * @see #afficheZoneByName(String)
+     * @param name
+     */
     public void actionBtnSearch(String name){
 
         // vérifie si le contenu du textfield existe dans les data
@@ -324,6 +373,20 @@ public class Controller implements Initializable {
     }
 
     public void displayZone(ApiZoneSpeciesResponse apiZoneSpeciesResponse){
+    /**
+     * Affiche les zones d'une espèce
+     * @see com.geosis.api.loader.HttpLoaderZoneSpecies#getZoneSpeciesByName(String)
+     * @see #addPolygon(Group, Point2D[], Color)
+     * @param name
+     */
+    public void afficheZoneByName(String name){
+
+        //ProgressBar progressBar = new ProgressBar();
+
+        LoaderZoneSpecies loaderZoneSpecies = LoaderZoneSpecies.createLoaderSpecies();
+
+        ApiZoneSpeciesResponse apiZoneSpeciesResponse = loaderZoneSpecies.getZoneSpeciesByName(name);
+
         int minNbSignals = apiZoneSpeciesResponse.getNbSignalsMin();
         int maxNbSignals = apiZoneSpeciesResponse.getNbSignalsMax();
 
@@ -344,6 +407,14 @@ public class Controller implements Initializable {
         displayZone(apiZoneSpeciesResponse);
     }
 
+    /**
+     * Affiche les zones d'une espèce entre 2 années
+     * @see com.geosis.api.loader.HttpLoaderZoneSpecies#getZoneSpeciesByTime(String, int, int)
+     * @see #addPolygon(Group, Point2D[], Color)
+     * @param name
+     * @param anneeStart
+     * @param anneeEnd
+     */
     public void afficheZoneByTime(String name, int anneeStart, int anneeEnd){
 
         LoaderZoneSpecies loaderZoneSpecies = LoaderZoneSpecies.createLoaderSpecies();
@@ -352,6 +423,11 @@ public class Controller implements Initializable {
         displayZone(apiZoneSpeciesResponse);
     }
 
+    /**
+     * Détermine la légende selon le nombre de signalements
+     * @param minNbSignals
+     * @param maxNbSignals
+     */
     public void setLegend(int minNbSignals, int maxNbSignals){
 
         color1.setVisible(true);
@@ -376,44 +452,107 @@ public class Controller implements Initializable {
 
     }
 
+    /**
+     * Détermine la Color selon le nombre de signalements
+     * @param zoneSpecies
+     * @param minNbSignals
+     * @param maxNbSignals
+     * @return Color
+     */
     public Color setColor(ZoneSpecies zoneSpecies, int minNbSignals, int maxNbSignals){
 
         int interval = (maxNbSignals - minNbSignals) / 8;
 
         int nbSignals = zoneSpecies.getNbSignals();
 
-         if(nbSignals <= minNbSignals + interval && nbSignals >= minNbSignals){
-             return (Color)color1.getFill();
-         }
-         else if(nbSignals <= minNbSignals + 2 * interval && nbSignals > nbSignals + interval){
-             return (Color)color2.getFill();
-         }
-         else if(nbSignals <= minNbSignals + 3 * interval && nbSignals > minNbSignals + 2 * interval){
-             return (Color)color3.getFill();
-         }
-         else if(nbSignals <= minNbSignals + 4 * interval && nbSignals > minNbSignals + 3 * interval){
-             return (Color)color4.getFill();
-         }
-         else if(nbSignals <= minNbSignals + 5 * interval && nbSignals > minNbSignals + 4 * interval){
-             return (Color)color5.getFill();
-         }
-         else if(nbSignals <= minNbSignals + 6 * interval && nbSignals > minNbSignals + 5 * interval){
-             return (Color)color6.getFill();
-         }
-         else if(nbSignals <= minNbSignals + 7 * interval && nbSignals >= minNbSignals + 6 * interval + 1){
-             return (Color)color7.getFill();
-         }
-         else if(nbSignals < maxNbSignals && nbSignals > minNbSignals + 7 * interval + 1){
-             return (Color)color8.getFill();
-         }
-         else {
-             return null;
-         }
+        if(nbSignals <= minNbSignals + interval && nbSignals >= minNbSignals){
+            return (Color)color1.getFill();
+        }
+        else if(nbSignals <= minNbSignals + 2 * interval && nbSignals > nbSignals + interval){
+            return (Color)color2.getFill();
+        }
+        else if(nbSignals <= minNbSignals + 3 * interval && nbSignals > minNbSignals + 2 * interval){
+            return (Color)color3.getFill();
+        }
+        else if(nbSignals <= minNbSignals + 4 * interval && nbSignals > minNbSignals + 3 * interval){
+            return (Color)color4.getFill();
+        }
+        else if(nbSignals <= minNbSignals + 5 * interval && nbSignals > minNbSignals + 4 * interval){
+            return (Color)color5.getFill();
+        }
+        else if(nbSignals <= minNbSignals + 6 * interval && nbSignals > minNbSignals + 5 * interval){
+            return (Color)color6.getFill();
+        }
+        else if(nbSignals <= minNbSignals + 7 * interval && nbSignals >= minNbSignals + 6 * interval + 1){
+            return (Color)color7.getFill();
+        }
+        else if(nbSignals < maxNbSignals && nbSignals > minNbSignals + 7 * interval + 1){
+            return (Color)color8.getFill();
+        }
+        else {
+            return null;
+        }
 
     }
 
+    /**
+     * Crée un polygone grâce aux 5 points de chaque Zone
+     * @param parent
+     * @param coords
+     * @param color
+     */
+    public void addPolygon(Group parent, Point2D[] coords, Color color){
 
+        final TriangleMesh triangleMesh = new TriangleMesh();
 
+        Point3D coord1 = geoCoordTo3dCoord((float)coords[0].getX(), (float)coords[0].getY());
+        Point3D coord2 = geoCoordTo3dCoord((float)coords[1].getX(), (float)coords[1].getY());
+        Point3D coord3 = geoCoordTo3dCoord((float)coords[2].getX(), (float)coords[2].getY());
+        Point3D coord4 = geoCoordTo3dCoord((float)coords[3].getX(), (float)coords[3].getY());
+        Point3D coord5 = geoCoordTo3dCoord((float)coords[4].getX(), (float)coords[4].getY());
+
+        final float[] points = {
+                (float)coord1.getX(), (float) coord1.getY(), (float)coord1.getZ(),
+                (float)coord2.getX(), (float) coord2.getY(), (float)coord2.getZ(),
+                (float)coord3.getX(), (float) coord3.getY(), (float)coord3.getZ(),
+                (float)coord4.getX(), (float) coord4.getY(), (float)coord4.getZ(),
+                (float)coord5.getX(), (float) coord5.getY(), (float)coord5.getZ(),
+        };
+
+        final float[] texCoords = {
+                1, 1,
+                1, 0,
+                1, -1,
+                0, 1,
+                0, 0
+        };
+
+        final int[] faces = {
+                0, 0, 1, 1, 2, 2,
+                0, 0, 2, 2, 3, 3,
+                0, 0, 3, 3, 4, 4
+        };
+
+        triangleMesh.getPoints().setAll(points);
+        triangleMesh.getTexCoords().setAll(texCoords);
+        triangleMesh.getFaces().setAll(faces);
+
+        final PhongMaterial material = new PhongMaterial();
+        material.setDiffuseColor(color);
+
+        final MeshView meshView = new MeshView(triangleMesh);
+        meshView.setMaterial(material);
+        // permet de voir les faces avant et arrière des formes
+        meshView.setCullFace(CullFace.NONE);
+        parent.getChildren().addAll(meshView);
+    }
+
+    /**
+     * Crée l'objet Earth
+     * @see com.geosis.app.Earth
+     * @see CameraManager
+     * @param root3D
+     */
     public void createEarth(Group root3D){
         // Load geometry
         ObjModelImporter objImporter = new ObjModelImporter();
@@ -446,5 +585,41 @@ public class Controller implements Initializable {
         subScene.translateXProperty().setValue(25);
         subScene.translateYProperty().setValue(25);
         anchorPane.getChildren().addAll(subScene);
+    }
+
+    /**
+     * Convertir des Coordonnées (lat, lon) en Point3D (méthode du tutoriel)
+     * @param lat
+     * @param lon
+     * @return Point3D créé à partir de latitude et longitude
+     */
+    public static Point3D geoCoordTo3dCoord(float lat, float lon) {
+        float lat_cor = lat + TEXTURE_LAT_OFFSET;
+        float lon_cor = lon + TEXTURE_LON_OFFSET;
+        return new Point3D(
+                -java.lang.Math.sin(java.lang.Math.toRadians(lon_cor))
+                        * java.lang.Math.cos(java.lang.Math.toRadians(lat_cor)),
+                -java.lang.Math.sin(java.lang.Math.toRadians(lat_cor)),
+                java.lang.Math.cos(java.lang.Math.toRadians(lon_cor))
+                        * java.lang.Math.cos(java.lang.Math.toRadians(lat_cor)));
+    }
+
+    /**
+     * Convertir des Coordonnées 3D en (lat, lon) (méthode du tutoriel)
+     * @param p
+     * @return Point2D (X = latitude ; Y = longitude)
+     */
+    public static Point2D spaceCoordToGeoCoord(Point3D p) {
+        float lat = (float) (Math.asin(-p.getY() / TEXTURE_OFFSET)
+                * (180 / Math.PI) - TEXTURE_LAT_OFFSET);
+        float lon;
+        if (p.getZ() < 0) {
+            lon = 180 - (float) (Math.asin(-p.getX() / (TEXTURE_OFFSET * Math.cos((Math.PI / 180)
+                    * (lat + TEXTURE_LAT_OFFSET)))) * 180 / Math.PI + TEXTURE_LON_OFFSET);
+        } else {
+            lon = (float) (Math.asin(-p.getX() / (TEXTURE_OFFSET * Math.cos((Math.PI / 180)
+                    * (lat + TEXTURE_LAT_OFFSET)))) * 180 / Math.PI - TEXTURE_LON_OFFSET);
+        }
+        return new Point2D(lat, lon);
     }
 }
