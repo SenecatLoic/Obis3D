@@ -2,7 +2,10 @@ package com.geosis.api.loader;
 
 import com.geosis.api.response.ApiZoneSpeciesResponse;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public abstract class LoaderZoneSpecies {
 
@@ -13,5 +16,5 @@ public abstract class LoaderZoneSpecies {
     public abstract ApiZoneSpeciesResponse getZoneSpeciesByName(String name);
 
     public abstract ApiZoneSpeciesResponse getZoneSpeciesByTime(String name, int anneeStart, int anneeEnd);
-    public abstract ApiZoneSpeciesResponse getZoneSpeciesByInterval(String name,int precision, Date dateStart, int interval,int nbIntervals);
+    public abstract ArrayList<CompletableFuture<Object>> getZoneSpeciesByInterval(String name, int precision, int yearStart, int interval, int nbIntervals);
 }

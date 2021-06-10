@@ -10,9 +10,7 @@ import org.json.JSONObject;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -100,42 +98,43 @@ public class HttpLoaderZoneSpecies extends LoaderZoneSpecies{
     }
 
     @Override
-    public ApiZoneSpeciesResponse getZoneSpeciesByInterval(String name,int precision, Date dateStart, int interval, int nbIntervals) {
-        ApiZoneSpeciesResponse response = new ApiZoneSpeciesResponse();
+    public ArrayList<CompletableFuture<Object>> getZoneSpeciesByInterval(String name,int precision, int yearStart, int interval, int nbIntervals) {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        ArrayList<CompletableFuture<Object>> listRequest = new ArrayList<>();
 
-        Date startTmp = dateStart;
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.YEAR, yearStart);
+        cal.set(Calendar.MONTH, Calendar.JANUARY);
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+        Date startTmp = cal.getTime();
+        Calendar c = Calendar.getInstance();
+        c.setTime(startTmp);
+        c.add(Calendar.YEAR, interval);
+        Date end;
 
         try {
-
-            ArrayList<CompletableFuture<String>> listRequest = new ArrayList<>();
             //on fait toute les requêtes
             for (int i = 1; i <= nbIntervals; i++) {
-                Calendar c = Calendar.getInstance();
-                c.setTime(startTmp);
-                c.add(Calendar.YEAR, interval);
-                Date tmp = c.getTime();
+                ApiZoneSpeciesResponse response = new ApiZoneSpeciesResponse();
+                end = c.getTime();
 
                 String param = String.format("occurrence/grid/%d?scientificname=%s&" +
                                 "startdate=%s&enddate=%s",precision,URLEncoder.encode(name, StandardCharsets.UTF_8),
-                        formatter.format(startTmp),formatter.format(tmp));
+                        formatter.format(startTmp),formatter.format(end));
 
-                startTmp = tmp;
-                listRequest.add(Request.readJsonFromUrl(url + param,response));
+                c.add(Calendar.YEAR, interval);
+
+                listRequest.add(Request.readJsonFromUrl(url + param,response).thenApply(rest -> {
+                    JSONObject result = new JSONObject(rest);
+                    createZoneSpeciesResponse(result,response,name);
+                    return response;
+                }));
+
             }
-
-            for (CompletableFuture<String> request : listRequest) {
-                JSONObject result = new JSONObject(request.get(10, TimeUnit.SECONDS));
-                createZoneSpeciesResponse(result,response,name);
-            }
-
-
         }catch (Exception e){
-            System.out.println(e.getMessage());
-            response.setMessage(e.getMessage());
+
         }
 
-
-        return response;
+        return listRequest;
     }
 }

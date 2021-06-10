@@ -1,10 +1,16 @@
 package com.geosis.api.loader;
 
+import com.geosis.api.object.ZoneSpecies;
 import com.geosis.api.response.ApiZoneSpeciesResponse;
 import static org.junit.Assert.*;
 import org.junit.Test;
+
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class TestHttpLoaderZoneSpeices {
 
@@ -40,9 +46,20 @@ public class TestHttpLoaderZoneSpeices {
         cal.set(Calendar.DAY_OF_MONTH, 1);
         Date start = cal.getTime();
 
-        ApiZoneSpeciesResponse zoneSpecies = loader.getZoneSpeciesByInterval("Delphinidae",3,start ,5,1);
+        ArrayList<CompletableFuture<Object>> zoneSpecies = loader.getZoneSpeciesByInterval("Delphinidae",3,2015 ,5,3);
 
-        assertEquals(zoneSpecies.getCode(),200);
-        assertEquals(5454,zoneSpecies.getData().get(0).getNbSignals());
+        assertEquals(3,zoneSpecies.size());
+        System.out.println("ezafaz");
+        for (CompletableFuture<Object> zone: zoneSpecies) {
+            try {
+                ApiZoneSpeciesResponse zoneSpeciesResponse = (ApiZoneSpeciesResponse) zone.get(10, TimeUnit.SECONDS);
+                System.out.println(zoneSpeciesResponse.getData().size());
+            }catch (Exception e){
+
+            }
+        }
+
+        //assertEquals(zoneSpecies.getCode(),200);
+        //assertEquals(5454,zoneSpecies.getData().get(0).getNbSignals());
     }
 }
