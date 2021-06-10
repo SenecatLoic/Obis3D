@@ -13,9 +13,10 @@ public class GeometryTools {
     // for earth
     private static final float TEXTURE_LAT_OFFSET = -0.2f;
     private static final float TEXTURE_LON_OFFSET = 2.8f;
+    private static final float TEXTURE_OFFSET = 1.01f;
 
     /**
-     * Convertir des Coordonnées (méthode du tutoriel)
+     * Convertir des Coordonnées (lat, lon) en Point3D (méthode du tutoriel)
      * @param lat
      * @param lon
      * @return Point3D créé à partir de latitude et longitude
@@ -31,15 +32,31 @@ public class GeometryTools {
                         * java.lang.Math.cos(java.lang.Math.toRadians(lat_cor)));
     }
 
-    public static Point2D point3DtoGeoCoord(Point3D point3D){
-
-        float latitude = (float) Math.acos(point3D.getZ());
-        float longitude = (float) Math.atan2(point3D.getY(), point3D.getX());
-
-        return new Point2D(latitude, longitude);
-
+    /**
+     * Convertir des Coordonnées 3D en (lat, lon) (méthode du tutoriel)
+     * @param p
+     * @return Point2D (X = latitude ; Y = longitude)
+     */
+    public static Point2D spaceCoordToGeoCoord(Point3D p) {
+        float lat = (float) (Math.asin(-p.getY() / TEXTURE_OFFSET)
+                * (180 / Math.PI) - TEXTURE_LAT_OFFSET);
+        float lon;
+        if (p.getZ() < 0) {
+            lon = 180 - (float) (Math.asin(-p.getX() / (TEXTURE_OFFSET * Math.cos((Math.PI / 180)
+                    * (lat + TEXTURE_LAT_OFFSET)))) * 180 / Math.PI + TEXTURE_LON_OFFSET);
+        } else {
+            lon = (float) (Math.asin(-p.getX() / (TEXTURE_OFFSET * Math.cos((Math.PI / 180)
+                    * (lat + TEXTURE_LAT_OFFSET)))) * 180 / Math.PI - TEXTURE_LON_OFFSET);
+        }
+        return new Point2D(lat, lon);
     }
 
+    /**
+     * Crée un polygone grâce aux 5 points de chaque Zone
+     * @param parent
+     * @param coords
+     * @param color
+     */
     public static void addPolygon(Group parent, Point2D[] coords, Color color){
 
         final TriangleMesh triangleMesh = new TriangleMesh();
