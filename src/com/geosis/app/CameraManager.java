@@ -1,4 +1,4 @@
-package com.geosis.api;
+package com.geosis.app;
 
 import javafx.event.EventHandler;
 import javafx.scene.*;

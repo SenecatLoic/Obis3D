@@ -1,4 +1,4 @@
-package com.geosis.api;
+package com.geosis.app;
 
 import com.geosis.api.loader.LoaderSpecies;
 import com.geosis.api.loader.LoaderZoneSpecies;
@@ -16,7 +16,6 @@ import javafx.geometry.Point3D;
 import javafx.scene.*;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
@@ -29,11 +28,7 @@ import javafx.geometry.Point2D;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.ResourceBundle;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Controller implements Initializable {
 
@@ -118,7 +113,6 @@ public class Controller implements Initializable {
                 nameSearch = apiNameResponse.getData();
 
                 System.out.println(apiNameResponse.getData());
-
             }
         });
 
@@ -160,7 +154,7 @@ public class Controller implements Initializable {
 
             String s = scientificName.getText();
 
-            System.out.println(s);
+            //System.out.println(s);
 
             // vérifie si le contenu du textfield existe dans les data
             for (String n : nameSearch) {
@@ -178,12 +172,11 @@ public class Controller implements Initializable {
                     yearStartInt = Integer.parseInt(yearStart.getText());
                     yearEndInt = Integer.parseInt(yearEnd.getText());
 
-                    float nbRep = (((float) yearStartInt - (float) yearEndInt) / 5) + 1;
+                    float nbRep = (((float) yearEndInt - (float) yearStartInt ) / 5) + 1;
 
                     int i = 0;
                     int j = 5;
 
-                    // TODO ne se met pas à jour
                     while (nbRep > 1) {
 
                         // supprime tous les anciens polygones sur le globe
@@ -198,14 +191,7 @@ public class Controller implements Initializable {
                         i += 5;
                         j += 5;
                         nbRep--;
-
-                        try {
-                            Thread.sleep(5000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
                     }
-
                 }
                 catch (NumberFormatException e) {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
