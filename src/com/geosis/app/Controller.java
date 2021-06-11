@@ -31,14 +31,13 @@ import javafx.scene.transform.Rotate;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static com.geosis.app.GeometryTools.*;
+
+import org.controlsfx.control.*;
 
 public class Controller implements Initializable {
 
@@ -79,6 +78,9 @@ public class Controller implements Initializable {
         //Create a Pane et graph scene root for the 3D content
         Group root3D = new Group();
         createEarth(root3D);
+
+        //RangeSlider rangeSlider = new RangeSlider(0, 100, 10, 90);
+
 
         //Rotate the earth
         ToggleSwitchRotation toggleSwitchRotation = new ToggleSwitchRotation(earth, 25);
@@ -224,8 +226,6 @@ public class Controller implements Initializable {
 
             String s = scientificName.getText();
 
-            //System.out.println(s);
-
             // vérifie si le contenu du textfield existe dans les data
             for (String n : nameSearch) {
                 if (n.equalsIgnoreCase(s)) {
@@ -288,8 +288,8 @@ public class Controller implements Initializable {
         });
 
     }
-    // todo use ByInterval
 
+    // todo use by interval
     /**
      * Crée le graphique d'une espèce entre 2 années
      *
@@ -387,11 +387,10 @@ public class Controller implements Initializable {
     }
 
     /**
-     * Permet d'appeler les bonnes méthodes selon les entrées
-     *
+     * Action du bouton Search
      * @param name
      * @see #afficheZoneByName(String)
-     * @see #afficheZoneByName(String)
+     * @see #afficheZoneByTime(String, int, int)
      */
     public void actionBtnSearch(String name) {
 
@@ -435,7 +434,7 @@ public class Controller implements Initializable {
     }
 
     /**
-     *
+     * Affiche zone
      * @param apiZoneSpeciesResponse
      */
     public void displayZone(ApiZoneSpeciesResponse apiZoneSpeciesResponse) {
@@ -456,8 +455,6 @@ public class Controller implements Initializable {
      */
     public void afficheZoneByName (String name){
 
-        //ProgressBar progressBar = new ProgressBar();
-
         LoaderZoneSpecies loaderZoneSpecies = LoaderZoneSpecies.createLoaderSpecies();
 
         ApiZoneSpeciesResponse apiZoneSpeciesResponse = loaderZoneSpecies.getZoneSpeciesByName(name);
@@ -467,7 +464,6 @@ public class Controller implements Initializable {
     /**
      * Affiche les zones d'une espèce entre 2 années
      * @see com.geosis.api.loader.HttpLoaderZoneSpecies#getZoneSpeciesByTime(String, int, int)
-     *
      * @param name
      * @param anneeStart
      * @param anneeEnd
@@ -544,6 +540,12 @@ public class Controller implements Initializable {
 
     }
 
+    /**
+     * Animation qui tourne parent selon l'axe y
+     * @param parent
+     * @param rotationSpeed
+     * @return AnimationTimer
+     */
     public static AnimationTimer animationTimerRotate(Group parent, double rotationSpeed){
 
         final long startNanoTime = System.nanoTime();
