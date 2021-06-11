@@ -552,7 +552,7 @@ public class Controller implements Initializable {
             public void handle(long currentNanoTime) {
                 double t = (currentNanoTime - startNanoTime) / 1000000000.0;
                 parent.setRotationAxis(new Point3D(0,1,0));
-                parent.setRotate(180 + rotationSpeed * t);
+                parent.setRotate(rotationSpeed * t);
             }
         };
 
@@ -578,9 +578,6 @@ public class Controller implements Initializable {
         }
         MeshView[] meshViews = objImporter.getImport();
         earth = new Group(meshViews);
-
-        earth.setRotationAxis(new Point3D(0, 1, 0));
-        earth.setRotate(180);
 
         root3D.getChildren().add(earth);
         root3D.setFocusTraversable(true);
