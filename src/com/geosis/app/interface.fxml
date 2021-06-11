@@ -25,7 +25,7 @@
                   <Insets />
                </VBox.margin>
             </Label>
-            <TextField fx:id="scientificName" pickOnBounds="false" prefHeight="40.0" prefWidth="250.0" promptText="Enter a scientif name">
+            <TextField fx:id="scientificName" pickOnBounds="false" prefHeight="40.0" prefWidth="250.0" promptText="Enter a scientific name">
                <font>
                   <Font name="Consolas" size="13.0" />
                </font>
@@ -270,6 +270,11 @@
                   <Font name="Leelawadee" size="14.0" />
                </font>
             </Button>
+            <Label layoutX="7.0" layoutY="4.0" text="Earth rotation" AnchorPane.topAnchor="15.0">
+               <font>
+                  <Font name="Leelawadee" size="16.0" />
+               </font>
+            </Label>
          </children>
       </AnchorPane>
       <Separator orientation="VERTICAL" prefHeight="200.0" />

@@ -7,6 +7,7 @@ import com.geosis.api.response.ApiNameResponse;
 import com.geosis.api.response.ApiZoneSpeciesResponse;
 import com.interactivemesh.jfx.importer.ImportException;
 import com.interactivemesh.jfx.importer.obj.ObjModelImporter;
+import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -26,6 +27,7 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.*;
 
 import javafx.geometry.Point2D;
+import javafx.scene.transform.Rotate;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -35,6 +37,8 @@ import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+
+import static com.geosis.app.GeometryTools.*;
 
 public class Controller implements Initializable {
 
@@ -76,6 +80,12 @@ public class Controller implements Initializable {
         Group root3D = new Group();
         createEarth(root3D);
 
+        //Rotate the earth
+        ToggleSwitchRotation toggleSwitchRotation = new ToggleSwitchRotation(earth, 25);
+        toggleSwitchRotation.setTranslateX(140);
+        toggleSwitchRotation.setTranslateY(12);
+        anchorPane.getChildren().addAll(toggleSwitchRotation);
+
         LoaderSpecies loader = LoaderSpecies.createLoaderSpecies();
         LoaderZoneSpecies loaderZoneSpecies = LoaderZoneSpecies.createLoaderSpecies();
 
@@ -87,7 +97,7 @@ public class Controller implements Initializable {
                 System.out.println(spaceCoord);
                 Point2D point2D = GeometryTools.spaceCoordToGeoCoord(spaceCoord);
                 System.out.println(point2D.getX() + "    " + point2D.getY());
-                Point3D space = GeometryTools.geoCoordTo3dCoord((float) point2D.getX(), (float) point2D.getY());
+                Point3D space = geoCoordTo3dCoord((float) point2D.getX(), (float) point2D.getY());
                 System.out.println(space);
 
                 Sphere sphere = new Sphere(0.05);
@@ -103,6 +113,65 @@ public class Controller implements Initializable {
                 earth.getChildren().add(sphere);
 
             }
+            if (event.getEventType() == MouseEvent.MOUSE_PRESSED && event.isShiftDown()) {
+                PickResult pickResult = event.getPickResult();
+                Point3D spaceCoord = pickResult.getIntersectedPoint();
+                System.out.println(spaceCoord);
+                Point2D point2D = GeometryTools.spaceCoordToGeoCoord(spaceCoord);
+                System.out.println(point2D.getX() + "    " + point2D.getY());
+                Point3D space = geoCoordTo3dCoord((float)point2D.getX(), (float) point2D.getY());
+                System.out.println(space);
+
+                Box box = new Box(0.1, 4, 0.1);
+                final PhongMaterial sphereMaterial = new PhongMaterial();
+                sphereMaterial.setDiffuseColor(new Color(1, 0, 0, 0.3));
+                box.setMaterial(sphereMaterial);
+
+                Rotate rotate = new Rotate();
+
+                //box.setRotationAxis(new Point3D(1, 1, (Math.cos(Math.toRadians(point2D.getY())) + Math.sin(Math.toRadians(point2D.getY()))) / -Math.tan(Math.toRadians(point2D.getX()))));
+                box.setRotationAxis(new Point3D(0, 0, 1));
+                box.setRotate(point2D.getY());
+
+                box.setRotationAxis(new Point3D(1, 0, 0));
+                box.setRotate(point2D.getX());
+
+
+                //box.setTranslateX(spaceCoord.getX());
+                //box.setTranslateY(spaceCoord.getY());
+                //box.setTranslateZ(spaceCoord.getZ());
+
+                earth.getChildren().add(box);
+
+            }
+        });
+
+        btnBreak.setOnAction(actionEvent -> {
+
+            for(int lat = -90; lat <= 90; lat+=30){
+                for(int lon = -180; lon <= 180; lon+=30) {
+
+                    Box box = new Box(0.1, 0.1, 0.5);
+                    final PhongMaterial sphereMaterial = new PhongMaterial();
+                    sphereMaterial.setDiffuseColor(new Color(1, 0, 0, 0.3));
+                    box.setMaterial(sphereMaterial);
+
+                    box.setRotationAxis(new Point3D(0, 0, 1));
+                    box.setRotate(lon);
+                    box.setRotationAxis(new Point3D(1, 0, 0));
+                    box.setRotate(lat);
+
+                    Point3D spaceCoord = geoCoordTo3dCoord(lat, lon);
+
+                    box.setTranslateX(spaceCoord.getX());
+                    box.setTranslateY(spaceCoord.getY());
+                    box.setTranslateZ(spaceCoord.getZ());
+
+                    earth.getChildren().add(box);
+                }
+
+            }
+
         });
 
 
@@ -219,7 +288,6 @@ public class Controller implements Initializable {
         });
 
     }
-
     // todo use ByInterval
 
     /**
@@ -476,6 +544,20 @@ public class Controller implements Initializable {
 
     }
 
+    public static AnimationTimer animationTimerRotate(Group parent, double rotationSpeed){
+
+        final long startNanoTime = System.nanoTime();
+        AnimationTimer animationTimer = new AnimationTimer() {
+            @Override
+            public void handle(long currentNanoTime) {
+                double t = (currentNanoTime - startNanoTime) / 1000000000.0;
+                parent.setRotationAxis(new Point3D(0,1,0));
+                parent.setRotate(rotationSpeed * t);
+            }
+        };
+
+        return animationTimer;
+    }
 
     /**
      * Crée l'objet Earth
