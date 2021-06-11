@@ -82,7 +82,7 @@ public class Controller implements Initializable {
 
         //Rotate the earth
         ToggleSwitchRotation toggleSwitchRotation = new ToggleSwitchRotation(earth, 25);
-        toggleSwitchRotation.setTranslateX(140);
+        toggleSwitchRotation.setTranslateX(120);
         toggleSwitchRotation.setTranslateY(12);
         anchorPane.getChildren().addAll(toggleSwitchRotation);
 
@@ -552,7 +552,7 @@ public class Controller implements Initializable {
             public void handle(long currentNanoTime) {
                 double t = (currentNanoTime - startNanoTime) / 1000000000.0;
                 parent.setRotationAxis(new Point3D(0,1,0));
-                parent.setRotate(rotationSpeed * t);
+                parent.setRotate(180 + rotationSpeed * t);
             }
         };
 
@@ -578,6 +578,9 @@ public class Controller implements Initializable {
         }
         MeshView[] meshViews = objImporter.getImport();
         earth = new Group(meshViews);
+
+        earth.setRotationAxis(new Point3D(0, 1, 0));
+        earth.setRotate(180);
 
         root3D.getChildren().add(earth);
         root3D.setFocusTraversable(true);

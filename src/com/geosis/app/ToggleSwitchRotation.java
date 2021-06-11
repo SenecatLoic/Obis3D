@@ -27,7 +27,7 @@ public class ToggleSwitchRotation extends HBox {
 
     private void init(Group parent, double rotationSpeed) {
 
-        label.setText("ON");
+        label.setText("OFF");
         label.setFont(new Font("Consolas", 11));
         label.setStyle("-fx-font-weight: bold;");
         button.setStyle("-fx-background-radius: 30;");
@@ -43,16 +43,14 @@ public class ToggleSwitchRotation extends HBox {
         setStyle();
         bindProperties();
 
-        animationTimer = Controller.animationTimerRotate(parent, rotationSpeed);
-        animationTimer.start();
-
+        label.toFront();
     }
 
     private void setStyle() {
         //Default Width
         setWidth(50);
         label.setAlignment(Pos.CENTER);
-        setStyle("-fx-background-color: #27AE60; -fx-text-fill:black; -fx-background-radius: 30;");
+        setStyle("-fx-background-color: #C0392B; -fx-text-fill:black; -fx-background-radius: 30;");
         setAlignment(Pos.CENTER_LEFT);
     }
 
@@ -67,20 +65,19 @@ public class ToggleSwitchRotation extends HBox {
         init(parent, rotationSpeed);
         switchedOn.addListener((a,b,valueChange) -> {
             if (valueChange) {
-                label.setText("OFF");
-                setStyle("-fx-background-color: #C0392B; -fx-background-radius: 30;");
-                label.toFront();
-
-                animationTimer.stop();
-            }
-            else {
                 label.setText("ON");
-                //label.setTextFill(Color.web("#27AE60"));
                 setStyle("-fx-background-color: #27AE60; -fx-background-radius: 30;");
                 button.toFront();
 
                 animationTimer = Controller.animationTimerRotate(parent, rotationSpeed);
                 animationTimer.start();
+            }
+            else {
+                label.setText("OFF");
+                setStyle("-fx-background-color: #C0392B; -fx-background-radius: 30;");
+                label.toFront();
+
+                animationTimer.stop();
             }
         });
     }
