@@ -10,7 +10,7 @@ import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 
 public class GeometryTools {
-    // for earth
+
     private static final float TEXTURE_LAT_OFFSET = -0.2f;
     private static final float TEXTURE_LON_OFFSET = 2.8f;
     private static final float TEXTURE_OFFSET = 1.01f;

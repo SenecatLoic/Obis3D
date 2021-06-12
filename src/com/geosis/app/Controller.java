@@ -69,6 +69,9 @@ public class Controller implements Initializable {
     ArrayList<String> nameSearch = new ArrayList<>();
     boolean nameExist = false;
 
+    int finalCurrentYear;
+
+
     public Controller() {
     }
 
@@ -80,7 +83,6 @@ public class Controller implements Initializable {
         createEarth(root3D);
 
         //RangeSlider rangeSlider = new RangeSlider(0, 100, 10, 90);
-
 
         //Rotate the earth
         ToggleSwitchRotation toggleSwitchRotation = new ToggleSwitchRotation(earth, 25);
@@ -187,7 +189,6 @@ public class Controller implements Initializable {
                 nameSearch = apiNameResponse.getData();
 
                 System.out.println(apiNameResponse.getData());
-                System.out.println("change");
             }
         });
 
@@ -206,7 +207,7 @@ public class Controller implements Initializable {
             actionBtnSearch(s);
 
         });
-/*
+
         btnStop.setOnAction(actionEvent -> {
             String s = scientificName.getText();
             if (!yearStart.getText().isEmpty() && !yearEnd.getText().isEmpty()) {
@@ -221,7 +222,7 @@ public class Controller implements Initializable {
                 }
             }
         });
-*/
+
         btnStart.setOnAction(actionEvent -> {
 
             String s = scientificName.getText();
@@ -244,7 +245,10 @@ public class Controller implements Initializable {
 
                     double nbRep = (((double) yearEndInt - (double) yearStartInt) / 5);
 
+                    finalCurrentYear = yearStartInt;
+
                     ArrayList<CompletableFuture<Object>> completableFutures = loaderZoneSpecies.getZoneSpeciesByInterval(s, 3, yearStartInt, 5, (int) Math.ceil(nbRep));
+                    createGraph(loaderZoneSpecies, s, yearStartInt, yearEndInt);
 
                     for (CompletableFuture<Object> zone : completableFutures) {
 
@@ -256,6 +260,7 @@ public class Controller implements Initializable {
                                 try {
                                     zoneSpeciesResponse = (ApiZoneSpeciesResponse) zone.get(10, TimeUnit.SECONDS);
                                     ApiZoneSpeciesResponse finalZoneSpeciesResponse = zoneSpeciesResponse;
+
                                     //nécessaire pour modifier un element javafx
                                     Platform.runLater(() -> {
                                         while (earth.getChildren().size() > 1) {
@@ -263,17 +268,24 @@ public class Controller implements Initializable {
                                         }
                                         displayZone(finalZoneSpeciesResponse);
                                     });
+
                                 } catch (Exception e) {
                                     System.out.println(e.getMessage());
                                 }
                                 return zoneSpeciesResponse;
                             }
                         };
+                        // todo afficher les points
+                        createPoints(loaderZoneSpecies, s, finalCurrentYear);
+
+                        finalCurrentYear += 5;
 
                         Thread getItemsThread = new Thread(pollDatabaseTask);
                         getItemsThread.setDaemon(true);
                         getItemsThread.start();
                     }
+
+
                 } catch (NumberFormatException e) {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.setContentText("L'année pour l'évolution n'est pas valide");
@@ -289,18 +301,50 @@ public class Controller implements Initializable {
 
     }
 
-    // todo use by interval
+    private final LineChart.Series series = new LineChart.Series<>();
+    private NumberAxis xAxis = new NumberAxis(0, 0, 5);
+    private NumberAxis yAxis = new NumberAxis(0, 0, 0);
+    private LineChart chart = new LineChart(xAxis, yAxis);
+    private int minY = 0;
+    private int maxY = 0;
+
+    public void createPoints(LoaderZoneSpecies loaderZoneSpecies, String name, int currentYear){
+
+        ApiZoneSpeciesResponse apiZoneSpeciesResponse = loaderZoneSpecies.getZoneSpeciesByTime(name, currentYear, currentYear);
+
+        int value = 0;
+         for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponse.getData()) {
+                value += zoneSpecies.getNbSignals();
+         }
+         System.out.println("value : " + value);
+         if (value > maxY) {
+             maxY = value;
+         }
+         if (value < minY) {
+             minY = value;
+         }
+        System.out.println("min : " + minY + " max : " + maxY);
+
+        final LineChart.Data data = new LineChart.Data(currentYear, value);
+         series.getData().add(data);
+
+         yAxis.setLowerBound(minY);
+         yAxis.setUpperBound(maxY);
+
+        //yAxis = new NumberAxis(minY, maxY, (maxY - minY) / 8);
+
+        chart.getData().setAll(series);
+
+    }
+
     /**
      * Crée le graphique d'une espèce entre 2 années
      *
      * @param loaderZoneSpecies
-     * @param name
      * @param anneeStart
      * @param anneeEnd
      */
     public void createGraph(LoaderZoneSpecies loaderZoneSpecies, String name, int anneeStart, int anneeEnd) {
-
-        ApiZoneSpeciesResponse apiZoneSpeciesResponse = loaderZoneSpecies.getZoneSpeciesByTime(name, anneeStart, anneeEnd);
 
         // supprimer le graphe d'avant s'il y en a un
         if (vbox.getChildren().get(vbox.getChildren().size() - 1) instanceof LineChart) {
@@ -310,36 +354,15 @@ public class Controller implements Initializable {
         // Création des séries.
         final int minX = anneeStart;
         final int maxX = anneeEnd;
-        int minY = apiZoneSpeciesResponse.getNbSignalsMin();
-        int maxY = apiZoneSpeciesResponse.getNbSignalsMax();
-
-        final LineChart.Series series = new LineChart.Series<>();
-        for (int x = minX; x <= maxX; x += 5) {
-            int value = 0;
-            ApiZoneSpeciesResponse apiZoneSpeciesResponseX = loaderZoneSpecies.getZoneSpeciesByTime(name, x, x);
-            for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponseX.getData()) {
-                value += zoneSpecies.getNbSignals();
-            }
-            if (value > maxY) {
-                maxY = value;
-            }
-            if (value < minY) {
-                minY = value;
-            }
-            final LineChart.Data data = new LineChart.Data(x, value);
-            series.getData().add(data);
-        }
 
         // Création du graphique.
-        final NumberAxis xAxis = new NumberAxis(minX, maxX, 5);
+        xAxis.setLowerBound(anneeStart);
+        xAxis.setUpperBound(anneeEnd);
         xAxis.setLabel("Year");
-        final NumberAxis yAxis = new NumberAxis(minY, maxY, (maxY - minY) / 8);
         yAxis.setLabel("Number of signalements");
-        final LineChart chart = new LineChart(xAxis, yAxis);
         chart.setTitle(name);
         chart.setLegendVisible(false);
         chart.setMaxHeight(290);
-        chart.getData().setAll(series);
         vbox.getChildren().add(chart);
 
     }
@@ -530,9 +553,9 @@ public class Controller implements Initializable {
             return (Color) color5.getFill();
         } else if (nbSignals <= minNbSignals + 6 * interval && nbSignals > minNbSignals + 5 * interval) {
             return (Color) color6.getFill();
-        } else if (nbSignals <= minNbSignals + 7 * interval && nbSignals >= minNbSignals + 6 * interval + 1) {
+        } else if (nbSignals <= minNbSignals + 7 * interval && nbSignals > minNbSignals + 6 * interval) {
             return (Color) color7.getFill();
-        } else if (nbSignals < maxNbSignals && nbSignals > minNbSignals + 7 * interval + 1) {
+        } else if (nbSignals <= maxNbSignals && nbSignals > minNbSignals + 7 * interval) {
             return (Color) color8.getFill();
         } else {
             return null;
