@@ -69,6 +69,14 @@ public class Controller implements Initializable {
     ArrayList<String> nameSearch = new ArrayList<>();
     boolean nameExist = false;
 
+    // Create Graph
+    private final LineChart.Series series = new LineChart.Series<>();
+    private NumberAxis xAxis = new NumberAxis(0, 0, 5);
+    private NumberAxis yAxis = new NumberAxis(0, 0, 0);
+    private LineChart chart = new LineChart(xAxis, yAxis);
+    private int minY = 0;
+    private int maxY = 0;
+
     int finalCurrentYear;
 
 
@@ -82,7 +90,18 @@ public class Controller implements Initializable {
         Group root3D = new Group();
         createEarth(root3D);
 
-        //RangeSlider rangeSlider = new RangeSlider(0, 100, 10, 90);
+        scientificName.setFocusTraversable(false);
+        yearStart.setFocusTraversable(false);
+        yearEnd.setFocusTraversable(false);
+        btnStart.setFocusTraversable(false);
+        btnBreak.setFocusTraversable(false);
+        btnSearch.setFocusTraversable(false);
+        btnReset.setFocusTraversable(false);
+        btnClose.setFocusTraversable(false);
+
+        scientificName.setStyle("-fx-focus-color : #F5B041");
+        yearStart.setStyle("-fx-focus-color : #F5B041");
+        yearEnd.setStyle("-fx-focus-color : #F5B041");
 
         //Rotate the earth
         ToggleSwitchRotation toggleSwitchRotation = new ToggleSwitchRotation(earth, 25);
@@ -192,12 +211,12 @@ public class Controller implements Initializable {
             }
         });
 
-        btnClose.setOnAction(actionEvent -> {
-            Platform.exit();
-        });
-
         btnReset.setOnAction(actionEvent -> {
             actionBtnReset();
+        });
+
+        btnClose.setOnAction(actionEvent -> {
+            Platform.exit();
         });
 
         btnSearch.setOnAction(actionEvent -> {
@@ -209,18 +228,9 @@ public class Controller implements Initializable {
         });
 
         btnStop.setOnAction(actionEvent -> {
-            String s = scientificName.getText();
-            if (!yearStart.getText().isEmpty() && !yearEnd.getText().isEmpty()) {
-                try {
-                    yearStartInt = Integer.parseInt(yearStart.getText());
-                    yearEndInt = Integer.parseInt(yearEnd.getText());
-                    createGraph(loaderZoneSpecies, s, yearStartInt, yearEndInt);
-                } catch (NumberFormatException e) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setContentText("L'année pour l'évolution n'est pas valide");
-                    alert.show();
-                }
-            }
+
+
+
         });
 
         btnStart.setOnAction(actionEvent -> {
@@ -261,6 +271,8 @@ public class Controller implements Initializable {
                                     zoneSpeciesResponse = (ApiZoneSpeciesResponse) zone.get(10, TimeUnit.SECONDS);
                                     ApiZoneSpeciesResponse finalZoneSpeciesResponse = zoneSpeciesResponse;
 
+                                    System.out.println(Platform.isAccessibilityActive());
+
                                     //nécessaire pour modifier un element javafx
                                     Platform.runLater(() -> {
                                         while (earth.getChildren().size() > 1) {
@@ -276,15 +288,13 @@ public class Controller implements Initializable {
                             }
                         };
                         // todo afficher les points
-                        createPoints(loaderZoneSpecies, s, finalCurrentYear);
-
+                        createPoint(loaderZoneSpecies, s, finalCurrentYear);
                         finalCurrentYear += 5;
 
                         Thread getItemsThread = new Thread(pollDatabaseTask);
                         getItemsThread.setDaemon(true);
                         getItemsThread.start();
                     }
-
 
                 } catch (NumberFormatException e) {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -301,14 +311,14 @@ public class Controller implements Initializable {
 
     }
 
-    private final LineChart.Series series = new LineChart.Series<>();
-    private NumberAxis xAxis = new NumberAxis(0, 0, 5);
-    private NumberAxis yAxis = new NumberAxis(0, 0, 0);
-    private LineChart chart = new LineChart(xAxis, yAxis);
-    private int minY = 0;
-    private int maxY = 0;
-
-    public void createPoints(LoaderZoneSpecies loaderZoneSpecies, String name, int currentYear){
+    /**
+     * Crée un point
+     * @see #createGraph(LoaderZoneSpecies, String, int, int) 
+     * @param loaderZoneSpecies
+     * @param name
+     * @param currentYear
+     */
+    public void createPoint(LoaderZoneSpecies loaderZoneSpecies, String name, int currentYear){
 
         ApiZoneSpeciesResponse apiZoneSpeciesResponse = loaderZoneSpecies.getZoneSpeciesByTime(name, currentYear, currentYear);
 
@@ -316,7 +326,7 @@ public class Controller implements Initializable {
          for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponse.getData()) {
                 value += zoneSpecies.getNbSignals();
          }
-         System.out.println("value : " + value);
+         System.out.println(currentYear + " value : " + value);
          if (value > maxY) {
              maxY = value;
          }
@@ -339,7 +349,7 @@ public class Controller implements Initializable {
 
     /**
      * Crée le graphique d'une espèce entre 2 années
-     *
+     * @see #createPoint(LoaderZoneSpecies, String, int) 
      * @param loaderZoneSpecies
      * @param anneeStart
      * @param anneeEnd
@@ -458,6 +468,8 @@ public class Controller implements Initializable {
 
     /**
      * Affiche zone
+     * @see #afficheZoneByName(String)
+     * @see #afficheZoneByTime(String, int, int) 
      * @param apiZoneSpeciesResponse
      */
     public void displayZone(ApiZoneSpeciesResponse apiZoneSpeciesResponse) {
@@ -473,6 +485,7 @@ public class Controller implements Initializable {
     }
     /**
      * Affiche les zones d'une espèce
+     * @see #displayZone(ApiZoneSpeciesResponse) 
      * @see com.geosis.api.loader.HttpLoaderZoneSpecies#getZoneSpeciesByName(String)
      * @param name
      */
@@ -486,6 +499,7 @@ public class Controller implements Initializable {
 
     /**
      * Affiche les zones d'une espèce entre 2 années
+     * @see #displayZone(ApiZoneSpeciesResponse) 
      * @see com.geosis.api.loader.HttpLoaderZoneSpecies#getZoneSpeciesByTime(String, int, int)
      * @param name
      * @param anneeStart

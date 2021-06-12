@@ -13,11 +13,11 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
-<HBox fx:id="hboxRoot" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="670.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1">
+<HBox fx:id="hboxRoot" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="670.0" prefWidth="1000.0" style="-fx-background-color: black;" stylesheets="@style.css" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <VBox fx:id="vbox" prefHeight="800.0" prefWidth="357.0">
          <children>
-            <Label fx:id="labelName" alignment="CENTER" prefHeight="40.0" prefWidth="275.0" style="-fx-background-color: #F7DC6F;" text="Scientific name" textAlignment="CENTER">
+            <Label fx:id="labelName" alignment="CENTER" prefHeight="40.0" prefWidth="275.0" style="-fx-background-color: #59BAFF;" text="Scientific name" textAlignment="CENTER">
                <font>
                   <Font name="Leelawadee" size="20.0" />
                </font>
@@ -33,7 +33,7 @@
                   <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
                </VBox.margin>
             </TextField>
-            <Label fx:id="labelInterval" alignment="CENTER" prefHeight="40.0" prefWidth="275.0" style="-fx-background-color: #F7DC6F;" text="Between two years" textAlignment="CENTER">
+            <Label fx:id="labelInterval" alignment="CENTER" prefHeight="40.0" prefWidth="275.0" style="-fx-background-color: #59BAFF;" text="Between two years" textAlignment="CENTER">
                <font>
                   <Font name="Leelawadee" size="20.0" />
                </font>
@@ -45,7 +45,7 @@
                <children>
                   <HBox prefHeight="80.0" prefWidth="257.0">
                      <children>
-                        <Label prefHeight="22.0" prefWidth="74.0" text="Between">
+                        <Label prefHeight="22.0" prefWidth="74.0" text="Between" textFill="WHITE">
                            <font>
                               <Font name="Leelawadee" size="16.0" />
                            </font>
@@ -64,7 +64,7 @@
                               <Font size="13.0" />
                            </font>
                         </TextField>
-                        <Label text="and">
+                        <Label text="and" textFill="WHITE">
                            <font>
                               <Font name="Leelawadee" size="16.0" />
                            </font>
@@ -84,7 +84,7 @@
                   </HBox>
                </children>
             </Pane>
-            <VBox prefHeight="75.0" prefWidth="241.0" style="-fx-background-color: #FCF3CF;">
+            <VBox prefHeight="75.0" prefWidth="241.0" style="-fx-background-color: #BFE4FF;">
                <children>
                   <Label fx:id="labelInterval1" alignment="CENTER" prefHeight="1.0" prefWidth="275.0" text="to see the evolution live..." textAlignment="CENTER">
                      <font>
@@ -144,7 +144,7 @@
          </children>
       </VBox>
       <Separator orientation="VERTICAL" prefHeight="200.0" />
-      <AnchorPane fx:id="anchorPane" prefHeight="800.0" prefWidth="603.0">
+      <AnchorPane fx:id="anchorPane" prefHeight="800.0" prefWidth="603.0" styleClass="body" stylesheets="@style.css">
          <HBox.margin>
             <Insets />
          </HBox.margin>
@@ -270,7 +270,7 @@
                   <Font name="Leelawadee" size="14.0" />
                </font>
             </Button>
-            <Label layoutX="7.0" layoutY="4.0" text="Earth rotation" AnchorPane.topAnchor="15.0">
+            <Label layoutX="7.0" layoutY="4.0" text="Earth rotation" textFill="WHITE" AnchorPane.topAnchor="15.0">
                <font>
                   <Font name="Leelawadee" size="16.0" />
                </font>
@@ -280,7 +280,7 @@
       <Separator orientation="VERTICAL" prefHeight="200.0" />
       <Pane prefHeight="800.0" prefWidth="273.0">
          <children>
-            <Label fx:id="labelName1" alignment="CENTER" layoutX="-3.0" layoutY="-6.0" prefHeight="40.0" prefWidth="193.0" style="-fx-background-color: #F7DC6F;" text="Results" textAlignment="CENTER">
+            <Label fx:id="labelName1" alignment="CENTER" layoutX="-3.0" layoutY="-6.0" prefHeight="40.0" prefWidth="193.0" style="-fx-background-color: #59BAFF;" text="Results" textAlignment="CENTER">
                <font>
                   <Font name="Leelawadee" size="20.0" />
                </font>
