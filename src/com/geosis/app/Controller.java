@@ -16,8 +16,10 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point3D;
 import javafx.scene.*;
+import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
@@ -73,9 +75,10 @@ public class Controller implements Initializable {
     private final LineChart.Series series = new LineChart.Series<>();
     private NumberAxis xAxis = new NumberAxis(0, 0, 5);
     private NumberAxis yAxis = new NumberAxis(0, 0, 0);
-    private LineChart chart = new LineChart(xAxis, yAxis);
+    private AreaChart chart = new AreaChart(xAxis, yAxis);
     private int minY = 0;
     private int maxY = 0;
+    private int tickUnit = 0;
 
     int finalCurrentYear;
 
@@ -90,16 +93,6 @@ public class Controller implements Initializable {
         Group root3D = new Group();
         createEarth(root3D);
 
-        scientificName.setFocusTraversable(false);
-        yearStart.setFocusTraversable(false);
-        yearEnd.setFocusTraversable(false);
-        btnStart.setFocusTraversable(false);
-        btnBreak.setFocusTraversable(false);
-        btnStop.setFocusTraversable(false);
-        btnSearch.setFocusTraversable(false);
-        btnReset.setFocusTraversable(false);
-        btnClose.setFocusTraversable(false);
-
         //Rotate the earth
         ToggleSwitchRotation toggleSwitchRotation = new ToggleSwitchRotation(earth, 25);
         toggleSwitchRotation.setTranslateX(120);
@@ -108,7 +101,6 @@ public class Controller implements Initializable {
 
         LoaderSpecies loader = LoaderSpecies.createLoaderSpecies();
         LoaderZoneSpecies loaderZoneSpecies = LoaderZoneSpecies.createLoaderSpecies();
-
 
         root3D.addEventHandler(MouseEvent.ANY, event -> {
             if (event.getEventType() == MouseEvent.MOUSE_PRESSED && event.isControlDown()) {
@@ -208,6 +200,7 @@ public class Controller implements Initializable {
             }
         });
 
+
         btnReset.setOnAction(actionEvent -> {
             actionBtnReset();
         });
@@ -225,6 +218,22 @@ public class Controller implements Initializable {
         });
 
         btnStop.setOnAction(actionEvent -> {
+
+            String s = scientificName.getText();
+
+            try {
+                yearStartInt = Integer.parseInt(yearStart.getText());
+                yearEndInt = Integer.parseInt(yearEnd.getText());
+            } catch (NumberFormatException e){
+                System.out.println("hello");
+            }
+
+            int currentYear = yearStartInt;
+
+            double nbRep = (((double) yearEndInt - (double) yearStartInt) / 5);
+
+            createPoint(loaderZoneSpecies, s, currentYear + 5, yearStartInt, yearEndInt);
+            createPoint(loaderZoneSpecies, s, currentYear + 10, yearStartInt, yearEndInt);
 
 
 
@@ -252,10 +261,7 @@ public class Controller implements Initializable {
 
                     double nbRep = (((double) yearEndInt - (double) yearStartInt) / 5);
 
-                    finalCurrentYear = yearStartInt;
-
                     ArrayList<CompletableFuture<Object>> completableFutures = loaderZoneSpecies.getZoneSpeciesByInterval(s, 3, yearStartInt, 5, (int) Math.ceil(nbRep));
-                    createGraph(loaderZoneSpecies, s, yearStartInt, yearEndInt);
 
                     for (CompletableFuture<Object> zone : completableFutures) {
 
@@ -268,14 +274,15 @@ public class Controller implements Initializable {
                                     zoneSpeciesResponse = (ApiZoneSpeciesResponse) zone.get(10, TimeUnit.SECONDS);
                                     ApiZoneSpeciesResponse finalZoneSpeciesResponse = zoneSpeciesResponse;
 
-                                    System.out.println(Platform.isAccessibilityActive());
-
                                     //nécessaire pour modifier un element javafx
                                     Platform.runLater(() -> {
+                                        int currentYear = yearStartInt + 5 * finalCurrentYear;
                                         while (earth.getChildren().size() > 1) {
                                             earth.getChildren().remove(1);
                                         }
                                         displayZone(finalZoneSpeciesResponse);
+                                        createPoint(loaderZoneSpecies, s, currentYear, yearStartInt, yearEndInt);
+                                        finalCurrentYear +=1;
                                     });
 
                                 } catch (Exception e) {
@@ -284,9 +291,7 @@ public class Controller implements Initializable {
                                 return zoneSpeciesResponse;
                             }
                         };
-                        // todo afficher les points
-                        createPoint(loaderZoneSpecies, s, finalCurrentYear);
-                        finalCurrentYear += 5;
+                        createPoint(loaderZoneSpecies, s, yearEndInt, yearStartInt, yearEndInt);
 
                         Thread getItemsThread = new Thread(pollDatabaseTask);
                         getItemsThread.setDaemon(true);
@@ -309,67 +314,73 @@ public class Controller implements Initializable {
     }
 
     /**
-     * Crée un point
-     * @see #createGraph(LoaderZoneSpecies, String, int, int) 
+     * Crée un nouveau point sur un graphe créé pour
+     * @see #createGraph(String, int, int, int, int, XYChart.Series)
      * @param loaderZoneSpecies
      * @param name
      * @param currentYear
      */
-    public void createPoint(LoaderZoneSpecies loaderZoneSpecies, String name, int currentYear){
+    public void createPoint(LoaderZoneSpecies loaderZoneSpecies, String name, int currentYear, int yearStart, int yearEnd){
 
         ApiZoneSpeciesResponse apiZoneSpeciesResponse = loaderZoneSpecies.getZoneSpeciesByTime(name, currentYear, currentYear);
 
         int value = 0;
-         for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponse.getData()) {
-                value += zoneSpecies.getNbSignals();
-         }
-         System.out.println(currentYear + " value : " + value);
-         if (value > maxY) {
-             maxY = value;
-         }
-         if (value < minY) {
-             minY = value;
-         }
-        System.out.println("min : " + minY + " max : " + maxY);
+        for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponse.getData()) {
+            value += zoneSpecies.getNbSignals();
+        }
+        if (value > maxY) {
+            maxY = value;
+        }
+        if (value < minY) {
+            minY = value;
+        }
 
         final LineChart.Data data = new LineChart.Data(currentYear, value);
-         series.getData().add(data);
+        series.getData().add(data);
 
-         yAxis.setLowerBound(minY);
-         yAxis.setUpperBound(maxY);
-
-        //yAxis = new NumberAxis(minY, maxY, (maxY - minY) / 8);
-
-        chart.getData().setAll(series);
+        createGraph(name, yearStart, yearEnd, minY, maxY, series);
 
     }
 
     /**
-     * Crée le graphique d'une espèce entre 2 années
-     * @see #createPoint(LoaderZoneSpecies, String, int) 
-     * @param loaderZoneSpecies
-     * @param anneeStart
-     * @param anneeEnd
+     * Crée le graphique
+     * @see #createGraph(String, int, int, int, int, XYChart.Series)
+     * @param name
+     * @param yearStart
+     * @param yearEnd
+     * @param minY
+     * @param maxY
+     * @param series
      */
-    public void createGraph(LoaderZoneSpecies loaderZoneSpecies, String name, int anneeStart, int anneeEnd) {
+    public void createGraph(String name, int yearStart, int yearEnd, int minY, int maxY, XYChart.Series series) {
 
         // supprimer le graphe d'avant s'il y en a un
-        if (vbox.getChildren().get(vbox.getChildren().size() - 1) instanceof LineChart) {
+        if (vbox.getChildren().get(vbox.getChildren().size() - 1) instanceof AreaChart) {
             vbox.getChildren().remove(vbox.getChildren().size() - 1);
         }
 
         // Création des séries.
-        final int minX = anneeStart;
-        final int maxX = anneeEnd;
+        final int minX = yearStart;
+        final int maxX = yearEnd;
 
         // Création du graphique.
-        xAxis.setLowerBound(anneeStart);
-        xAxis.setUpperBound(anneeEnd);
+        xAxis.setLowerBound(yearStart);
+        xAxis.setUpperBound(yearEnd);
         xAxis.setLabel("Year");
+
         yAxis.setLabel("Number of signalements");
+        tickUnit = (maxY  -minY) / 8;
+        yAxis.setLowerBound(minY);
+        yAxis.setUpperBound(maxY);
+        yAxis.setTickUnit(tickUnit);
+
         chart.setTitle(name);
         chart.setLegendVisible(false);
         chart.setMaxHeight(290);
+        chart.getData().setAll(series);
+        Node line = series.getNode().lookup(".chart-series-area-line");
+        line.setStyle("-fx-stroke-width: 2px; -fx-stroke:  #59BAFF; -fx-fill:  rgba("+89+","+186+","+255+","+0.3+");");
+
         vbox.getChildren().add(chart);
 
     }
@@ -389,7 +400,7 @@ public class Controller implements Initializable {
         }
 
         // supprimer le graphe d'avant s'il y en a un
-        if (vbox.getChildren().get(vbox.getChildren().size() - 1) instanceof LineChart) {
+        if (vbox.getChildren().get(vbox.getChildren().size() - 1) instanceof AreaChart) {
             vbox.getChildren().remove(vbox.getChildren().size() - 1);
         }
 
