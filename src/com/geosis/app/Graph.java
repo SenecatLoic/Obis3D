@@ -3,7 +3,6 @@ package com.geosis.app;
 import com.geosis.api.loader.LoaderZoneSpecies;
 import com.geosis.api.object.ZoneSpecies;
 import com.geosis.api.response.ApiZoneSpeciesResponse;
-import javafx.scene.Node;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
@@ -12,7 +11,7 @@ import javafx.scene.layout.Pane;
 
 public class Graph {
 
-    private static final LineChart.Series series = new LineChart.Series<>();
+    private static LineChart.Series series;
     private static NumberAxis xAxis = new NumberAxis(0, 0, 5);
     private static NumberAxis yAxis = new NumberAxis(0, 0, 0);
     private static AreaChart chart = new AreaChart(xAxis, yAxis);
@@ -29,11 +28,13 @@ public class Graph {
         minY = 0;
         maxY = 0;
 
+        series = new LineChart.Series<>();
+
     }
 
     /**
      * Crée un nouveau point sur un graphe créé pour
-     * @see #createGraph(Pane, String, int, int, int, int, XYChart.Series)
+     * @see #createGraph(Pane, String, int, int) 
      * @param parent
      * @param loaderZoneSpecies
      * @param name
@@ -57,22 +58,20 @@ public class Graph {
         final LineChart.Data data = new LineChart.Data(currentYear, value);
         series.getData().add(data);
 
-        createGraph(parent, name, yearStart, yearEnd, minY, maxY, series);
+        createGraph(parent, name, yearStart, yearEnd);
 
     }
 
     /**
      * Crée le graphique
-     * @see #createGraph(Pane, String, int, int, int, int, XYChart.Series)
+     * @see #createPoint(Pane, LoaderZoneSpecies, String, int, int, int) 
      * @param parent
      * @param name
      * @param yearStart
      * @param yearEnd
-     * @param minY
-     * @param maxY
-     * @param series
+
      */
-    public static void createGraph(Pane parent, String name, int yearStart, int yearEnd, int minY, int maxY, XYChart.Series series) {
+    public static void createGraph(Pane parent, String name, int yearStart, int yearEnd) {
 
         // supprimer le graphe d'avant s'il y en a un
         if (parent.getChildren().get(parent.getChildren().size() - 1) instanceof AreaChart) {
@@ -88,7 +87,7 @@ public class Graph {
         xAxis.setUpperBound(yearEnd);
         xAxis.setLabel("Year");
 
-        yAxis.setLabel("Number of signalements");
+        yAxis.setLabel("Number of signals");
         tickUnit = (maxY  -minY) / 8;
         yAxis.setLowerBound(minY);
         yAxis.setUpperBound(maxY);

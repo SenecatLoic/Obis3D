@@ -249,8 +249,10 @@ public class Controller implements Initializable {
 
             try {
                 actionBtnSearch(s);
-            } catch (InputException | EmptyException e) {
-                // todo faire qqch ?
+            } catch (InputException e) {
+                e.sendAlert();
+            } catch (EmptyException e){
+                e.sendAlert();
             }
 
         });
@@ -267,8 +269,10 @@ public class Controller implements Initializable {
 
             try {
                 actionBtnStart(loaderZoneSpecies, s);
-            } catch (InputException | EmptyException e) {
-                // todo faire qqch ?
+            } catch (InputException e) {
+                e.sendAlert();
+            } catch (EmptyException e){
+                e.sendAlert();
             }
 
         });
@@ -301,6 +305,7 @@ public class Controller implements Initializable {
                 yearStartInt = Integer.parseInt(yearStart.getText());
                 yearEndInt = Integer.parseInt(yearEnd.getText());
 
+                finalCurrentYear = 0;
                 Graph.initGraph();
 
                 double nbRep = (((double) yearEndInt - (double) yearStartInt) / 5);
@@ -327,7 +332,7 @@ public class Controller implements Initializable {
                                     try {
                                         displayZone(finalZoneSpeciesResponse);
                                     } catch (EmptyException e) {
-                                        // todo faire qqch ?
+                                        // on ne veut pas créer d'alerte
                                     }
                                     Graph.createPoint(vbox, loaderZoneSpecies, name, currentYear, yearStartInt, yearEndInt);
                                     finalCurrentYear +=1;
@@ -426,16 +431,14 @@ public class Controller implements Initializable {
             } else {
                 try {
                     yearStartInt = Integer.parseInt(yearStart.getText());
+                    yearEndInt = Integer.parseInt(yearEnd.getText());
+
+                    afficheZoneByTime(name, yearStartInt, yearEndInt);
+
                 } catch (NumberFormatException e) {
                     throw new InputException("L'année n'est pas valide");
 
                 }
-                try {
-                    yearEndInt = Integer.parseInt(yearEnd.getText());
-                } catch (NumberFormatException e) {
-                    throw new InputException("L'année n'est pas valide");
-                }
-                afficheZoneByTime(name, yearStartInt, yearEndInt);
             }
         }
     }
@@ -461,8 +464,6 @@ public class Controller implements Initializable {
         } else {
             throw new EmptyException();
         }
-
-
     }
 
     /**
