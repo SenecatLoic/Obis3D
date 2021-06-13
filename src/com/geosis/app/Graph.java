@@ -100,8 +100,6 @@ public class Graph {
 
         chart.getData().setAll(series);
 
-        chart.getStylesheets().add("com.geosis.app.styleSheet.css");
-
         parent.getChildren().add(chart);
 
     }

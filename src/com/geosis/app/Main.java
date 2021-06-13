@@ -22,6 +22,7 @@ public class Main extends Application {
 
             primaryStage.setTitle("OBIS 3D");
             primaryStage.setScene(scene);
+            scene.getStylesheets().add("com/geosis/app/styleSheet.css");
             primaryStage.show();
         } catch (Exception e){
             e.printStackTrace();
