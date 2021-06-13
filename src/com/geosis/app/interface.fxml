@@ -13,7 +13,7 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
-<HBox fx:id="hboxRoot" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="670.0" prefWidth="1000.0" style="-fx-background-color: black;" stylesheets="@style.css" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1">
+<HBox fx:id="hboxRoot" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="670.0" prefWidth="1000.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <VBox fx:id="vbox" prefHeight="800.0" prefWidth="357.0">
          <children>
@@ -25,7 +25,7 @@
                   <Insets />
                </VBox.margin>
             </Label>
-            <TextField fx:id="scientificName" pickOnBounds="false" prefHeight="40.0" prefWidth="250.0" promptText="Enter a scientific name">
+            <TextField fx:id="scientificName" pickOnBounds="false" prefHeight="40.0" prefWidth="250.0" promptText="Enter a scientific name" style="-fx-focus-color: #59BAFF;">
                <font>
                   <Font name="Consolas" size="13.0" />
                </font>
@@ -45,7 +45,7 @@
                <children>
                   <HBox prefHeight="80.0" prefWidth="257.0">
                      <children>
-                        <Label prefHeight="22.0" prefWidth="74.0" text="Between" textFill="WHITE">
+                        <Label prefHeight="22.0" prefWidth="74.0" text="Between">
                            <font>
                               <Font name="Leelawadee" size="16.0" />
                            </font>
@@ -56,7 +56,7 @@
                               <Insets top="5.0" />
                            </HBox.margin>
                         </Label>
-                        <TextField fx:id="yearStart" prefHeight="30.0" prefWidth="60.0" promptText="Year">
+                        <TextField fx:id="yearStart" prefHeight="30.0" prefWidth="60.0" promptText="Year" style="-fx-focus-color: #59BAFF;">
                            <HBox.margin>
                               <Insets />
                            </HBox.margin>
@@ -64,7 +64,7 @@
                               <Font size="13.0" />
                            </font>
                         </TextField>
-                        <Label text="and" textFill="WHITE">
+                        <Label text="and">
                            <font>
                               <Font name="Leelawadee" size="16.0" />
                            </font>
@@ -72,7 +72,7 @@
                               <Insets left="10.0" right="10.0" top="5.0" />
                            </padding>
                         </Label>
-                        <TextField fx:id="yearEnd" prefHeight="30.0" prefWidth="60.0" promptText="Year">
+                        <TextField fx:id="yearEnd" prefHeight="30.0" prefWidth="60.0" promptText="Year" style="-fx-focus-color: #59BAFF;">
                            <font>
                               <Font size="13.0" />
                            </font>
@@ -144,7 +144,7 @@
          </children>
       </VBox>
       <Separator orientation="VERTICAL" prefHeight="200.0" />
-      <AnchorPane fx:id="anchorPane" prefHeight="800.0" prefWidth="603.0" styleClass="body" stylesheets="@style.css">
+      <AnchorPane fx:id="anchorPane" prefHeight="800.0" prefWidth="603.0">
          <HBox.margin>
             <Insets />
          </HBox.margin>
@@ -270,7 +270,7 @@
                   <Font name="Leelawadee" size="14.0" />
                </font>
             </Button>
-            <Label layoutX="7.0" layoutY="4.0" text="Earth rotation" textFill="WHITE" AnchorPane.topAnchor="15.0">
+            <Label layoutX="7.0" layoutY="4.0" text="Earth rotation" AnchorPane.topAnchor="15.0">
                <font>
                   <Font name="Leelawadee" size="16.0" />
                </font>

@@ -95,13 +95,10 @@ public class Controller implements Initializable {
         yearEnd.setFocusTraversable(false);
         btnStart.setFocusTraversable(false);
         btnBreak.setFocusTraversable(false);
+        btnStop.setFocusTraversable(false);
         btnSearch.setFocusTraversable(false);
         btnReset.setFocusTraversable(false);
         btnClose.setFocusTraversable(false);
-
-        scientificName.setStyle("-fx-focus-color : #F5B041");
-        yearStart.setStyle("-fx-focus-color : #F5B041");
-        yearEnd.setStyle("-fx-focus-color : #F5B041");
 
         //Rotate the earth
         ToggleSwitchRotation toggleSwitchRotation = new ToggleSwitchRotation(earth, 25);
