@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-public class HttpLoaderZoneSpecies extends LoaderZoneSpecies{
+class HttpLoaderZoneSpecies extends LoaderZoneSpecies{
 
     private final String url = "https://api.obis.org/v3/";
 
@@ -25,7 +25,7 @@ public class HttpLoaderZoneSpecies extends LoaderZoneSpecies{
 
         try{
             String json = Request.readJsonFromUrl(url + "occurrence/grid/3?scientificname="
-                    + URLEncoder.encode(name, StandardCharsets.UTF_8),response).get(10, TimeUnit.SECONDS);
+                    + name.replace(" ","%20"),response).get(10, TimeUnit.SECONDS);
 
             if(response.getCode() == 404){
                 return response;
@@ -59,7 +59,7 @@ public class HttpLoaderZoneSpecies extends LoaderZoneSpecies{
 
         try{
             String param = String.format("occurrence/grid/3?scientificname=%s&" +
-                    "startdate=%s&enddate=%s",URLEncoder.encode(name, StandardCharsets.UTF_8),formatter.format(dateStart),formatter.format(dateEnd));
+                    "startdate=%s&enddate=%s",name.replace(" ","%20"),formatter.format(dateStart),formatter.format(dateEnd));
             String json = Request.readJsonFromUrl(url + param,response).get(10, TimeUnit.SECONDS);
 
             if(response.getCode() == 404){
@@ -119,7 +119,7 @@ public class HttpLoaderZoneSpecies extends LoaderZoneSpecies{
                 end = c.getTime();
 
                 String param = String.format("occurrence/grid/%d?scientificname=%s&" +
-                                "startdate=%s&enddate=%s",precision,URLEncoder.encode(name, StandardCharsets.UTF_8),
+                                "startdate=%s&enddate=%s",precision,name.replace(" ","%20"),
                         formatter.format(startTmp),formatter.format(end));
 
                 c.add(Calendar.YEAR, interval);

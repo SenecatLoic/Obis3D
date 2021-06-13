@@ -11,7 +11,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
-public class HttpLoaderSpecies extends LoaderSpecies{
+class HttpLoaderSpecies extends LoaderSpecies{
 
     private final String url = "https://api.obis.org/v3/";
 
@@ -22,7 +22,7 @@ public class HttpLoaderSpecies extends LoaderSpecies{
 
         try{
             String json = Request.readJsonFromUrl(url + "taxon/complete/verbose/" +
-                    URLEncoder.encode(name, StandardCharsets.UTF_8),response).get(10, TimeUnit.SECONDS);
+                    name.replace(" ","%20"),response).get(10, TimeUnit.SECONDS);
 
             if(response.getCode() == 404){
                 return response;
@@ -48,8 +48,9 @@ public class HttpLoaderSpecies extends LoaderSpecies{
 
 
         if(name != null){
-            param += "&scientificname=" + URLEncoder.encode(name, StandardCharsets.UTF_8);
+            param += "&scientificname=" + name.replace(" ","%20");
         }
+
         try {
             String json = Request.readJsonFromUrl(url + param,response).get(10, TimeUnit.SECONDS);
 
@@ -60,18 +61,30 @@ public class HttpLoaderSpecies extends LoaderSpecies{
 
             JSONArray array = result.getJSONArray("results");
 
-            for (int i = 0; i < array.length(); i++){
+            for (int i = 0; i < array.length(); i++) {
                 Observation observation = new Observation();
 
                 observation.setScientificName(array.getJSONObject(i).getString("scientificName"));
-                observation.setOrder(array.getJSONObject(i).getString("order"));
-                observation.setSpecies(array.getJSONObject(i).getString("species"));
-                observation.setRecordedBy(array.getJSONObject(i).getString("recordedBy"));
-                observation.setSuperClass(array.getJSONObject(i).getString("superclass"));
+                if(array.getJSONObject(i).has("order")) {
+                    observation.setOrder(array.getJSONObject(i).getString("order"));
+                }
+
+                if(array.getJSONObject(i).has("species")) {
+                    observation.setSpecies(array.getJSONObject(i).getString("species"));
+                }
+                if(array.getJSONObject(i).has("recordedBy")){
+                    observation.setRecordedBy(array.getJSONObject(i).getString("recordedBy"));
+                }
+
+                if(array.getJSONObject(i).has("superclass")) {
+                    observation.setSuperClass(array.getJSONObject(i).getString("superclass"));
+                }
 
                 response.addObservation(observation);
+
             }
         }catch (Exception e){
+            System.out.println(e.getMessage());
             response.setMessage(e.getMessage());
         }
 
