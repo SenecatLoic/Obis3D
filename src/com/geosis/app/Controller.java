@@ -5,6 +5,8 @@ import com.geosis.api.loader.LoaderZoneSpecies;
 import com.geosis.api.object.ZoneSpecies;
 import com.geosis.api.response.ApiNameResponse;
 import com.geosis.api.response.ApiZoneSpeciesResponse;
+import com.geosis.app.exception.EmptyException;
+import com.geosis.app.exception.InputException;
 import com.interactivemesh.jfx.importer.ImportException;
 import com.interactivemesh.jfx.importer.obj.ObjModelImporter;
 import javafx.animation.AnimationTimer;
@@ -38,8 +40,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import static com.geosis.app.GeometryTools.*;
-
-import org.controlsfx.control.*;
+import com.geosis.app.exception.InputException;
 
 public class Controller implements Initializable {
 
@@ -102,6 +103,19 @@ public class Controller implements Initializable {
         LoaderSpecies loader = LoaderSpecies.createLoaderSpecies();
         LoaderZoneSpecies loaderZoneSpecies = LoaderZoneSpecies.createLoaderSpecies();
 
+        scientificName.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable,
+                                String oldValue, String newValue) {
+
+                ApiNameResponse apiNameResponse = loader.getNames(newValue);
+
+                nameSearch = apiNameResponse.getData();
+
+                System.out.println(apiNameResponse.getData());
+            }
+        });
+
         root3D.addEventHandler(MouseEvent.ANY, event -> {
             if (event.getEventType() == MouseEvent.MOUSE_PRESSED && event.isControlDown()) {
                 PickResult pickResult = event.getPickResult();
@@ -134,24 +148,23 @@ public class Controller implements Initializable {
                 Point3D space = geoCoordTo3dCoord((float)point2D.getX(), (float) point2D.getY());
                 System.out.println(space);
 
-                Box box = new Box(0.1, 4, 0.1);
+                Box box = new Box(0.1, 2, 0.1);
                 final PhongMaterial sphereMaterial = new PhongMaterial();
                 sphereMaterial.setDiffuseColor(new Color(1, 0, 0, 0.3));
                 box.setMaterial(sphereMaterial);
 
-                Rotate rotate = new Rotate();
 
                 //box.setRotationAxis(new Point3D(1, 1, (Math.cos(Math.toRadians(point2D.getY())) + Math.sin(Math.toRadians(point2D.getY()))) / -Math.tan(Math.toRadians(point2D.getX()))));
-                box.setRotationAxis(new Point3D(0, 0, 1));
+                box.setRotationAxis(new Point3D(0, 1, 0));
                 box.setRotate(point2D.getY());
 
                 box.setRotationAxis(new Point3D(1, 0, 0));
                 box.setRotate(point2D.getX());
 
 
-                //box.setTranslateX(spaceCoord.getX());
-                //box.setTranslateY(spaceCoord.getY());
-                //box.setTranslateZ(spaceCoord.getZ());
+                box.setTranslateX(spaceCoord.getX());
+                box.setTranslateY(spaceCoord.getY());
+                box.setTranslateZ(spaceCoord.getZ());
 
                 earth.getChildren().add(box);
 
@@ -168,10 +181,13 @@ public class Controller implements Initializable {
                     sphereMaterial.setDiffuseColor(new Color(1, 0, 0, 0.3));
                     box.setMaterial(sphereMaterial);
 
-                    box.setRotationAxis(new Point3D(0, 0, 1));
-                    box.setRotate(lon);
                     box.setRotationAxis(new Point3D(1, 0, 0));
                     box.setRotate(lat);
+
+                    box.setRotationAxis(new Point3D(0, 1, 0));
+                    box.setRotate(lon);
+
+
 
                     Point3D spaceCoord = geoCoordTo3dCoord(lat, lon);
 
@@ -186,21 +202,6 @@ public class Controller implements Initializable {
 
         });
 
-
-        scientificName.textProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observable,
-                                String oldValue, String newValue) {
-
-                ApiNameResponse apiNameResponse = loader.getNames(newValue);
-
-                nameSearch = apiNameResponse.getData();
-
-                System.out.println(apiNameResponse.getData());
-            }
-        });
-
-
         btnReset.setOnAction(actionEvent -> {
             actionBtnReset();
         });
@@ -213,27 +214,15 @@ public class Controller implements Initializable {
 
             String s = scientificName.getText();
 
-            actionBtnSearch(s);
+            try {
+                actionBtnSearch(s);
+            } catch (InputException | EmptyException e) {
+                // todo faire qqch ?
+            }
 
         });
 
         btnStop.setOnAction(actionEvent -> {
-
-            String s = scientificName.getText();
-
-            try {
-                yearStartInt = Integer.parseInt(yearStart.getText());
-                yearEndInt = Integer.parseInt(yearEnd.getText());
-            } catch (NumberFormatException e){
-                System.out.println("hello");
-            }
-
-            int currentYear = yearStartInt;
-
-            double nbRep = (((double) yearEndInt - (double) yearStartInt) / 5);
-
-            createPoint(loaderZoneSpecies, s, currentYear + 5, yearStartInt, yearEndInt);
-            createPoint(loaderZoneSpecies, s, currentYear + 10, yearStartInt, yearEndInt);
 
 
 
@@ -243,75 +232,91 @@ public class Controller implements Initializable {
 
             String s = scientificName.getText();
 
-            // vérifie si le contenu du textfield existe dans les data
-            for (String n : nameSearch) {
-                if (n.equalsIgnoreCase(s)) {
-                    nameExist = true;
-                }
-            }
-
-            if (nameSearch.isEmpty() || !nameExist) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setContentText("Le nom scientifique n'est pas valide");
-                alert.show();
-            } else if (!yearStart.getText().isEmpty() && !yearEnd.getText().isEmpty()) {
-                try {
-                    yearStartInt = Integer.parseInt(yearStart.getText());
-                    yearEndInt = Integer.parseInt(yearEnd.getText());
-
-                    double nbRep = (((double) yearEndInt - (double) yearStartInt) / 5);
-
-                    ArrayList<CompletableFuture<Object>> completableFutures = loaderZoneSpecies.getZoneSpeciesByInterval(s, 3, yearStartInt, 5, (int) Math.ceil(nbRep));
-
-                    for (CompletableFuture<Object> zone : completableFutures) {
-
-                        Task<ApiZoneSpeciesResponse> pollDatabaseTask = new Task<>() {
-                            @Override
-                            public ApiZoneSpeciesResponse call() {
-                                ApiZoneSpeciesResponse zoneSpeciesResponse = null;
-
-                                try {
-                                    zoneSpeciesResponse = (ApiZoneSpeciesResponse) zone.get(10, TimeUnit.SECONDS);
-                                    ApiZoneSpeciesResponse finalZoneSpeciesResponse = zoneSpeciesResponse;
-
-                                    //nécessaire pour modifier un element javafx
-                                    Platform.runLater(() -> {
-                                        int currentYear = yearStartInt + 5 * finalCurrentYear;
-                                        while (earth.getChildren().size() > 1) {
-                                            earth.getChildren().remove(1);
-                                        }
-                                        displayZone(finalZoneSpeciesResponse);
-                                        createPoint(loaderZoneSpecies, s, currentYear, yearStartInt, yearEndInt);
-                                        finalCurrentYear +=1;
-                                    });
-
-                                } catch (Exception e) {
-                                    System.out.println(e.getMessage());
-                                }
-                                return zoneSpeciesResponse;
-                            }
-                        };
-                        createPoint(loaderZoneSpecies, s, yearEndInt, yearStartInt, yearEndInt);
-
-                        Thread getItemsThread = new Thread(pollDatabaseTask);
-                        getItemsThread.setDaemon(true);
-                        getItemsThread.start();
-                    }
-
-                } catch (NumberFormatException e) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setContentText("L'année pour l'évolution n'est pas valide");
-                    alert.show();
-                }
-            } else {
-                Alert alert = new Alert(Alert.AlertType.WARNING);
-                alert.setContentText("L'année évolution est vide. Merci de la compléter");
-                alert.show();
+            try {
+                actionBtnStart(loaderZoneSpecies, s);
+            } catch (InputException | EmptyException e) {
+                // todo faire qqch ?
             }
 
         });
 
     }
+
+    /**
+     * Début de l'affiche d'une évolution
+     * @see #createPoint(LoaderZoneSpecies, String, int, int, int)
+     * @param loaderZoneSpecies
+     * @param name
+     * @throws InputException
+     */
+    public void actionBtnStart(LoaderZoneSpecies loaderZoneSpecies, String name) throws InputException, EmptyException{
+
+        // vérifie si le contenu du textfield existe dans les data
+        for (String n : nameSearch) {
+            if (n.equalsIgnoreCase(name)) {
+                nameExist = true;
+            }
+        }
+
+        if (nameSearch.isEmpty() || !nameExist) {
+            throw new InputException("Le nom scientifique n'est pas valide");
+        } else if (!yearStart.getText().isEmpty() && !yearEnd.getText().isEmpty()) {
+            try {
+                yearStartInt = Integer.parseInt(yearStart.getText());
+                yearEndInt = Integer.parseInt(yearEnd.getText());
+
+                double nbRep = (((double) yearEndInt - (double) yearStartInt) / 5);
+
+                ArrayList<CompletableFuture<Object>> completableFutures = loaderZoneSpecies.getZoneSpeciesByInterval(name, 3, yearStartInt, 5, (int) Math.ceil(nbRep));
+
+                for (CompletableFuture<Object> zone : completableFutures) {
+
+                    Task<ApiZoneSpeciesResponse> pollDatabaseTask = new Task<>() {
+                        @Override
+                        public ApiZoneSpeciesResponse call() {
+                            ApiZoneSpeciesResponse zoneSpeciesResponse = null;
+
+                            try {
+                                zoneSpeciesResponse = (ApiZoneSpeciesResponse) zone.get(10, TimeUnit.SECONDS);
+                                ApiZoneSpeciesResponse finalZoneSpeciesResponse = zoneSpeciesResponse;
+
+                                //nécessaire pour modifier un element javafx
+                                Platform.runLater(() -> {
+                                    int currentYear = yearStartInt + 5 * finalCurrentYear;
+                                    while (earth.getChildren().size() > 1) {
+                                        earth.getChildren().remove(1);
+                                    }
+                                    try {
+                                        displayZone(finalZoneSpeciesResponse);
+                                    } catch (EmptyException e) {
+                                        // todo faire qqch ?
+                                    }
+                                    createPoint(loaderZoneSpecies, name, currentYear, yearStartInt, yearEndInt);
+                                    finalCurrentYear +=1;
+                                });
+
+                            } catch (Exception e) {
+                                System.err.println(e.getMessage());
+                            }
+                            return zoneSpeciesResponse;
+                        }
+                    };
+                    createPoint(loaderZoneSpecies, name, yearEndInt, yearStartInt, yearEndInt);
+
+                    Thread getItemsThread = new Thread(pollDatabaseTask);
+                    getItemsThread.setDaemon(true);
+                    getItemsThread.start();
+                }
+
+            } catch (NumberFormatException e) {
+                throw new InputException("L'année n'est pas valide");
+            }
+        } else {
+            throw new InputException("L'année n'est pas valide");
+        }
+
+    }
+
 
     /**
      * Crée un nouveau point sur un graphe créé pour
@@ -379,7 +384,7 @@ public class Controller implements Initializable {
         chart.setMaxHeight(290);
         chart.getData().setAll(series);
         Node line = series.getNode().lookup(".chart-series-area-line");
-        line.setStyle("-fx-stroke-width: 2px; -fx-stroke:  #59BAFF; -fx-fill:  rgba("+89+","+186+","+255+","+0.3+");");
+        line.setStyle("-fx-stroke-width: 2px; -fx-stroke:  #59BAFF; -fx-fill:  rgba("+89+","+186+","+255+","+0.5+");");
 
         vbox.getChildren().add(chart);
 
@@ -429,11 +434,12 @@ public class Controller implements Initializable {
 
     /**
      * Action du bouton Search
+     * @throws InputException
      * @param name
      * @see #afficheZoneByName(String)
      * @see #afficheZoneByTime(String, int, int)
      */
-    public void actionBtnSearch(String name) {
+    public void actionBtnSearch(String name) throws InputException, EmptyException {
 
         // vérifie si le contenu du textfield existe dans les data
         for (String n : nameSearch) {
@@ -443,9 +449,7 @@ public class Controller implements Initializable {
         }
 
         if (nameSearch.isEmpty() || !nameExist) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setContentText("Le nom scientifique n'est pas valide");
-            alert.show();
+            throw new InputException("Le nom scientifique n'est pas valide");
         } else {
             // supprime tous les anciens polygones sur le globe
             while (earth.getChildren().size() > 1) {
@@ -458,16 +462,13 @@ public class Controller implements Initializable {
                 try {
                     yearStartInt = Integer.parseInt(yearStart.getText());
                 } catch (NumberFormatException e) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setContentText("L'année n'est pas valide");
-                    alert.show();
+                    throw new InputException("L'année n'est pas valide");
+
                 }
                 try {
                     yearEndInt = Integer.parseInt(yearEnd.getText());
                 } catch (NumberFormatException e) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setContentText("L'année n'est pas valide");
-                    alert.show();
+                    throw new InputException("L'année n'est pas valide");
                 }
                 afficheZoneByTime(name, yearStartInt, yearEndInt);
             }
@@ -476,28 +477,37 @@ public class Controller implements Initializable {
 
     /**
      * Affiche zone
+     * @throws EmptyException
      * @see #afficheZoneByName(String)
      * @see #afficheZoneByTime(String, int, int) 
      * @param apiZoneSpeciesResponse
      */
-    public void displayZone(ApiZoneSpeciesResponse apiZoneSpeciesResponse) {
+    public void displayZone(ApiZoneSpeciesResponse apiZoneSpeciesResponse) throws EmptyException{
 
         int minNbSignals = apiZoneSpeciesResponse.getNbSignalsMin();
         int maxNbSignals = apiZoneSpeciesResponse.getNbSignalsMax();
 
-        setLegend(minNbSignals, maxNbSignals);
+        if(minNbSignals != Integer.MAX_VALUE && maxNbSignals != Integer.MIN_VALUE){
+            setLegend(minNbSignals, maxNbSignals);
 
-        for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponse.getData()) {
-            GeometryTools.addPolygon(earth, zoneSpecies.getZone().getCoords(), setColor(zoneSpecies, minNbSignals, maxNbSignals));
+            for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponse.getData()) {
+                GeometryTools.addPolygon(earth, zoneSpecies.getZone().getCoords(), setColor(zoneSpecies, minNbSignals, maxNbSignals));
+            }
+        } else {
+            throw new EmptyException();
         }
+
+
     }
+
     /**
      * Affiche les zones d'une espèce
+     * @throws EmptyException
      * @see #displayZone(ApiZoneSpeciesResponse) 
      * @see com.geosis.api.loader.HttpLoaderZoneSpecies#getZoneSpeciesByName(String)
      * @param name
      */
-    public void afficheZoneByName (String name){
+    public void afficheZoneByName (String name) throws EmptyException {
 
         LoaderZoneSpecies loaderZoneSpecies = LoaderZoneSpecies.createLoaderSpecies();
 
@@ -507,13 +517,14 @@ public class Controller implements Initializable {
 
     /**
      * Affiche les zones d'une espèce entre 2 années
+     * @throws EmptyException
      * @see #displayZone(ApiZoneSpeciesResponse) 
      * @see com.geosis.api.loader.HttpLoaderZoneSpecies#getZoneSpeciesByTime(String, int, int)
      * @param name
      * @param anneeStart
      * @param anneeEnd
      */
-    public void afficheZoneByTime (String name,int anneeStart, int anneeEnd){
+    public void afficheZoneByTime (String name,int anneeStart, int anneeEnd) throws EmptyException {
 
         LoaderZoneSpecies loaderZoneSpecies = LoaderZoneSpecies.createLoaderSpecies();
 
