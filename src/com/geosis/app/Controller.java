@@ -20,10 +20,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point3D;
 import javafx.scene.*;
-import javafx.scene.chart.AreaChart;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
+import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -38,13 +35,15 @@ import javafx.geometry.Point2D;
 import javafx.scene.transform.Rotate;
 
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import static com.geosis.app.GeometryTools.*;
-import com.geosis.app.exception.InputException;
+import com.geosis.api.loader.*;
 
 public class Controller implements Initializable {
 
@@ -67,6 +66,9 @@ public class Controller implements Initializable {
     private Rectangle color1, color2, color3, color4, color5, color6, color7, color8;
 
     @FXML
+    private Label labelName1;
+
+    @FXML
     private Label labelColor1, labelColor2, labelColor3, labelColor4, labelColor5, labelColor6, labelColor7, labelColor8;
 
     @FXML
@@ -77,15 +79,6 @@ public class Controller implements Initializable {
     private int yearEndInt = Integer.MAX_VALUE;
     ArrayList<String> nameSearch = new ArrayList<>();
     boolean nameExist = false;
-
-    // Create Graph
-    private final LineChart.Series series = new LineChart.Series<>();
-    private NumberAxis xAxis = new NumberAxis(0, 0, 5);
-    private NumberAxis yAxis = new NumberAxis(0, 0, 0);
-    private AreaChart chart = new AreaChart(xAxis, yAxis);
-    private int minY = 0;
-    private int maxY = 0;
-    private int tickUnit = 0;
 
     int finalCurrentYear;
 
@@ -126,6 +119,13 @@ public class Controller implements Initializable {
 
                 listView.setItems(names);
 
+                labelName1.setText("Scientific names");
+
+                if(scientificName.getText().isEmpty()){
+                    listView.setVisible(false);
+                    labelName1.setText("Results");
+                }
+
                 //System.out.println(apiNameResponse.getData());
             }
         });
@@ -136,12 +136,16 @@ public class Controller implements Initializable {
                 if(eventKey.getCode() == KeyCode.ENTER){
                     String nameClicked = listView.getSelectionModel().getSelectedItem();
                     scientificName.setText(nameClicked);
+                    listView.setVisible(false);
+                    labelName1.setText("Results");
                 }
             });
             // mettre à jour le Textfield scientificName en double cliquant
             if(event.getClickCount() == 2){
                 String nameClicked = listView.getSelectionModel().getSelectedItem();
                 scientificName.setText(nameClicked);
+                listView.setVisible(false);
+                labelName1.setText("Results");
             }
         });
 
@@ -273,7 +277,10 @@ public class Controller implements Initializable {
 
     /**
      * Début de l'affiche d'une évolution
-     * @see #createPoint(LoaderZoneSpecies, String, int, int, int)
+     * @see Graph#initGraph()
+     * @see Graph#createPoint(Pane, LoaderZoneSpecies, String, int, int, int)
+     * @see #displayZone(ApiZoneSpeciesResponse)
+     * @see com.geosis.api.loader.LoaderZoneSpecies#getZoneSpeciesByInterval(String, int, int, int, int)
      * @param loaderZoneSpecies
      * @param name
      * @throws InputException
@@ -293,6 +300,8 @@ public class Controller implements Initializable {
             try {
                 yearStartInt = Integer.parseInt(yearStart.getText());
                 yearEndInt = Integer.parseInt(yearEnd.getText());
+
+                Graph.initGraph();
 
                 double nbRep = (((double) yearEndInt - (double) yearStartInt) / 5);
 
@@ -320,7 +329,7 @@ public class Controller implements Initializable {
                                     } catch (EmptyException e) {
                                         // todo faire qqch ?
                                     }
-                                    createPoint(loaderZoneSpecies, name, currentYear, yearStartInt, yearEndInt);
+                                    Graph.createPoint(vbox, loaderZoneSpecies, name, currentYear, yearStartInt, yearEndInt);
                                     finalCurrentYear +=1;
                                 });
 
@@ -330,7 +339,7 @@ public class Controller implements Initializable {
                             return zoneSpeciesResponse;
                         }
                     };
-                    createPoint(loaderZoneSpecies, name, yearEndInt, yearStartInt, yearEndInt);
+                    Graph.createPoint(vbox, loaderZoneSpecies, name, yearEndInt, yearStartInt, yearEndInt);
 
                     Thread getItemsThread = new Thread(pollDatabaseTask);
                     getItemsThread.setDaemon(true);
@@ -343,79 +352,6 @@ public class Controller implements Initializable {
         } else {
             throw new InputException("L'année n'est pas valide");
         }
-
-    }
-
-
-    /**
-     * Crée un nouveau point sur un graphe créé pour
-     * @see #createGraph(String, int, int, int, int, XYChart.Series)
-     * @param loaderZoneSpecies
-     * @param name
-     * @param currentYear
-     */
-    public void createPoint(LoaderZoneSpecies loaderZoneSpecies, String name, int currentYear, int yearStart, int yearEnd){
-
-        ApiZoneSpeciesResponse apiZoneSpeciesResponse = loaderZoneSpecies.getZoneSpeciesByTime(name, currentYear, currentYear);
-
-        int value = 0;
-        for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponse.getData()) {
-            value += zoneSpecies.getNbSignals();
-        }
-        if (value > maxY) {
-            maxY = value;
-        }
-        if (value < minY) {
-            minY = value;
-        }
-
-        final LineChart.Data data = new LineChart.Data(currentYear, value);
-        series.getData().add(data);
-
-        createGraph(name, yearStart, yearEnd, minY, maxY, series);
-
-    }
-
-    /**
-     * Crée le graphique
-     * @see #createGraph(String, int, int, int, int, XYChart.Series)
-     * @param name
-     * @param yearStart
-     * @param yearEnd
-     * @param minY
-     * @param maxY
-     * @param series
-     */
-    public void createGraph(String name, int yearStart, int yearEnd, int minY, int maxY, XYChart.Series series) {
-
-        // supprimer le graphe d'avant s'il y en a un
-        if (vbox.getChildren().get(vbox.getChildren().size() - 1) instanceof AreaChart) {
-            vbox.getChildren().remove(vbox.getChildren().size() - 1);
-        }
-
-        // Création des séries.
-        final int minX = yearStart;
-        final int maxX = yearEnd;
-
-        // Création du graphique.
-        xAxis.setLowerBound(yearStart);
-        xAxis.setUpperBound(yearEnd);
-        xAxis.setLabel("Year");
-
-        yAxis.setLabel("Number of signalements");
-        tickUnit = (maxY  -minY) / 8;
-        yAxis.setLowerBound(minY);
-        yAxis.setUpperBound(maxY);
-        yAxis.setTickUnit(tickUnit);
-
-        chart.setTitle(name);
-        chart.setLegendVisible(false);
-        chart.setMaxHeight(290);
-        chart.getData().setAll(series);
-        Node line = series.getNode().lookup(".chart-series-area-line");
-        line.setStyle("-fx-stroke-width: 2px; -fx-stroke:  #59BAFF; -fx-fill:  rgba("+89+","+186+","+255+","+0.5+");");
-
-        vbox.getChildren().add(chart);
 
     }
 
@@ -533,7 +469,7 @@ public class Controller implements Initializable {
      * Affiche les zones d'une espèce
      * @throws EmptyException
      * @see #displayZone(ApiZoneSpeciesResponse) 
-     * @see com.geosis.api.loader.HttpLoaderZoneSpecies#getZoneSpeciesByName(String)
+     * @see com.geosis.api.loader.LoaderZoneSpecies#getZoneSpeciesByName(String)
      * @param name
      */
     public void afficheZoneByName (String name) throws EmptyException {
@@ -547,8 +483,8 @@ public class Controller implements Initializable {
     /**
      * Affiche les zones d'une espèce entre 2 années
      * @throws EmptyException
-     * @see #displayZone(ApiZoneSpeciesResponse) 
-     * @see com.geosis.api.loader.HttpLoaderZoneSpecies#getZoneSpeciesByTime(String, int, int)
+     * @see #displayZone(ApiZoneSpeciesResponse)
+     * @see com.geosis.api.loader.LoaderZoneSpecies#getZoneSpeciesByTime(String, int, int)
      * @param name
      * @param anneeStart
      * @param anneeEnd
