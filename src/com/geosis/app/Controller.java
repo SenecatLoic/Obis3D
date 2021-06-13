@@ -13,6 +13,8 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -23,6 +25,8 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import javafx.scene.layout.*;
@@ -65,6 +69,8 @@ public class Controller implements Initializable {
     @FXML
     private Label labelColor1, labelColor2, labelColor3, labelColor4, labelColor5, labelColor6, labelColor7, labelColor8;
 
+    @FXML
+    private ListView<String> listView;
 
     private Group earth;
     private int yearStartInt = Integer.MIN_VALUE;
@@ -90,6 +96,8 @@ public class Controller implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resource) {
 
+        listView.setVisible(false);
+
         //Create a Pane et graph scene root for the 3D content
         Group root3D = new Group();
         createEarth(root3D);
@@ -112,7 +120,28 @@ public class Controller implements Initializable {
 
                 nameSearch = apiNameResponse.getData();
 
-                System.out.println(apiNameResponse.getData());
+                ObservableList<String> names = FXCollections.observableArrayList(nameSearch);
+
+                listView.setVisible(true);
+
+                listView.setItems(names);
+
+                //System.out.println(apiNameResponse.getData());
+            }
+        });
+
+        listView.setOnMouseClicked(event -> {
+            // mettre à jour le Textfield scientificName en sélectionnant l'espèce + appui sur ENTREE
+            listView.addEventHandler(KeyEvent.KEY_PRESSED, eventKey -> {
+                if(eventKey.getCode() == KeyCode.ENTER){
+                    String nameClicked = listView.getSelectionModel().getSelectedItem();
+                    scientificName.setText(nameClicked);
+                }
+            });
+            // mettre à jour le Textfield scientificName en double cliquant
+            if(event.getClickCount() == 2){
+                String nameClicked = listView.getSelectionModel().getSelectedItem();
+                scientificName.setText(nameClicked);
             }
         });
 
