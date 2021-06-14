@@ -153,12 +153,12 @@
             <Insets />
          </opaqueInsets>
          <children>
-            <FlowPane fx:id="legFlowPane" prefHeight="160.0" prefWidth="260.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0">
+            <FlowPane fx:id="legFlowPane" prefHeight="160.0" prefWidth="326.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0">
                <children>
-                  <HBox fx:id="hbox1" prefHeight="20.0" prefWidth="300.0">
+                  <HBox fx:id="hbox1" prefHeight="20.0" prefWidth="335.0">
                      <children>
                         <Rectangle fx:id="color1" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #F9E79F;" visible="false" width="20.0" />
-                        <Label fx:id="labelColor1" prefHeight="18.0" prefWidth="282.0">
+                        <Label fx:id="labelColor1" prefHeight="20.0" prefWidth="306.0">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -168,10 +168,10 @@
                         </Label>
                      </children>
                   </HBox>
-                  <HBox fx:id="hbox2" prefHeight="20.0" prefWidth="300.0">
+                  <HBox fx:id="hbox2" prefHeight="20.0" prefWidth="336.0">
                      <children>
                         <Rectangle fx:id="color2" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #F7DC6F;" visible="false" width="20.0" />
-                        <Label fx:id="labelColor2" prefHeight="18.0" prefWidth="282.0">
+                        <Label fx:id="labelColor2" prefHeight="20.0" prefWidth="305.0">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -181,10 +181,10 @@
                         </Label>
                      </children>
                   </HBox>
-                  <HBox fx:id="hbox3" prefHeight="20.0" prefWidth="300.0">
+                  <HBox fx:id="hbox3" prefHeight="20.0" prefWidth="337.0">
                      <children>
                         <Rectangle fx:id="color3" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #F5B041;" visible="false" width="20.0" />
-                        <Label fx:id="labelColor3" prefHeight="18.0" prefWidth="282.0">
+                        <Label fx:id="labelColor3" prefHeight="20.0" prefWidth="314.0">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -194,10 +194,10 @@
                         </Label>
                      </children>
                   </HBox>
-                  <HBox fx:id="hbox4" prefHeight="20.0" prefWidth="300.0">
+                  <HBox fx:id="hbox4" prefHeight="20.0" prefWidth="338.0">
                      <children>
                         <Rectangle fx:id="color4" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #F39C12;" visible="false" width="20.0" />
-                        <Label fx:id="labelColor4" prefHeight="18.0" prefWidth="282.0">
+                        <Label fx:id="labelColor4" prefHeight="20.0" prefWidth="320.0">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -220,10 +220,10 @@
                         </Label>
                      </children>
                   </HBox>
-                  <HBox fx:id="hbox6" prefHeight="20.0" prefWidth="300.0">
+                  <HBox fx:id="hbox6" prefHeight="20.0" prefWidth="337.0">
                      <children>
                         <Rectangle fx:id="color6" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #D35400;" visible="false" width="20.0" />
-                        <Label fx:id="labelColor6" prefHeight="18.0" prefWidth="282.0">
+                        <Label fx:id="labelColor6" prefHeight="20.0" prefWidth="322.0">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -233,10 +233,10 @@
                         </Label>
                      </children>
                   </HBox>
-                  <HBox fx:id="hbox7" prefHeight="20.0" prefWidth="300.0">
+                  <HBox fx:id="hbox7" prefHeight="20.0" prefWidth="337.0">
                      <children>
                         <Rectangle fx:id="color7" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #A93226;" visible="false" width="20.0" />
-                        <Label fx:id="labelColor7" prefHeight="18.0" prefWidth="282.0">
+                        <Label fx:id="labelColor7" prefHeight="20.0" prefWidth="314.0">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -246,10 +246,10 @@
                         </Label>
                      </children>
                   </HBox>
-                  <HBox fx:id="hbox8" prefHeight="20.0" prefWidth="299.0">
+                  <HBox fx:id="hbox8" prefHeight="20.0" prefWidth="338.0">
                      <children>
                         <Rectangle fx:id="color8" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #7B241C;" visible="false" width="20.0" />
-                        <Label fx:id="labelColor8" prefHeight="20.0" prefWidth="185.0">
+                        <Label fx:id="labelColor8" prefHeight="20.0" prefWidth="312.0">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -286,7 +286,7 @@
                   <Font name="Leelawadee" size="20.0" />
                </font>
             </Label>
-            <ListView fx:id="listView" layoutX="-2.0" prefHeight="630.0" prefWidth="193.0" translateY="38.0" style="-fx-font-size: 14px; -fx-font-family: 'Consolas'; -fx-background-insets: 0; -fx-selection-bar: #59BAFF ;" />
+            <ListView fx:id="listView" layoutX="-2.0" prefHeight="630.0" prefWidth="193.0" style="-fx-font-size: 14px; -fx-font-family: 'Consolas'; -fx-background-insets: 0; -fx-selection-bar: #59BAFF ;" translateY="38.0" />
          </children>
       </Pane>
    </children>

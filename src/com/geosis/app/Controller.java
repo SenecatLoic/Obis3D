@@ -18,6 +18,7 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.geometry.Point3D;
 import javafx.scene.*;
 import javafx.scene.chart.*;
@@ -44,6 +45,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.geosis.app.GeometryTools.*;
 import com.geosis.api.loader.*;
+import javafx.stage.Stage;
 
 public class Controller implements Initializable {
 
@@ -77,10 +79,14 @@ public class Controller implements Initializable {
     private Group earth;
     private int yearStartInt = Integer.MIN_VALUE;
     private int yearEndInt = Integer.MAX_VALUE;
-    ArrayList<String> nameSearch = new ArrayList<>();
-    boolean nameExist = false;
+    private ArrayList<String> nameSearch = new ArrayList<>();
+    private boolean nameExist = false;
 
-    int finalCurrentYear;
+    private int finalCurrentYear;
+
+    private ProgressBar progressBar = new ProgressBar();
+    private static final double EPSILON = 0.005;
+    private float finalProgression;
 
 
     public Controller() {
@@ -430,6 +436,7 @@ public class Controller implements Initializable {
                 afficheZoneByName(name);
             } else {
                 try {
+
                     yearStartInt = Integer.parseInt(yearStart.getText());
                     yearEndInt = Integer.parseInt(yearEnd.getText());
 
@@ -455,15 +462,42 @@ public class Controller implements Initializable {
         int minNbSignals = apiZoneSpeciesResponse.getNbSignalsMin();
         int maxNbSignals = apiZoneSpeciesResponse.getNbSignalsMax();
 
-        if(minNbSignals != Integer.MAX_VALUE && maxNbSignals != Integer.MIN_VALUE){
-            setLegend(minNbSignals, maxNbSignals);
+        // défini les paramètres pour la progressBar
+        float pas = (float) apiZoneSpeciesResponse.getData().size() / 100;
+        finalProgression = 0;
 
-            for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponse.getData()) {
-                GeometryTools.addPolygon(earth, zoneSpecies.getZone().getCoords(), setColor(zoneSpecies, minNbSignals, maxNbSignals));
+        final Task<Void> task = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                if(minNbSignals != Integer.MAX_VALUE && maxNbSignals != Integer.MIN_VALUE){
+
+                    Platform.runLater(() -> {
+                        setLegend(minNbSignals, maxNbSignals);
+                    });
+
+                    for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponse.getData()) {
+
+                        Platform.runLater(() -> {
+                            GeometryTools.addPolygon(earth, zoneSpecies.getZone().getCoords(), setColor(zoneSpecies, minNbSignals, maxNbSignals));
+                            updateProgress(finalProgression, apiZoneSpeciesResponse.getData().size());
+                            finalProgression += 1;
+                        });
+                        Thread.sleep((long) 0.5);
+                    }
+
+                } else {
+                    throw new EmptyException();
+                }
+                return null;
             }
-        } else {
-            throw new EmptyException();
-        }
+        };
+
+        ProgressBarWindow.createProgressBarWindow(task);
+
+        final Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
+
     }
 
     /**
