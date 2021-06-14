@@ -1,5 +1,7 @@
 package com.geosis.app;
 
+import com.geosis.api.response.ApiZoneSpeciesResponse;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -14,6 +16,11 @@ public class ProgressBarWindow {
     private static final double EPSILON = 0.005;
     private static Stage newWindow = new Stage();
 
+    /**
+     * Création de la fenêtre progressBar
+     * @see com.geosis.app.Controller#displayZone(ApiZoneSpeciesResponse)
+     * @param task
+     */
     public static void createProgressBarWindow(Task task){
 
         progressBar.progressProperty().bind(task.progressProperty());
@@ -21,9 +28,19 @@ public class ProgressBarWindow {
 
         progressBar.progressProperty().addListener(observable -> {
             progressBar.setStyle("-fx-accent: #59BAFF;");
-            // change la couleur quand la progressBar est complétée
+            // change la couleur quand la progressBar est complétée puis la fermer automatiquement
             if (progressBar.getProgress() >= 1 - EPSILON) {
+                progressLabel.textProperty().unbind();
+                progressLabel.setText("DONE");
                 progressBar.setStyle("-fx-accent: forestgreen;");
+                Platform.runLater(() -> {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    newWindow.close();
+                });
             }
         });
 

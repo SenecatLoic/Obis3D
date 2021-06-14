@@ -99,6 +99,8 @@ public class Controller implements Initializable {
     public void initialize(URL location, ResourceBundle resource) {
 
         listView.setVisible(false);
+
+        //Create lists for the legend
         colorsPane = Arrays.asList(color1, color2, color3, color4, color5, color6, color7, color8);
         labels = Arrays.asList(labelColor1, labelColor2, labelColor3, labelColor4, labelColor5, labelColor6, labelColor7, labelColor8);
 
@@ -441,6 +443,7 @@ public class Controller implements Initializable {
     /**
      * Affiche zone
      * @throws EmptyException
+     * @see ProgressBarWindow#createProgressBarWindow(Task)
      * @see #afficheZoneByName(String)
      * @see #afficheZoneByTime(String, int, int) 
      * @param apiZoneSpeciesResponse
@@ -519,7 +522,6 @@ public class Controller implements Initializable {
         ApiZoneSpeciesResponse apiZoneSpeciesResponse = loaderZoneSpecies.getZoneSpeciesByTime(name, anneeStart, anneeEnd);
         displayZone(apiZoneSpeciesResponse);
     }
-
 
     /**
      * Animation qui tourne parent selon l'axe y

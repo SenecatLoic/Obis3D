@@ -43,10 +43,10 @@ public class Legend {
         int interval = (maxNbSignals - minNbSignals) / 8;
 
 
-        labels.get(0).setText("De " + minNbSignals + interval + " à " + (minNbSignals + interval) + " signalements");
+        labels.get(0).setText("De " + minNbSignals + " à " + (minNbSignals + interval) + " signalements");
 
         for(int i = 1; i < labels.size(); i++){
-            labels.get(i).setText("De " + minNbSignals + i * interval + " à " + (minNbSignals + (i + 1) *  interval) + " signalements");
+            labels.get(i).setText("De " + (minNbSignals + i * interval + 1) + " à " + ((minNbSignals + (i + 1) *  interval)) + " signalements");
         }
     }
 
