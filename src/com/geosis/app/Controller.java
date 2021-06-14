@@ -35,10 +35,13 @@ import javafx.scene.shape.*;
 import javafx.geometry.Point2D;
 import javafx.scene.transform.Rotate;
 
+import java.lang.reflect.Array;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -76,6 +79,9 @@ public class Controller implements Initializable {
     @FXML
     private ListView<String> listView;
 
+    private List<Rectangle> colorsPane= new ArrayList<>();
+    private List<Label> labels = new ArrayList<>();
+
     private Group earth;
     private int yearStartInt = Integer.MIN_VALUE;
     private int yearEndInt = Integer.MAX_VALUE;
@@ -83,9 +89,6 @@ public class Controller implements Initializable {
     private boolean nameExist = false;
 
     private int finalCurrentYear;
-
-    private ProgressBar progressBar = new ProgressBar();
-    private static final double EPSILON = 0.005;
     private float finalProgression;
 
 
@@ -96,6 +99,8 @@ public class Controller implements Initializable {
     public void initialize(URL location, ResourceBundle resource) {
 
         listView.setVisible(false);
+        colorsPane = Arrays.asList(color1, color2, color3, color4, color5, color6, color7, color8);
+        labels = Arrays.asList(labelColor1, labelColor2, labelColor3, labelColor4, labelColor5, labelColor6, labelColor7, labelColor8);
 
         //Create a Pane et graph scene root for the 3D content
         Group root3D = new Group();
@@ -385,24 +390,7 @@ public class Controller implements Initializable {
             vbox.getChildren().remove(vbox.getChildren().size() - 1);
         }
 
-        color1.setVisible(false);
-        color2.setVisible(false);
-        color3.setVisible(false);
-        color4.setVisible(false);
-        color5.setVisible(false);
-        color6.setVisible(false);
-        color7.setVisible(false);
-        color8.setVisible(false);
-
-        labelColor1.setText("");
-        labelColor2.setText("");
-        labelColor3.setText("");
-        labelColor4.setText("");
-        labelColor5.setText("");
-        labelColor6.setText("");
-        labelColor7.setText("");
-        labelColor8.setText("");
-
+        Legend.setInvisible(colorsPane, labels);
 
         // Todo suppr les résultats
 
@@ -464,7 +452,7 @@ public class Controller implements Initializable {
 
         // défini les paramètres pour la progressBar
         float pas = (float) apiZoneSpeciesResponse.getData().size() / 100;
-        finalProgression = 0;
+        finalProgression = 1;
 
         final Task<Void> task = new Task<Void>() {
             @Override
@@ -472,17 +460,17 @@ public class Controller implements Initializable {
                 if(minNbSignals != Integer.MAX_VALUE && maxNbSignals != Integer.MIN_VALUE){
 
                     Platform.runLater(() -> {
-                        setLegend(minNbSignals, maxNbSignals);
+                        Legend.setLegend(minNbSignals, maxNbSignals, colorsPane, labels);
                     });
 
                     for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponse.getData()) {
 
                         Platform.runLater(() -> {
-                            GeometryTools.addPolygon(earth, zoneSpecies.getZone().getCoords(), setColor(zoneSpecies, minNbSignals, maxNbSignals));
+                            GeometryTools.addPolygon(earth, zoneSpecies.getZone().getCoords(), Legend.setColor(zoneSpecies, minNbSignals, maxNbSignals, colorsPane));
                             updateProgress(finalProgression, apiZoneSpeciesResponse.getData().size());
                             finalProgression += 1;
                         });
-                        Thread.sleep((long) 0.5);
+                        Thread.sleep((long)0.05);
                     }
 
                 } else {
@@ -532,69 +520,6 @@ public class Controller implements Initializable {
         displayZone(apiZoneSpeciesResponse);
     }
 
-    /**
-     * Détermine la légende selon le nombre de signalements
-     * @param minNbSignals
-     * @param maxNbSignals
-     */
-    public void setLegend ( int minNbSignals, int maxNbSignals){
-
-        color1.setVisible(true);
-        color2.setVisible(true);
-        color3.setVisible(true);
-        color4.setVisible(true);
-        color5.setVisible(true);
-        color6.setVisible(true);
-        color7.setVisible(true);
-        color8.setVisible(true);
-
-        int interval = (maxNbSignals - minNbSignals) / 8;
-
-        labelColor1.setText("De " + minNbSignals + " à " + (minNbSignals + interval) + " signalements");
-        labelColor2.setText("De " + (minNbSignals + interval + 1) + " à " + (minNbSignals + 2 * interval) + " signalements");
-        labelColor3.setText("De " + (minNbSignals + 2 * interval + 1) + " à " + (minNbSignals + 3 * interval) + " signalements");
-        labelColor4.setText("De " + (minNbSignals + 3 * interval + 1) + " à " + (minNbSignals + 4 * interval) + " signalements");
-        labelColor5.setText("De " + (minNbSignals + 4 * interval + 1) + " à " + (minNbSignals + 5 * interval) + " signalements");
-        labelColor6.setText("De " + (minNbSignals + 5 * interval + 1) + " à " + (minNbSignals + 6 * interval) + " signalements");
-        labelColor7.setText("De " + (minNbSignals + 6 * interval + 1) + " à " + (minNbSignals + 7 * interval) + " signalements");
-        labelColor8.setText("De " + (minNbSignals + 7 * interval + 1) + " à " + (maxNbSignals) + " signalements");
-
-    }
-
-    /**
-     * Détermine la Color selon le nombre de signalements
-     * @param zoneSpecies
-     * @param minNbSignals
-     * @param maxNbSignals
-     * @return Color
-     */
-    public Color setColor (ZoneSpecies zoneSpecies,int minNbSignals, int maxNbSignals){
-
-        int interval = (maxNbSignals - minNbSignals) / 8;
-
-        int nbSignals = zoneSpecies.getNbSignals();
-
-        if (nbSignals <= minNbSignals + interval && nbSignals >= minNbSignals) {
-            return (Color) color1.getFill();
-        } else if (nbSignals <= minNbSignals + 2 * interval && nbSignals > nbSignals + interval) {
-            return (Color) color2.getFill();
-        } else if (nbSignals <= minNbSignals + 3 * interval && nbSignals > minNbSignals + 2 * interval) {
-            return (Color) color3.getFill();
-        } else if (nbSignals <= minNbSignals + 4 * interval && nbSignals > minNbSignals + 3 * interval) {
-            return (Color) color4.getFill();
-        } else if (nbSignals <= minNbSignals + 5 * interval && nbSignals > minNbSignals + 4 * interval) {
-            return (Color) color5.getFill();
-        } else if (nbSignals <= minNbSignals + 6 * interval && nbSignals > minNbSignals + 5 * interval) {
-            return (Color) color6.getFill();
-        } else if (nbSignals <= minNbSignals + 7 * interval && nbSignals > minNbSignals + 6 * interval) {
-            return (Color) color7.getFill();
-        } else if (nbSignals <= maxNbSignals && nbSignals > minNbSignals + 7 * interval) {
-            return (Color) color8.getFill();
-        } else {
-            return null;
-        }
-
-    }
 
     /**
      * Animation qui tourne parent selon l'axe y

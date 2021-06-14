@@ -34,7 +34,7 @@ public class ProgressBarWindow {
 
         loadingPane.getChildren().addAll(progressBar, progressLabel);
 
-        Scene secondScene = new Scene(loadingPane, 200, 80);
+        Scene secondScene = new Scene(loadingPane, 270, 80);
 
         newWindow.setTitle("Loading");
         newWindow.setScene(secondScene);
