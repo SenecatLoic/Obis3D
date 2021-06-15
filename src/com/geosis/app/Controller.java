@@ -143,10 +143,26 @@ public class Controller implements Initializable {
             }
         });
 
+        scientificName.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
+            if(keyEvent.getCode() == KeyCode.ENTER){
+                String s = scientificName.getText();
+
+                try {
+                    actionBtnSearch(s);
+                } catch (InputException e) {
+                    e.sendAlert();
+                } catch (EmptyException e) {
+                    e.sendAlert();
+                }
+            }
+        });
+
+
+
         listView.setOnMouseClicked(event -> {
             // mettre à jour le Textfield scientificName en sélectionnant l'espèce + appui sur ENTREE
-            listView.addEventHandler(KeyEvent.KEY_PRESSED, eventKey -> {
-                if(eventKey.getCode() == KeyCode.ENTER){
+            listView.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
+                if(keyEvent.getCode() == KeyCode.ENTER){
                     String nameClicked = listView.getSelectionModel().getSelectedItem();
                     scientificName.setText(nameClicked);
                     listView.setVisible(false);
@@ -304,6 +320,8 @@ public class Controller implements Initializable {
      */
     public void actionBtnStart(LoaderZoneSpecies loaderZoneSpecies, String name) throws InputException, EmptyException{
 
+        nameExist = false;
+
         // vérifie si le contenu du textfield existe dans les data
         for (String n : nameSearch) {
             if (n.equalsIgnoreCase(name)) {
@@ -401,11 +419,14 @@ public class Controller implements Initializable {
     /**
      * Action du bouton Search
      * @throws InputException
+     * @throws EmptyException
      * @param name
      * @see #afficheZoneByName(String)
      * @see #afficheZoneByTime(String, int, int)
      */
     public void actionBtnSearch(String name) throws InputException, EmptyException {
+
+        nameExist = false;
 
         // vérifie si le contenu du textfield existe dans les data
         for (String n : nameSearch) {
@@ -415,6 +436,7 @@ public class Controller implements Initializable {
         }
 
         if (nameSearch.isEmpty() || !nameExist) {
+
             throw new InputException("Le nom scientifique n'est pas valide");
         } else {
             // supprime tous les anciens polygones sur le globe
