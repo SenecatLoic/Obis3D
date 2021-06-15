@@ -33,14 +33,14 @@ public class ProgressBarWindow {
                 progressLabel.textProperty().unbind();
                 progressLabel.setText("DONE");
                 progressBar.setStyle("-fx-accent: forestgreen;");
-                Platform.runLater(() -> {
+                /*Platform.runLater(() -> {
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                     newWindow.close();
-                });
+                });*/
             }
         });
 
