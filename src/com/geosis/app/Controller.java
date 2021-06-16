@@ -201,23 +201,24 @@ public class Controller implements Initializable {
         });
 
         listView.setOnMouseClicked(event -> {
+            String nameClicked = listView.getSelectionModel().getSelectedItem();
+            if(nameClicked != null){
+                scientificName.setText(nameClicked );
+                // mettre à jour le Textfield scientificName en double cliquant
+                if(event.getClickCount() == 2){
 
-            scientificName.setText(listView.getSelectionModel().getSelectedItem());
-            // mettre à jour le Textfield scientificName en double cliquant
-            if(event.getClickCount() == 2){
-                String nameClicked = listView.getSelectionModel().getSelectedItem();
-                scientificName.setText(nameClicked);
-                listView.setVisible(false);
-                labelName1.setText("Results");
-                try {
-                    afficheZoneByName(listView.getSelectionModel().getSelectedItem());
+                    scientificName.setText(nameClicked);
+                    listView.setVisible(false);
+                    labelName1.setText("Results");
+                    try {
+                        afficheZoneByName(nameClicked);
 
-                    search = true;
-                } catch (EmptyException e) {
-                    e.printStackTrace();
+                        search = true;
+                    } catch (EmptyException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
-
         });
 
         root3D.addEventHandler(MouseEvent.ANY, event -> {
