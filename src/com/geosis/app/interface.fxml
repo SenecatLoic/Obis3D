@@ -134,16 +134,6 @@
                   </HBox>
                </children>
             </FlowPane>
-            <Button fx:id="btnClose" mnemonicParsing="false" prefWidth="60.0" text="Close" AnchorPane.bottomAnchor="20.0" AnchorPane.rightAnchor="20.0">
-               <font>
-                  <Font name="Leelawadee" size="14.0" />
-               </font>
-            </Button>
-            <Button fx:id="btnReset" mnemonicParsing="false" prefHeight="25.0" prefWidth="60.0" text="Reset" AnchorPane.bottomAnchor="20.0" AnchorPane.rightAnchor="100.0">
-               <font>
-                  <Font name="Leelawadee" size="14.0" />
-               </font>
-            </Button>
             <Label layoutX="7.0" layoutY="4.0" text="Earth rotation" AnchorPane.topAnchor="15.0">
                <font>
                   <Font name="Leelawadee" size="16.0" />
@@ -289,14 +279,37 @@
       </HBox>
    </left>
    <right>
-      <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="534.0" prefWidth="240.0">
+      <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="671.0" prefWidth="240.0">
          <children>
-            <Label fx:id="labelName1" alignment="CENTER" prefHeight="30.0" prefWidth="248.0" style="-fx-background-color: #59BAFF;" text="Results" textAlignment="CENTER">
+            <Label fx:id="labelName1" alignment="CENTER" prefHeight="30.0" prefWidth="242.0" style="-fx-background-color: #59BAFF;" text="Results" textAlignment="CENTER">
                <font>
                   <Font size="20.0" />
                </font>
             </Label>
-            <ListView fx:id="listView" prefHeight="500.0" prefWidth="242.0" style="-fx-font-size: 14px; -fx-font-family: 'Consolas'; -fx-background-insets: 0; -fx-selection-bar: #59BAFF ;" />
+            <ListView fx:id="listView" prefHeight="528.0" prefWidth="240.0" style="-fx-font-size: 14px; -fx-font-family: 'Consolas'; -fx-background-insets: 0; -fx-selection-bar: #59BAFF ;" />
+            <HBox prefHeight="41.0" prefWidth="240.0" translateY="70.0">
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+               <children>
+                  <Button fx:id="btnReset" mnemonicParsing="false" prefHeight="25.0" prefWidth="60.0" text="Reset">
+                     <font>
+                        <Font name="Leelawadee" size="14.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets left="45.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button fx:id="btnClose" mnemonicParsing="false" prefWidth="60.0" text="Close">
+                     <font>
+                        <Font name="Leelawadee" size="14.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets left="30.0" />
+                     </HBox.margin>
+                  </Button>
+               </children>
+            </HBox>
          </children>
       </VBox>
    </right>
