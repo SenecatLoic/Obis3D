@@ -28,6 +28,7 @@ public class Main extends Application {
             primaryStage.setMinHeight(670);
             primaryStage.setTitle("OBIS 3D");
             primaryStage.setScene(scene);
+            scene.getStylesheets().add("com/geosis/app/styleSheet.css");
             primaryStage.show();
             primaryStage.widthProperty().addListener((old,oldVal,newVal)->{
                 controller.setSizeDiffX((newVal.intValue() - oldVal.intValue())/2);

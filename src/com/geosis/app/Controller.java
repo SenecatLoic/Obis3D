@@ -22,12 +22,10 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.geometry.Point3D;
 import javafx.scene.*;
-import javafx.scene.chart.AreaChart;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
+import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -42,14 +40,20 @@ import javafx.geometry.Point2D;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 
+import java.lang.reflect.Array;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import static com.geosis.app.GeometryTools.*;
-import com.geosis.app.exception.InputException;
+import com.geosis.api.loader.*;
+import javafx.stage.Stage;
 
 public class Controller implements Initializable {
 
@@ -75,17 +79,25 @@ public class Controller implements Initializable {
     private Rectangle color1, color2, color3, color4, color5, color6, color7, color8;
 
     @FXML
+    private Label labelName1;
+
+    @FXML
     private Label labelColor1, labelColor2, labelColor3, labelColor4, labelColor5, labelColor6, labelColor7, labelColor8;
 
     @FXML
     private ListView<String> listView;
 
+    private List<Rectangle> colorsPane= new ArrayList<>();
+    private List<Label> labels = new ArrayList<>();
+
     private Group earth;
     private int yearStartInt = Integer.MIN_VALUE;
     private int yearEndInt = Integer.MAX_VALUE;
-    ArrayList<String> nameSearch = new ArrayList<>();
-    boolean nameExist = false;
+    private ArrayList<String> nameSearch = new ArrayList<>();
+    private boolean nameExist = false;
 
+    private int finalCurrentYear;
+    private float finalProgression;
     private SubScene subScene;
 
     private boolean search;
@@ -106,8 +118,6 @@ public class Controller implements Initializable {
     private int maxY = 0;
     private int tickUnit = 0;
 
-    int finalCurrentYear;
-
 
     public Controller() {
         search = false;
@@ -118,6 +128,10 @@ public class Controller implements Initializable {
     public void initialize(URL location, ResourceBundle resource) {
 
         //listView.setVisible(false);
+
+        //Create lists for the legend
+        colorsPane = Arrays.asList(color1, color2, color3, color4, color5, color6, color7, color8);
+        labels = Arrays.asList(labelColor1, labelColor2, labelColor3, labelColor4, labelColor5, labelColor6, labelColor7, labelColor8);
 
         //Create a Pane et graph scene root for the 3D content
         Group root3D = new Group();
@@ -147,22 +161,49 @@ public class Controller implements Initializable {
 
                 listView.setItems(names);
 
+                labelName1.setText("Scientific names");
+
+                if(scientificName.getText().isEmpty()){
+                    listView.setVisible(false);
+                    labelName1.setText("Results");
+                }
+
                 //System.out.println(apiNameResponse.getData());
             }
         });
 
+        scientificName.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
+            if(keyEvent.getCode() == KeyCode.ENTER){
+                String s = scientificName.getText();
+
+                try {
+                    actionBtnSearch(s);
+                } catch (InputException e) {
+                    e.sendAlert();
+                } catch (EmptyException e) {
+                    e.sendAlert();
+                }
+            }
+        });
+
+
+
         listView.setOnMouseClicked(event -> {
             // mettre à jour le Textfield scientificName en sélectionnant l'espèce + appui sur ENTREE
-            listView.addEventHandler(KeyEvent.KEY_PRESSED, eventKey -> {
-                if(eventKey.getCode() == KeyCode.ENTER){
+            listView.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
+                if(keyEvent.getCode() == KeyCode.ENTER){
                     String nameClicked = listView.getSelectionModel().getSelectedItem();
                     scientificName.setText(nameClicked);
+                    listView.setVisible(false);
+                    labelName1.setText("Results");
                 }
             });
             // mettre à jour le Textfield scientificName en double cliquant
             if(event.getClickCount() == 2){
                 String nameClicked = listView.getSelectionModel().getSelectedItem();
                 scientificName.setText(nameClicked);
+                listView.setVisible(false);
+                labelName1.setText("Results");
             }
         });
 
@@ -196,7 +237,7 @@ public class Controller implements Initializable {
                     ApiObservationResponse response = loader.getObservations(GeoHashHelper.getGeohash(loc),scientificName.getText());
 
                     observations = response.getData();
-                   
+
                     if(response.getCode() == 200){
                         ArrayList<String> names = new ArrayList<>();
                         for (Observation ob: observations) {
@@ -263,9 +304,6 @@ public class Controller implements Initializable {
                     box.setRotationAxis(new Point3D(1, 0, 0));
                     box.setRotate(lat);
 
-
-
-
                     box.setRotationAxis(new Point3D(0, 1, 0));
                     box.setRotate(lon);
 
@@ -281,8 +319,8 @@ public class Controller implements Initializable {
                 }
 
             }
-        });
 
+        });
 
         listView.setOnMouseClicked(mouseEvent -> {
             try {
@@ -293,7 +331,6 @@ public class Controller implements Initializable {
                 e.printStackTrace();
             }
         });
-
 
         btnReset.setOnAction(actionEvent -> {
             actionBtnReset();
@@ -310,9 +347,12 @@ public class Controller implements Initializable {
             try {
                 search = true;
                 actionBtnSearch(s);
-            } catch (InputException | EmptyException e) {
-                // todo faire qqch ?
+            } catch (InputException e) {
+                e.sendAlert();
+            } catch (EmptyException e){
+                e.sendAlert();
             }
+
         });
 
         btnStop.setOnAction(actionEvent -> {
@@ -327,8 +367,10 @@ public class Controller implements Initializable {
 
             try {
                 actionBtnStart(loaderZoneSpecies, s);
-            } catch (InputException | EmptyException e) {
-                // todo faire qqch ?
+            } catch (InputException e) {
+                e.sendAlert();
+            } catch (EmptyException e){
+                e.sendAlert();
             }
 
         });
@@ -337,12 +379,17 @@ public class Controller implements Initializable {
 
     /**
      * Début de l'affiche d'une évolution
-     * @see #createPoint(LoaderZoneSpecies, String, int, int, int)
+     * @see Graph#initGraph()
+     * @see Graph#createPoint(Pane, LoaderZoneSpecies, String, int, int, int)
+     * @see #displayZone(ApiZoneSpeciesResponse)
+     * @see com.geosis.api.loader.LoaderZoneSpecies#getZoneSpeciesByInterval(String, int, int, int, int)
      * @param loaderZoneSpecies
      * @param name
      * @throws InputException
      */
     public void actionBtnStart(LoaderZoneSpecies loaderZoneSpecies, String name) throws InputException, EmptyException{
+
+        nameExist = false;
 
         // vérifie si le contenu du textfield existe dans les data
         for (String n : nameSearch) {
@@ -357,6 +404,9 @@ public class Controller implements Initializable {
             try {
                 yearStartInt = Integer.parseInt(yearStart.getText());
                 yearEndInt = Integer.parseInt(yearEnd.getText());
+
+                finalCurrentYear = 0;
+                Graph.initGraph();
 
                 double nbRep = (((double) yearEndInt - (double) yearStartInt) / 5);
 
@@ -382,9 +432,9 @@ public class Controller implements Initializable {
                                     try {
                                         displayZone(finalZoneSpeciesResponse);
                                     } catch (EmptyException e) {
-                                        // todo faire qqch ?
+                                        // on ne veut pas créer d'alerte
                                     }
-                                    createPoint(loaderZoneSpecies, name, currentYear, yearStartInt, yearEndInt);
+                                    Graph.createPoint(vbox, loaderZoneSpecies, name, currentYear, yearStartInt, yearEndInt);
                                     finalCurrentYear +=1;
                                 });
 
@@ -394,7 +444,7 @@ public class Controller implements Initializable {
                             return zoneSpeciesResponse;
                         }
                     };
-                    createPoint(loaderZoneSpecies, name, yearEndInt, yearStartInt, yearEndInt);
+                    Graph.createPoint(vbox, loaderZoneSpecies, name, yearEndInt, yearStartInt, yearEndInt);
 
                     Thread getItemsThread = new Thread(pollDatabaseTask);
                     getItemsThread.setDaemon(true);
@@ -407,79 +457,6 @@ public class Controller implements Initializable {
         } else {
             throw new InputException("L'année n'est pas valide");
         }
-
-    }
-
-
-    /**
-     * Crée un nouveau point sur un graphe créé pour
-     * @see #createGraph(String, int, int, int, int, XYChart.Series)
-     * @param loaderZoneSpecies
-     * @param name
-     * @param currentYear
-     */
-    public void createPoint(LoaderZoneSpecies loaderZoneSpecies, String name, int currentYear, int yearStart, int yearEnd){
-
-        ApiZoneSpeciesResponse apiZoneSpeciesResponse = loaderZoneSpecies.getZoneSpeciesByTime(name, currentYear, currentYear);
-
-        int value = 0;
-        for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponse.getData()) {
-            value += zoneSpecies.getNbSignals();
-        }
-        if (value > maxY) {
-            maxY = value;
-        }
-        if (value < minY) {
-            minY = value;
-        }
-
-        final LineChart.Data data = new LineChart.Data(currentYear, value);
-        series.getData().add(data);
-
-        createGraph(name, yearStart, yearEnd, minY, maxY, series);
-
-    }
-
-    /**
-     * Crée le graphique
-     * @see #createGraph(String, int, int, int, int, XYChart.Series)
-     * @param name
-     * @param yearStart
-     * @param yearEnd
-     * @param minY
-     * @param maxY
-     * @param series
-     */
-    public void createGraph(String name, int yearStart, int yearEnd, int minY, int maxY, XYChart.Series series) {
-
-        // supprimer le graphe d'avant s'il y en a un
-        if (vbox.getChildren().get(vbox.getChildren().size() - 1) instanceof AreaChart) {
-            vbox.getChildren().remove(vbox.getChildren().size() - 1);
-        }
-
-        // Création des séries.
-        final int minX = yearStart;
-        final int maxX = yearEnd;
-
-        // Création du graphique.
-        xAxis.setLowerBound(yearStart);
-        xAxis.setUpperBound(yearEnd);
-        xAxis.setLabel("Year");
-
-        yAxis.setLabel("Number of signalements");
-        tickUnit = (maxY  -minY) / 8;
-        yAxis.setLowerBound(minY);
-        yAxis.setUpperBound(maxY);
-        yAxis.setTickUnit(tickUnit);
-
-        chart.setTitle(name);
-        chart.setLegendVisible(false);
-        chart.setMaxHeight(290);
-        chart.getData().setAll(series);
-        Node line = series.getNode().lookup(".chart-series-area-line");
-        line.setStyle("-fx-stroke-width: 2px; -fx-stroke:  #59BAFF; -fx-fill:  rgba("+89+","+186+","+255+","+0.5+");");
-
-        vbox.getChildren().add(chart);
 
     }
 
@@ -502,24 +479,7 @@ public class Controller implements Initializable {
             vbox.getChildren().remove(vbox.getChildren().size() - 1);
         }
 
-        color1.setVisible(false);
-        color2.setVisible(false);
-        color3.setVisible(false);
-        color4.setVisible(false);
-        color5.setVisible(false);
-        color6.setVisible(false);
-        color7.setVisible(false);
-        color8.setVisible(false);
-
-        labelColor1.setText("");
-        labelColor2.setText("");
-        labelColor3.setText("");
-        labelColor4.setText("");
-        labelColor5.setText("");
-        labelColor6.setText("");
-        labelColor7.setText("");
-        labelColor8.setText("");
-
+        Legend.setInvisible(colorsPane, labels);
 
         // Todo suppr les résultats
 
@@ -528,11 +488,14 @@ public class Controller implements Initializable {
     /**
      * Action du bouton Search
      * @throws InputException
+     * @throws EmptyException
      * @param name
      * @see #afficheZoneByName(String)
      * @see #afficheZoneByTime(String, int, int)
      */
     public void actionBtnSearch(String name) throws InputException, EmptyException {
+
+        nameExist = false;
 
         while (earth.getChildren().size() > 1) {
             earth.getChildren().remove(1);
@@ -546,6 +509,7 @@ public class Controller implements Initializable {
         }
 
         if (nameSearch.isEmpty() || !nameExist) {
+
             throw new InputException("Le nom scientifique n'est pas valide");
         } else {
             // supprime tous les anciens polygones sur le globe
@@ -557,17 +521,16 @@ public class Controller implements Initializable {
                 afficheZoneByName(name);
             } else {
                 try {
+
                     yearStartInt = Integer.parseInt(yearStart.getText());
+                    yearEndInt = Integer.parseInt(yearEnd.getText());
+
+                    afficheZoneByTime(name, yearStartInt, yearEndInt);
+
                 } catch (NumberFormatException e) {
                     throw new InputException("L'année n'est pas valide");
 
                 }
-                try {
-                    yearEndInt = Integer.parseInt(yearEnd.getText());
-                } catch (NumberFormatException e) {
-                    throw new InputException("L'année n'est pas valide");
-                }
-                afficheZoneByTime(name, yearStartInt, yearEndInt);
             }
         }
     }
@@ -575,6 +538,7 @@ public class Controller implements Initializable {
     /**
      * Affiche zone
      * @throws EmptyException
+     * @see ProgressBarWindow#createProgressBarWindow(Task)
      * @see #afficheZoneByName(String)
      * @see #afficheZoneByTime(String, int, int)
      * @param apiZoneSpeciesResponse
@@ -584,23 +548,49 @@ public class Controller implements Initializable {
         int minNbSignals = apiZoneSpeciesResponse.getNbSignalsMin();
         int maxNbSignals = apiZoneSpeciesResponse.getNbSignalsMax();
 
-        if(minNbSignals != Integer.MAX_VALUE && maxNbSignals != Integer.MIN_VALUE){
-            setLegend(minNbSignals, maxNbSignals);
+        // défini les paramètres pour la progressBar
+        float pas = (float) apiZoneSpeciesResponse.getData().size() / 100;
+        finalProgression = 1;
 
-            for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponse.getData()) {
-                GeometryTools.addPolygon(earth, zoneSpecies.getZone().getCoords(), setColor(zoneSpecies, minNbSignals, maxNbSignals));
+        final Task<Void> task = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                if(minNbSignals != Integer.MAX_VALUE && maxNbSignals != Integer.MIN_VALUE){
+
+                    Platform.runLater(() -> {
+                        Legend.setLegend(minNbSignals, maxNbSignals, colorsPane, labels);
+                    });
+
+                    for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponse.getData()) {
+
+                        Platform.runLater(() -> {
+                            GeometryTools.addPolygon(earth, zoneSpecies.getZone().getCoords(), Legend.setColor(zoneSpecies, minNbSignals, maxNbSignals, colorsPane));
+                            updateProgress(finalProgression, apiZoneSpeciesResponse.getData().size());
+                            finalProgression += 1;
+                        });
+                        Thread.sleep((long)0.05);
+                    }
+
+                } else {
+                    throw new EmptyException();
+                }
+                return null;
             }
-        } else {
-            throw new EmptyException();
-        }
+        };
 
+        ProgressBarWindow.createProgressBarWindow(task);
+
+        final Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
 
     }
 
     /**
      * Affiche les zones d'une espèce
      * @throws EmptyException
-     * @see #displayZone(ApiZoneSpeciesResponse)
+     * @see #displayZone(ApiZoneSpeciesResponse) 
+     * @see com.geosis.api.loader.LoaderZoneSpecies#getZoneSpeciesByName(String)
      * @param name
      */
     public void afficheZoneByName (String name) throws EmptyException {
@@ -617,6 +607,7 @@ public class Controller implements Initializable {
      *
      * @throws EmptyException
      * @see #displayZone(ApiZoneSpeciesResponse)
+     * @see com.geosis.api.loader.LoaderZoneSpecies#getZoneSpeciesByTime(String, int, int)
      * @param name
      * @param anneeStart
      * @param anneeEnd
@@ -627,70 +618,6 @@ public class Controller implements Initializable {
 
         ApiZoneSpeciesResponse apiZoneSpeciesResponse = loaderZoneSpecies.getZoneSpeciesByTime(name, anneeStart, anneeEnd);
         displayZone(apiZoneSpeciesResponse);
-    }
-
-    /**
-     * Détermine la légende selon le nombre de signalements
-     * @param minNbSignals
-     * @param maxNbSignals
-     */
-    public void setLegend ( int minNbSignals, int maxNbSignals){
-
-        color1.setVisible(true);
-        color2.setVisible(true);
-        color3.setVisible(true);
-        color4.setVisible(true);
-        color5.setVisible(true);
-        color6.setVisible(true);
-        color7.setVisible(true);
-        color8.setVisible(true);
-
-        int interval = (maxNbSignals - minNbSignals) / 8;
-
-        labelColor1.setText("De " + minNbSignals + " à " + (minNbSignals + interval) + " signalements");
-        labelColor2.setText("De " + (minNbSignals + interval + 1) + " à " + (minNbSignals + 2 * interval) + " signalements");
-        labelColor3.setText("De " + (minNbSignals + 2 * interval + 1) + " à " + (minNbSignals + 3 * interval) + " signalements");
-        labelColor4.setText("De " + (minNbSignals + 3 * interval + 1) + " à " + (minNbSignals + 4 * interval) + " signalements");
-        labelColor5.setText("De " + (minNbSignals + 4 * interval + 1) + " à " + (minNbSignals + 5 * interval) + " signalements");
-        labelColor6.setText("De " + (minNbSignals + 5 * interval + 1) + " à " + (minNbSignals + 6 * interval) + " signalements");
-        labelColor7.setText("De " + (minNbSignals + 6 * interval + 1) + " à " + (minNbSignals + 7 * interval) + " signalements");
-        labelColor8.setText("De " + (minNbSignals + 7 * interval + 1) + " à " + (maxNbSignals) + " signalements");
-
-    }
-
-    /**
-     * Détermine la Color selon le nombre de signalements
-     * @param zoneSpecies
-     * @param minNbSignals
-     * @param maxNbSignals
-     * @return Color
-     */
-    public Color setColor (ZoneSpecies zoneSpecies,int minNbSignals, int maxNbSignals){
-
-        int interval = (maxNbSignals - minNbSignals) / 8;
-
-        int nbSignals = zoneSpecies.getNbSignals();
-
-        if (nbSignals <= minNbSignals + interval && nbSignals >= minNbSignals) {
-            return (Color) color1.getFill();
-        } else if (nbSignals <= minNbSignals + 2 * interval && nbSignals > nbSignals + interval) {
-            return (Color) color2.getFill();
-        } else if (nbSignals <= minNbSignals + 3 * interval && nbSignals > minNbSignals + 2 * interval) {
-            return (Color) color3.getFill();
-        } else if (nbSignals <= minNbSignals + 4 * interval && nbSignals > minNbSignals + 3 * interval) {
-            return (Color) color4.getFill();
-        } else if (nbSignals <= minNbSignals + 5 * interval && nbSignals > minNbSignals + 4 * interval) {
-            return (Color) color5.getFill();
-        } else if (nbSignals <= minNbSignals + 6 * interval && nbSignals > minNbSignals + 5 * interval) {
-            return (Color) color6.getFill();
-        } else if (nbSignals <= minNbSignals + 7 * interval && nbSignals > minNbSignals + 6 * interval) {
-            return (Color) color7.getFill();
-        } else if (nbSignals <= maxNbSignals && nbSignals > minNbSignals + 7 * interval) {
-            return (Color) color8.getFill();
-        } else {
-            return null;
-        }
-
     }
 
     /**

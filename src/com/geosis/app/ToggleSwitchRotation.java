@@ -66,7 +66,7 @@ public class ToggleSwitchRotation extends HBox {
         switchedOn.addListener((a,b,valueChange) -> {
             if (valueChange) {
                 label.setText("ON");
-                setStyle("-fx-background-color: #27AE60; -fx-background-radius: 30;");
+                setStyle("-fx-background-color: forestgreen; -fx-background-radius: 30;");
                 button.toFront();
 
                 animationTimer = Controller.animationTimerRotate(parent, rotationSpeed);

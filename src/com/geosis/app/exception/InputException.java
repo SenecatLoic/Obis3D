@@ -8,14 +8,16 @@ public class InputException extends Exception {
 
     public InputException(String messageErreur){
 
+        this.messageErreur = messageErreur;
+
+    }
+
+    public void sendAlert(){
+
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setContentText(messageErreur);
         alert.show();
 
-    }
-
-    public String getMessageErreur(){
-        return this.messageErreur;
     }
 
 }
