@@ -151,28 +151,32 @@ public class Controller implements Initializable {
             public void changed(ObservableValue<? extends String> observable,
                                 String oldValue, String newValue) {
 
-                ApiNameResponse apiNameResponse = loader.getNames(newValue);
 
-                nameSearch = apiNameResponse.getData();
-
-                ObservableList<String> names = FXCollections.observableArrayList(nameSearch);
-
-                listView.setVisible(true);
-
-                listView.setItems(names);
-
-                labelName1.setText("Scientific names");
-
-                if(scientificName.getText().isEmpty()){
-                    listView.setVisible(false);
-                    labelName1.setText("Results");
-                }
 
                 //System.out.println(apiNameResponse.getData());
             }
         });
 
+
         scientificName.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
+
+            ApiNameResponse apiNameResponse = loader.getNames(scientificName.getText());
+
+            nameSearch = apiNameResponse.getData();
+
+            ObservableList<String> names = FXCollections.observableArrayList(nameSearch);
+
+            listView.setVisible(true);
+
+            listView.setItems(names);
+
+            labelName1.setText("Scientific names");
+
+            if(scientificName.getText().isEmpty()){
+                listView.setVisible(false);
+                labelName1.setText("Results");
+            }
+
             if(keyEvent.getCode() == KeyCode.ENTER){
                 String s = scientificName.getText();
 
@@ -186,25 +190,34 @@ public class Controller implements Initializable {
             }
         });
 
-
+        // mettre à jour le Textfield scientificName en sélectionnant l'espèce + appui sur ENTREE
+        listView.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
+            if(keyEvent.getCode() == KeyCode.ENTER){
+                String nameClicked = listView.getSelectionModel().getSelectedItem();
+                scientificName.setText(nameClicked);
+                listView.setVisible(false);
+                labelName1.setText("Results");
+            }
+        });
 
         listView.setOnMouseClicked(event -> {
-            // mettre à jour le Textfield scientificName en sélectionnant l'espèce + appui sur ENTREE
-            listView.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
-                if(keyEvent.getCode() == KeyCode.ENTER){
-                    String nameClicked = listView.getSelectionModel().getSelectedItem();
-                    scientificName.setText(nameClicked);
-                    listView.setVisible(false);
-                    labelName1.setText("Results");
-                }
-            });
+
+            scientificName.setText(listView.getSelectionModel().getSelectedItem());
             // mettre à jour le Textfield scientificName en double cliquant
             if(event.getClickCount() == 2){
                 String nameClicked = listView.getSelectionModel().getSelectedItem();
                 scientificName.setText(nameClicked);
                 listView.setVisible(false);
                 labelName1.setText("Results");
+                try {
+                    afficheZoneByName(listView.getSelectionModel().getSelectedItem());
+
+                    search = true;
+                } catch (EmptyException e) {
+                    e.printStackTrace();
+                }
             }
+
         });
 
         root3D.addEventHandler(MouseEvent.ANY, event -> {
@@ -231,9 +244,9 @@ public class Controller implements Initializable {
                 Point2D point = GeometryTools.spaceCoordToGeoCoord(spaceCoord);
                 Location loc = new Location("selected",point.getX(),point.getY());
 
-                /*System.out.println(point.getX());
+                System.out.println(point.getX());
                 System.out.println(point.getY());
-                System.out.println(GeoHashHelper.getGeohash(loc));*/
+                System.out.println(GeoHashHelper.getGeohash(loc));
 
                 if(search){
                     ApiObservationResponse response = loader.getObservations(GeoHashHelper.getGeohash(loc),scientificName.getText());
@@ -323,16 +336,6 @@ public class Controller implements Initializable {
 
             }
 
-        });
-
-        listView.setOnMouseClicked(mouseEvent -> {
-            try {
-                afficheZoneByName(listView.getSelectionModel().getSelectedItem());
-                scientificName.setText(listView.getSelectionModel().getSelectedItem());
-                search = true;
-            } catch (EmptyException e) {
-                e.printStackTrace();
-            }
         });
 
         btnReset.setOnAction(actionEvent -> {
