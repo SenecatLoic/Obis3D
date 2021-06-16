@@ -294,7 +294,7 @@
          <children>
             <AnchorPane>
                <children>
-                  <Label alignment="CENTER" prefHeight="30.0" prefWidth="248.0" style="-fx-background-color: #59BAFF;" text="Results" textAlignment="CENTER" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                  <Label fx:id="labelName1" alignment="CENTER" prefHeight="30.0" prefWidth="248.0" style="-fx-background-color: #59BAFF;" text="Results" textAlignment="CENTER" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
                      <font>
                         <Font size="20.0" />
                      </font>
