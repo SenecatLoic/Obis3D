@@ -668,9 +668,8 @@ public class Controller implements Initializable {
         ambientLight.getScope().addAll(root3D);
         root3D.getChildren().add(ambientLight);
 
-        subScene = new SubScene(root3D, 500, 500, true, SceneAntialiasing.BALANCED);
+        subScene = new SubScene(root3D, 492, 497, true, SceneAntialiasing.BALANCED);
         subScene.setCamera(camera);
-        subScene.translateXProperty().setValue(25);
         subScene.translateYProperty().setValue(25);
 
         anchorPane.getChildren().addAll(subScene);
