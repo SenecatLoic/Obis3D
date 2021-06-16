@@ -38,8 +38,6 @@ import javafx.geometry.Point2D;
 
 import java.lang.reflect.Array;
 import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -47,6 +45,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import javafx.scene.transform.Affine;
 import sample.ludovic.vimont.*;
 import static com.geosis.app.GeometryTools.*;
 import com.geosis.api.loader.*;
@@ -201,27 +200,13 @@ public class Controller implements Initializable {
 
         root3D.addEventHandler(MouseEvent.ANY, event -> {
             if (event.getEventType() == MouseEvent.MOUSE_PRESSED && event.isControlDown()) {
+
+                // Récupérer les coordonnées à l'endroit du clic
                 PickResult pickResult = event.getPickResult();
                 Point3D spaceCoord = pickResult.getIntersectedPoint();
 
                 Point2D point2D = GeometryTools.spaceCoordToGeoCoord(spaceCoord);
-
-                Point3D space = geoCoordTo3dCoord((float) point2D.getX(), (float) point2D.getY());
-
-
-                Sphere sphere = new Sphere(0.05);
-                final PhongMaterial sphereMaterial = new PhongMaterial();
-                sphereMaterial.setSpecularColor(Color.RED);
-                sphereMaterial.setDiffuseColor(Color.YELLOW);
-                sphere.setMaterial(sphereMaterial);
-
-                sphere.setTranslateX(spaceCoord.getX());
-                sphere.setTranslateY(spaceCoord.getY());
-                sphere.setTranslateZ(spaceCoord.getZ());
-
-                //earth.getChildren().add(sphere);
-                Point2D point = GeometryTools.spaceCoordToGeoCoord(spaceCoord);
-                Location loc = new Location("selected",point.getX(),point.getY());
+                Location loc = new Location("selected",point2D.getX(),point2D.getY());
 
                 /*System.out.println(point.getX());
                 System.out.println(point.getY());
@@ -256,75 +241,6 @@ public class Controller implements Initializable {
                     }
                 }
             }
-
-            if (event.getEventType() == MouseEvent.MOUSE_PRESSED && event.isShiftDown()) {
-                PickResult pickResult = event.getPickResult();
-                Point3D spaceCoord = pickResult.getIntersectedPoint();
-                System.out.println(spaceCoord);
-                Point2D point2D = GeometryTools.spaceCoordToGeoCoord(spaceCoord);
-                System.out.println(point2D.getX() + "    " + point2D.getY());
-                Point3D space = geoCoordTo3dCoord((float)point2D.getX(), (float) point2D.getY());
-                System.out.println(space);
-
-                Box box = new Box(0.1, 2, 0.1);
-                final PhongMaterial sphereMaterial = new PhongMaterial();
-                sphereMaterial.setDiffuseColor(new Color(1, 0, 0, 0.3));
-                box.setMaterial(sphereMaterial);
-
-
-                //box.setRotationAxis(new Point3D(1, 1, (Math.cos(Math.toRadians(point2D.getY())) + Math.sin(Math.toRadians(point2D.getY()))) / -Math.tan(Math.toRadians(point2D.getX()))));
-                box.setRotationAxis(new Point3D(0, 1, 0));
-                box.setRotate(point2D.getY());
-
-                box.setRotationAxis(new Point3D(1, 0, 0));
-                box.setRotate(point2D.getX());
-
-
-                box.setTranslateX(spaceCoord.getX());
-                box.setTranslateY(spaceCoord.getY());
-                box.setTranslateZ(spaceCoord.getZ());
-                earth.getChildren().add(box);
-            }
-        });
-
-        btnBreak.setOnAction(actionEvent -> {
-
-            for(int lat = -90; lat <= 90; lat+=30){
-                for(int lon = -180; lon <= 180; lon+=30) {
-
-                    Box box = new Box(0.1, 0.1, 0.5);
-                    final PhongMaterial sphereMaterial = new PhongMaterial();
-                    sphereMaterial.setDiffuseColor(new Color(1, 0, 0, 0.3));
-                    box.setMaterial(sphereMaterial);
-                    box.setRotationAxis(new Point3D(1, 0, 0));
-                    box.setRotate(lat);
-
-                    box.setRotationAxis(new Point3D(0, 1, 0));
-                    box.setRotate(lon);
-
-
-
-                    Point3D spaceCoord = geoCoordTo3dCoord(lat, lon);
-
-                    box.setTranslateX(spaceCoord.getX());
-                    box.setTranslateY(spaceCoord.getY());
-                    box.setTranslateZ(spaceCoord.getZ());
-
-                    earth.getChildren().add(box);
-                }
-
-            }
-
-        });
-
-        listView.setOnMouseClicked(mouseEvent -> {
-            try {
-                afficheZoneByName(listView.getSelectionModel().getSelectedItem());
-                scientificName.setText(listView.getSelectionModel().getSelectedItem());
-                search = true;
-            } catch (EmptyException e) {
-                e.printStackTrace();
-            }
         });
 
         btnReset.setOnAction(actionEvent -> {
@@ -350,12 +266,6 @@ public class Controller implements Initializable {
 
         });
 
-        btnStop.setOnAction(actionEvent -> {
-
-
-
-        });
-
         btnStart.setOnAction(actionEvent -> {
 
             String s = scientificName.getText();
@@ -367,6 +277,18 @@ public class Controller implements Initializable {
             } catch (EmptyException e){
                 e.sendAlert();
             }
+
+        });
+
+        btnBreak.setOnAction(actionEvent -> {
+
+            //TODO actionBtnBreak()
+
+        });
+
+        btnStop.setOnAction(actionEvent -> {
+
+            //TODO actionBtnStop()
 
         });
 
@@ -559,7 +481,8 @@ public class Controller implements Initializable {
                     for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponse.getData()) {
 
                         Platform.runLater(() -> {
-                            GeometryTools.addPolygon(earth, zoneSpecies.getZone().getCoords(), Legend.setColor(zoneSpecies, minNbSignals, maxNbSignals, colorsPane));
+                            GeometryTools.addPolygon(earth, zoneSpecies.getZone().getCoords(), Legend.getColor(zoneSpecies, minNbSignals, maxNbSignals, colorsPane));
+                            GeometryTools.addBoxHistogramme(earth, zoneSpecies.getZone().getCoords()[0],GeometryTools.getHeightBox(zoneSpecies, minNbSignals, maxNbSignals, colorsPane), Legend.getColor(zoneSpecies, minNbSignals, maxNbSignals, colorsPane));
                             updateProgress(finalProgression, apiZoneSpeciesResponse.getData().size());
                             finalProgression += 1;
                         });
@@ -670,6 +593,7 @@ public class Controller implements Initializable {
 
         subScene = new SubScene(root3D, 492, 497, true, SceneAntialiasing.BALANCED);
         subScene.setCamera(camera);
+        subScene.setFill(Color.GREY);
         subScene.translateYProperty().setValue(25);
 
         anchorPane.getChildren().addAll(subScene);
@@ -690,4 +614,6 @@ public class Controller implements Initializable {
     public void setSizeDiffY(int height){
         subScene.translateYProperty().setValue(subScene.translateYProperty().getValue() + height);
     }
+
+
 }

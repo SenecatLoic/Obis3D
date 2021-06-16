@@ -57,7 +57,7 @@ public class Legend {
      * @param maxNbSignals
      * @return Color
      */
-    public static Color setColor (ZoneSpecies zoneSpecies, int minNbSignals, int maxNbSignals, List<Rectangle> colorsPane){
+    public static Color getColor (ZoneSpecies zoneSpecies, int minNbSignals, int maxNbSignals, List<Rectangle> colorsPane){
 
         int interval = (maxNbSignals - minNbSignals) / 8;
 
@@ -65,7 +65,7 @@ public class Legend {
 
         if (nbSignals <= minNbSignals + interval && nbSignals >= minNbSignals) {
             return (Color) colorsPane.get(0).getFill();
-        } else if (nbSignals <= minNbSignals + 2 * interval && nbSignals > nbSignals + interval) {
+        } else if (nbSignals <= minNbSignals + 2 * interval && nbSignals > minNbSignals + interval) {
             return (Color) colorsPane.get(1).getFill();
         } else if (nbSignals <= minNbSignals + 3 * interval && nbSignals > minNbSignals + 2 * interval) {
             return (Color) colorsPane.get(2).getFill();
