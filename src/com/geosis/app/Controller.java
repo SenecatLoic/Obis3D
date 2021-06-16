@@ -114,8 +114,6 @@ public class Controller implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resource) {
 
-        listView.setVisible(false);
-
         //Create lists for the legend
         colorsPane = Arrays.asList(color1, color2, color3, color4, color5, color6, color7, color8);
         labels = Arrays.asList(labelColor1, labelColor2, labelColor3, labelColor4, labelColor5, labelColor6, labelColor7, labelColor8);
@@ -144,14 +142,11 @@ public class Controller implements Initializable {
 
                 ObservableList<String> names = FXCollections.observableArrayList(nameSearch);
 
-                listView.setVisible(true);
-
                 listView.setItems(names);
 
                 labelName1.setText("Scientific names");
 
                 if(scientificName.getText().isEmpty()){
-                    listView.setVisible(false);
                     labelName1.setText("Results");
                 }
 
@@ -181,7 +176,6 @@ public class Controller implements Initializable {
             if(keyEvent.getCode() == KeyCode.ENTER){
                 String nameClicked = listView.getSelectionModel().getSelectedItem();
                 scientificName.setText(nameClicked);
-                listView.setVisible(false);
                 labelName1.setText("Results");
             }
         });
@@ -193,7 +187,6 @@ public class Controller implements Initializable {
             if(event.getClickCount() == 2){
                 String nameClicked = listView.getSelectionModel().getSelectedItem();
                 scientificName.setText(nameClicked);
-                listView.setVisible(false);
                 labelName1.setText("Results");
                 try {
                     afficheZoneByName(listView.getSelectionModel().getSelectedItem());
