@@ -11,8 +11,6 @@ import com.geosis.app.exception.EmptyException;
 import com.geosis.app.exception.InputException;
 import com.interactivemesh.jfx.importer.ImportException;
 import com.interactivemesh.jfx.importer.obj.ObjModelImporter;
-import com.ludovic.vimont.GeoHashHelper;
-import com.ludovic.vimont.Location;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -37,8 +35,6 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.*;
 
 import javafx.geometry.Point2D;
-import javafx.scene.transform.Rotate;
-import javafx.stage.Stage;
 
 import java.lang.reflect.Array;
 import java.net.URL;
@@ -51,6 +47,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import sample.ludovic.vimont.*;
 import static com.geosis.app.GeometryTools.*;
 import com.geosis.api.loader.*;
 import javafx.stage.Stage;
@@ -103,21 +100,11 @@ public class Controller implements Initializable {
     private boolean search;
 
     /**
-     * Permet de savoir si on es dans un état où il faut afficher les observations
+     * Permet de savoir si on est dans un état où il faut afficher les observations
      */
     private boolean searchObservation;
 
     private ArrayList<Observation> observations;
-
-    // Create Graph
-    private final LineChart.Series series = new LineChart.Series<>();
-    private NumberAxis xAxis = new NumberAxis(0, 0, 5);
-    private NumberAxis yAxis = new NumberAxis(0, 0, 0);
-    private AreaChart chart = new AreaChart(xAxis, yAxis);
-    private int minY = 0;
-    private int maxY = 0;
-    private int tickUnit = 0;
-
 
     public Controller() {
         search = false;
@@ -151,28 +138,32 @@ public class Controller implements Initializable {
             public void changed(ObservableValue<? extends String> observable,
                                 String oldValue, String newValue) {
 
-                ApiNameResponse apiNameResponse = loader.getNames(newValue);
 
-                nameSearch = apiNameResponse.getData();
-
-                ObservableList<String> names = FXCollections.observableArrayList(nameSearch);
-
-                listView.setVisible(true);
-
-                listView.setItems(names);
-
-                labelName1.setText("Scientific names");
-
-                if(scientificName.getText().isEmpty()){
-                    listView.setVisible(false);
-                    labelName1.setText("Results");
-                }
 
                 //System.out.println(apiNameResponse.getData());
             }
         });
 
+
         scientificName.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
+
+            ApiNameResponse apiNameResponse = loader.getNames(scientificName.getText());
+
+            nameSearch = apiNameResponse.getData();
+
+            ObservableList<String> names = FXCollections.observableArrayList(nameSearch);
+
+            listView.setVisible(true);
+
+            listView.setItems(names);
+
+            labelName1.setText("Scientific names");
+
+            if(scientificName.getText().isEmpty()){
+                listView.setVisible(false);
+                labelName1.setText("Results");
+            }
+
             if(keyEvent.getCode() == KeyCode.ENTER){
                 String s = scientificName.getText();
 
@@ -186,25 +177,34 @@ public class Controller implements Initializable {
             }
         });
 
-
+        // mettre à jour le Textfield scientificName en sélectionnant l'espèce + appui sur ENTREE
+        listView.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
+            if(keyEvent.getCode() == KeyCode.ENTER){
+                String nameClicked = listView.getSelectionModel().getSelectedItem();
+                scientificName.setText(nameClicked);
+                listView.setVisible(false);
+                labelName1.setText("Results");
+            }
+        });
 
         listView.setOnMouseClicked(event -> {
-            // mettre à jour le Textfield scientificName en sélectionnant l'espèce + appui sur ENTREE
-            listView.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
-                if(keyEvent.getCode() == KeyCode.ENTER){
-                    String nameClicked = listView.getSelectionModel().getSelectedItem();
-                    scientificName.setText(nameClicked);
-                    listView.setVisible(false);
-                    labelName1.setText("Results");
-                }
-            });
+
+            scientificName.setText(listView.getSelectionModel().getSelectedItem());
             // mettre à jour le Textfield scientificName en double cliquant
             if(event.getClickCount() == 2){
                 String nameClicked = listView.getSelectionModel().getSelectedItem();
                 scientificName.setText(nameClicked);
                 listView.setVisible(false);
                 labelName1.setText("Results");
+                try {
+                    afficheZoneByName(listView.getSelectionModel().getSelectedItem());
+
+                    search = true;
+                } catch (EmptyException e) {
+                    e.printStackTrace();
+                }
             }
+
         });
 
         root3D.addEventHandler(MouseEvent.ANY, event -> {
