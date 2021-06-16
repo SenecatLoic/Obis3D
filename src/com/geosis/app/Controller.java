@@ -114,7 +114,7 @@ public class Controller implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resource) {
 
-        //listView.setVisible(false);
+        listView.setVisible(false);
 
         //Create lists for the legend
         colorsPane = Arrays.asList(color1, color2, color3, color4, color5, color6, color7, color8);
@@ -138,31 +138,30 @@ public class Controller implements Initializable {
             public void changed(ObservableValue<? extends String> observable,
                                 String oldValue, String newValue) {
 
+                ApiNameResponse apiNameResponse = loader.getNames(scientificName.getText());
 
+                nameSearch = apiNameResponse.getData();
 
-                //System.out.println(apiNameResponse.getData());
+                ObservableList<String> names = FXCollections.observableArrayList(nameSearch);
+
+                listView.setVisible(true);
+
+                listView.setItems(names);
+
+                labelName1.setText("Scientific names");
+
+                if(scientificName.getText().isEmpty()){
+                    listView.setVisible(false);
+                    labelName1.setText("Results");
+                }
+
+                System.out.println(apiNameResponse.getData());
             }
         });
 
-
         scientificName.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
 
-            ApiNameResponse apiNameResponse = loader.getNames(scientificName.getText());
-
-            nameSearch = apiNameResponse.getData();
-
-            ObservableList<String> names = FXCollections.observableArrayList(nameSearch);
-
-            listView.setVisible(true);
-
-            listView.setItems(names);
-
-            labelName1.setText("Scientific names");
-
-            if(scientificName.getText().isEmpty()){
-                listView.setVisible(false);
-                labelName1.setText("Results");
-            }
+            ApiNameResponse apiNameResponse = loader.getNames(scientificName.getText() + keyEvent.getText());
 
             if(keyEvent.getCode() == KeyCode.ENTER){
                 String s = scientificName.getText();

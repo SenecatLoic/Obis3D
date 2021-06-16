@@ -24,7 +24,7 @@ public class Main extends Application {
 
             Scene scene = new Scene(root, 1000, 670, false,SceneAntialiasing.BALANCED);
 
-            primaryStage.setMinWidth(1000);
+            primaryStage.setMinWidth(1021);
             primaryStage.setMinHeight(670);
             primaryStage.setTitle("OBIS 3D");
             primaryStage.setScene(scene);
