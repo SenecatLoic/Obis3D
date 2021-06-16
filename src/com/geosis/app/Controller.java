@@ -211,11 +211,11 @@ public class Controller implements Initializable {
             if (event.getEventType() == MouseEvent.MOUSE_PRESSED && event.isControlDown()) {
                 PickResult pickResult = event.getPickResult();
                 Point3D spaceCoord = pickResult.getIntersectedPoint();
-                System.out.println(spaceCoord);
+
                 Point2D point2D = GeometryTools.spaceCoordToGeoCoord(spaceCoord);
-                System.out.println(point2D.getX() + "    " + point2D.getY());
+
                 Point3D space = geoCoordTo3dCoord((float) point2D.getX(), (float) point2D.getY());
-                System.out.println(space);
+
 
                 Sphere sphere = new Sphere(0.05);
                 final PhongMaterial sphereMaterial = new PhongMaterial();
@@ -227,11 +227,13 @@ public class Controller implements Initializable {
                 sphere.setTranslateY(spaceCoord.getY());
                 sphere.setTranslateZ(spaceCoord.getZ());
 
-                earth.getChildren().add(sphere);
+                //earth.getChildren().add(sphere);
                 Point2D point = GeometryTools.spaceCoordToGeoCoord(spaceCoord);
                 Location loc = new Location("selected",point.getX(),point.getY());
 
-                System.out.println(GeoHashHelper.getGeohash(loc));
+                /*System.out.println(point.getX());
+                System.out.println(point.getY());
+                System.out.println(GeoHashHelper.getGeohash(loc));*/
 
                 if(search){
                     ApiObservationResponse response = loader.getObservations(GeoHashHelper.getGeohash(loc),scientificName.getText());
@@ -246,6 +248,7 @@ public class Controller implements Initializable {
                         }
                         listView.setItems(FXCollections.observableArrayList(names));
                     }
+                    labelName1.setText("Observations");
                     searchObservation = true;
                 }else{
                     ApiObservationResponse response = loader.getObservations(GeoHashHelper.getGeohash(loc),null);
@@ -694,8 +697,6 @@ public class Controller implements Initializable {
      * @param height La différence de longueur
      */
     public void setSizeDiffY(int height){
-        System.out.println("issou");
-        System.out.println(height);
         subScene.translateYProperty().setValue(subScene.translateYProperty().getValue() + height);
     }
 }

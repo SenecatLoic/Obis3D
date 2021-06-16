@@ -44,7 +44,7 @@ class HttpLoaderSpecies extends LoaderSpecies{
     @Override
     public ApiObservationResponse getObservations(String geoHash, String name) {
         ApiObservationResponse response = new ApiObservationResponse();
-        String param = "occurrence?geometry=" + geoHash;
+        String param = "occurrence?size=1000&geometry=" + geoHash;
 
 
         if(name != null){
