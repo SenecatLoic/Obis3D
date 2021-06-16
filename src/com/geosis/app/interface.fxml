@@ -4,9 +4,11 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
@@ -14,138 +16,10 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
-<HBox fx:id="hboxRoot" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="670.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1">
-   <children>
-      <VBox fx:id="vbox" prefHeight="800.0" prefWidth="357.0">
-         <children>
-            <Label fx:id="labelName" alignment="CENTER" prefHeight="40.0" prefWidth="275.0" style="-fx-background-color: #59BAFF;" text="Scientific name" textAlignment="CENTER">
-               <font>
-                  <Font name="Leelawadee" size="20.0" />
-               </font>
-               <VBox.margin>
-                  <Insets />
-               </VBox.margin>
-            </Label>
-            <TextField fx:id="scientificName" pickOnBounds="false" prefHeight="40.0" prefWidth="250.0" promptText="Enter a scientific name" style="-fx-focus-color: #59BAFF;">
-               <font>
-                  <Font name="Consolas" size="13.0" />
-               </font>
-               <VBox.margin>
-                  <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
-               </VBox.margin>
-            </TextField>
-            <Label fx:id="labelInterval" alignment="CENTER" prefHeight="40.0" prefWidth="275.0" style="-fx-background-color: #59BAFF;" text="Between two years" textAlignment="CENTER">
-               <font>
-                  <Font name="Leelawadee" size="20.0" />
-               </font>
-            </Label>
-            <Pane fx:id="paneInterval" prefHeight="50.0" prefWidth="254.0">
-               <VBox.margin>
-                  <Insets left="10.0" right="10.0" top="20.0" />
-               </VBox.margin>
-               <children>
-                  <HBox prefHeight="80.0" prefWidth="257.0">
-                     <children>
-                        <Label prefHeight="22.0" prefWidth="74.0" text="Between">
-                           <font>
-                              <Font name="Leelawadee" size="16.0" />
-                           </font>
-                           <padding>
-                              <Insets right="10.0" />
-                           </padding>
-                           <HBox.margin>
-                              <Insets top="5.0" />
-                           </HBox.margin>
-                        </Label>
-                        <TextField fx:id="yearStart" prefHeight="30.0" prefWidth="60.0" promptText="Year" style="-fx-focus-color: #59BAFF;">
-                           <HBox.margin>
-                              <Insets />
-                           </HBox.margin>
-                           <font>
-                              <Font size="13.0" />
-                           </font>
-                        </TextField>
-                        <Label text="and">
-                           <font>
-                              <Font name="Leelawadee" size="16.0" />
-                           </font>
-                           <padding>
-                              <Insets left="10.0" right="10.0" top="5.0" />
-                           </padding>
-                        </Label>
-                        <TextField fx:id="yearEnd" prefHeight="30.0" prefWidth="60.0" promptText="Year" style="-fx-focus-color: #59BAFF;">
-                           <font>
-                              <Font size="13.0" />
-                           </font>
-                           <HBox.margin>
-                              <Insets />
-                           </HBox.margin>
-                        </TextField>
-                     </children>
-                  </HBox>
-               </children>
-            </Pane>
-            <VBox prefHeight="75.0" prefWidth="241.0" style="-fx-background-color: #BFE4FF;">
-               <children>
-                  <Label fx:id="labelInterval1" alignment="CENTER" prefHeight="1.0" prefWidth="275.0" text="to see the evolution live..." textAlignment="CENTER">
-                     <font>
-                        <Font name="Leelawadee" size="13.0" />
-                     </font>
-                     <padding>
-                        <Insets bottom="10.0" top="10.0" />
-                     </padding>
-                  </Label>
-                  <HBox fx:id="btnHbox" prefHeight="28.0" prefWidth="275.0">
-                     <children>
-                        <Button fx:id="btnStart" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="20.0" prefWidth="60.0" text="Start">
-                           <font>
-                              <Font name="Leelawadee" size="14.0" />
-                           </font>
-                           <HBox.margin>
-                              <Insets left="20.0" right="20.0" />
-                           </HBox.margin>
-                        </Button>
-                        <Button fx:id="btnBreak" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="20.0" prefWidth="60.0" text="Break">
-                           <font>
-                              <Font name="Leelawadee" size="14.0" />
-                           </font>
-                           <HBox.margin>
-                              <Insets right="20.0" />
-                           </HBox.margin>
-                        </Button>
-                        <Button fx:id="btnStop" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="20.0" prefWidth="60.0" text="Stop">
-                           <font>
-                              <Font name="Leelawadee" size="14.0" />
-                           </font>
-                           <HBox.margin>
-                              <Insets />
-                           </HBox.margin>
-                        </Button>
-                     </children>
-                     <VBox.margin>
-                        <Insets />
-                     </VBox.margin>
-                     <padding>
-                        <Insets bottom="10.0" />
-                     </padding>
-                  </HBox>
-               </children>
-               <VBox.margin>
-                  <Insets left="10.0" right="10.0" />
-               </VBox.margin>
-            </VBox>
-            <Button fx:id="btnSearch" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="37.0" prefWidth="288.0" text="Search">
-               <font>
-                  <Font name="System Bold" size="16.0" />
-               </font>
-               <VBox.margin>
-                  <Insets left="60.0" right="60.0" top="30.0" />
-               </VBox.margin>
-            </Button>
-         </children>
-      </VBox>
-      <Separator orientation="VERTICAL" prefHeight="200.0" />
-      <AnchorPane fx:id="anchorPane" prefHeight="800.0" prefWidth="603.0">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="670.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+
+   <center>
+      <AnchorPane fx:id="anchorPane" prefHeight="497.0" prefWidth="492.0">
          <HBox.margin>
             <Insets />
          </HBox.margin>
@@ -153,12 +27,12 @@
             <Insets />
          </opaqueInsets>
          <children>
-            <FlowPane fx:id="legFlowPane" prefHeight="160.0" prefWidth="260.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0">
+            <FlowPane fx:id="legFlowPane" prefHeight="160.0" prefWidth="326.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0">
                <children>
-                  <HBox fx:id="hbox1" prefHeight="20.0" prefWidth="300.0">
+                  <HBox fx:id="hbox1" prefHeight="20.0" prefWidth="335.0">
                      <children>
                         <Rectangle fx:id="color1" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #F9E79F;" visible="false" width="20.0" />
-                        <Label fx:id="labelColor1" prefHeight="18.0" prefWidth="282.0">
+                        <Label fx:id="labelColor1" prefHeight="20.0" prefWidth="306.0">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -168,10 +42,10 @@
                         </Label>
                      </children>
                   </HBox>
-                  <HBox fx:id="hbox2" prefHeight="20.0" prefWidth="300.0">
+                  <HBox fx:id="hbox2" prefHeight="20.0" prefWidth="336.0">
                      <children>
                         <Rectangle fx:id="color2" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #F7DC6F;" visible="false" width="20.0" />
-                        <Label fx:id="labelColor2" prefHeight="18.0" prefWidth="282.0">
+                        <Label fx:id="labelColor2" prefHeight="20.0" prefWidth="305.0">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -181,10 +55,10 @@
                         </Label>
                      </children>
                   </HBox>
-                  <HBox fx:id="hbox3" prefHeight="20.0" prefWidth="300.0">
+                  <HBox fx:id="hbox3" prefHeight="20.0" prefWidth="337.0">
                      <children>
                         <Rectangle fx:id="color3" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #F5B041;" visible="false" width="20.0" />
-                        <Label fx:id="labelColor3" prefHeight="18.0" prefWidth="282.0">
+                        <Label fx:id="labelColor3" prefHeight="20.0" prefWidth="314.0">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -194,10 +68,10 @@
                         </Label>
                      </children>
                   </HBox>
-                  <HBox fx:id="hbox4" prefHeight="20.0" prefWidth="300.0">
+                  <HBox fx:id="hbox4" prefHeight="20.0" prefWidth="338.0">
                      <children>
                         <Rectangle fx:id="color4" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #F39C12;" visible="false" width="20.0" />
-                        <Label fx:id="labelColor4" prefHeight="18.0" prefWidth="282.0">
+                        <Label fx:id="labelColor4" prefHeight="20.0" prefWidth="320.0">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -220,10 +94,10 @@
                         </Label>
                      </children>
                   </HBox>
-                  <HBox fx:id="hbox6" prefHeight="20.0" prefWidth="300.0">
+                  <HBox fx:id="hbox6" prefHeight="20.0" prefWidth="337.0">
                      <children>
                         <Rectangle fx:id="color6" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #D35400;" visible="false" width="20.0" />
-                        <Label fx:id="labelColor6" prefHeight="18.0" prefWidth="282.0">
+                        <Label fx:id="labelColor6" prefHeight="20.0" prefWidth="322.0">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -233,10 +107,10 @@
                         </Label>
                      </children>
                   </HBox>
-                  <HBox fx:id="hbox7" prefHeight="20.0" prefWidth="300.0">
+                  <HBox fx:id="hbox7" prefHeight="20.0" prefWidth="337.0">
                      <children>
                         <Rectangle fx:id="color7" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #A93226;" visible="false" width="20.0" />
-                        <Label fx:id="labelColor7" prefHeight="18.0" prefWidth="282.0">
+                        <Label fx:id="labelColor7" prefHeight="20.0" prefWidth="314.0">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -246,10 +120,10 @@
                         </Label>
                      </children>
                   </HBox>
-                  <HBox fx:id="hbox8" prefHeight="20.0" prefWidth="299.0">
+                  <HBox fx:id="hbox8" prefHeight="20.0" prefWidth="338.0">
                      <children>
                         <Rectangle fx:id="color8" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #7B241C;" visible="false" width="20.0" />
-                        <Label fx:id="labelColor8" prefHeight="20.0" prefWidth="185.0">
+                        <Label fx:id="labelColor8" prefHeight="20.0" prefWidth="312.0">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -278,16 +152,161 @@
             </Label>
          </children>
       </AnchorPane>
-      <Separator orientation="VERTICAL" prefHeight="200.0" />
-      <Pane prefHeight="800.0" prefWidth="273.0">
+   </center>
+   <left>
+      <HBox BorderPane.alignment="CENTER">
          <children>
-            <Label fx:id="labelName1" alignment="CENTER" layoutX="-3.0" layoutY="-6.0" prefHeight="40.0" prefWidth="193.0" style="-fx-background-color: #59BAFF;" text="Results" textAlignment="CENTER">
-               <font>
-                  <Font name="Leelawadee" size="20.0" />
-               </font>
-            </Label>
-            <ListView fx:id="listView" layoutX="-2.0" prefHeight="630.0" prefWidth="193.0" translateY="38.0" style="-fx-font-size: 14px; -fx-font-family: 'Consolas'; -fx-background-insets: 0; -fx-selection-bar: #59BAFF ;" />
+            <VBox fx:id="vbox" prefHeight="626.0" prefWidth="276.0">
+               <children>
+                  <Label fx:id="labelName" alignment="CENTER" prefHeight="40.0" prefWidth="334.0" style="-fx-background-color: #59BAFF;" text="Scientific name" textAlignment="CENTER">
+                     <font>
+                        <Font name="Leelawadee" size="20.0" />
+                     </font>
+                     <VBox.margin>
+                        <Insets />
+                     </VBox.margin>
+                  </Label>
+                  <TextField fx:id="scientificName" pickOnBounds="false" prefHeight="40.0" prefWidth="250.0" promptText="Enter a scientific name" style="-fx-focus-color: #59BAFF;">
+                     <font>
+                        <Font name="Consolas" size="13.0" />
+                     </font>
+                     <VBox.margin>
+                        <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+                     </VBox.margin>
+                  </TextField>
+                  <Label fx:id="labelInterval" alignment="CENTER" prefHeight="40.0" prefWidth="275.0" style="-fx-background-color: #59BAFF;" text="Between two years" textAlignment="CENTER">
+                     <font>
+                        <Font name="Leelawadee" size="20.0" />
+                     </font>
+                  </Label>
+                  <Pane fx:id="paneInterval" prefHeight="50.0" prefWidth="254.0">
+                     <VBox.margin>
+                        <Insets left="10.0" right="10.0" top="20.0" />
+                     </VBox.margin>
+                     <children>
+                        <HBox prefHeight="80.0" prefWidth="257.0">
+                           <children>
+                              <Label prefHeight="22.0" prefWidth="74.0" text="Between">
+                                 <font>
+                                    <Font name="Leelawadee" size="16.0" />
+                                 </font>
+                                 <padding>
+                                    <Insets right="10.0" />
+                                 </padding>
+                                 <HBox.margin>
+                                    <Insets top="5.0" />
+                                 </HBox.margin>
+                              </Label>
+                              <TextField fx:id="yearStart" prefHeight="30.0" prefWidth="60.0" promptText="Year" style="-fx-focus-color: #59BAFF;">
+                                 <HBox.margin>
+                                    <Insets />
+                                 </HBox.margin>
+                                 <font>
+                                    <Font size="13.0" />
+                                 </font>
+                              </TextField>
+                              <Label text="and">
+                                 <font>
+                                    <Font name="Leelawadee" size="16.0" />
+                                 </font>
+                                 <padding>
+                                    <Insets left="10.0" right="10.0" top="5.0" />
+                                 </padding>
+                              </Label>
+                              <TextField fx:id="yearEnd" prefHeight="30.0" prefWidth="60.0" promptText="Year" style="-fx-focus-color: #59BAFF;">
+                                 <font>
+                                    <Font size="13.0" />
+                                 </font>
+                                 <HBox.margin>
+                                    <Insets />
+                                 </HBox.margin>
+                              </TextField>
+                           </children>
+                        </HBox>
+                     </children>
+                  </Pane>
+                  <VBox prefHeight="75.0" prefWidth="241.0" style="-fx-background-color: #BFE4FF;">
+                     <children>
+                        <Label fx:id="labelInterval1" alignment="CENTER" prefHeight="1.0" prefWidth="275.0" text="to see the evolution live..." textAlignment="CENTER">
+                           <font>
+                              <Font name="Leelawadee" size="13.0" />
+                           </font>
+                           <padding>
+                              <Insets bottom="10.0" top="10.0" />
+                           </padding>
+                        </Label>
+                        <HBox fx:id="btnHbox" prefHeight="28.0" prefWidth="275.0">
+                           <children>
+                              <Button fx:id="btnStart" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="20.0" prefWidth="60.0" text="Start">
+                                 <font>
+                                    <Font name="Leelawadee" size="14.0" />
+                                 </font>
+                                 <HBox.margin>
+                                    <Insets left="20.0" right="20.0" />
+                                 </HBox.margin>
+                              </Button>
+                              <Button fx:id="btnBreak" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="20.0" prefWidth="60.0" text="Break">
+                                 <font>
+                                    <Font name="Leelawadee" size="14.0" />
+                                 </font>
+                                 <HBox.margin>
+                                    <Insets right="20.0" />
+                                 </HBox.margin>
+                              </Button>
+                              <Button fx:id="btnStop" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="20.0" prefWidth="60.0" text="Stop">
+                                 <font>
+                                    <Font name="Leelawadee" size="14.0" />
+                                 </font>
+                                 <HBox.margin>
+                                    <Insets />
+                                 </HBox.margin>
+                              </Button>
+                           </children>
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin>
+                           <padding>
+                              <Insets bottom="10.0" />
+                           </padding>
+                        </HBox>
+                     </children>
+                     <VBox.margin>
+                        <Insets left="10.0" right="10.0" />
+                     </VBox.margin>
+                  </VBox>
+                  <Button fx:id="btnSearch" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="37.0" prefWidth="288.0" text="Search">
+                     <font>
+                        <Font name="System Bold" size="16.0" />
+                     </font>
+                     <VBox.margin>
+                        <Insets bottom="20.0" left="60.0" right="60.0" top="30.0" />
+                     </VBox.margin>
+                  </Button>
+                  <Separator prefWidth="200.0" />
+               </children>
+            </VBox>
+            <Separator orientation="VERTICAL" prefHeight="626.0" prefWidth="0.0" />
          </children>
-      </Pane>
-   </children>
-</HBox>
+      </HBox>
+   </left>
+   <right>
+      <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="422.0" prefWidth="240.0">
+         <children>
+            <AnchorPane>
+               <children>
+                  <Label alignment="CENTER" prefHeight="30.0" prefWidth="248.0" style="-fx-background-color: #59BAFF;" text="Results" textAlignment="CENTER" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                     <font>
+                        <Font size="20.0" />
+                     </font>
+                  </Label>
+               </children>
+            </AnchorPane>
+            <ScrollPane>
+               <content>
+                  <ListView fx:id="listView" prefHeight="390.0" prefWidth="237.0" />
+               </content>
+            </ScrollPane>
+         </children>
+      </VBox>
+   </right>
+</BorderPane>

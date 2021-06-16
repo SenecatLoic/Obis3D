@@ -9,20 +9,33 @@ import javafx.scene.Scene;
 
 public class Main extends Application {
 
-    private Controller controller = new Controller();
+    private Controller controller;
 
     @Override
     public void start(Stage primaryStage) {
 
         try{
+            controller = new Controller();
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource("interface.fxml"));
             loader.setController(controller);
+
             Pane root = loader.load();
+
             Scene scene = new Scene(root, 1000, 670, false,SceneAntialiasing.BALANCED);
 
+            primaryStage.setMinWidth(1000);
+            primaryStage.setMinHeight(670);
             primaryStage.setTitle("OBIS 3D");
             primaryStage.setScene(scene);
             primaryStage.show();
+            primaryStage.widthProperty().addListener((old,oldVal,newVal)->{
+                controller.setSizeDiffX((newVal.intValue() - oldVal.intValue())/2);
+            });
+
+            primaryStage.heightProperty().addListener((old,oldVal,newVal)->{
+                controller.setSizeDiffY((newVal.intValue() - oldVal.intValue())/2);
+            });
         } catch (Exception e){
             e.printStackTrace();
         }

@@ -2,13 +2,17 @@ package com.geosis.app;
 
 import com.geosis.api.loader.LoaderSpecies;
 import com.geosis.api.loader.LoaderZoneSpecies;
+import com.geosis.api.object.Observation;
 import com.geosis.api.object.ZoneSpecies;
 import com.geosis.api.response.ApiNameResponse;
+import com.geosis.api.response.ApiObservationResponse;
 import com.geosis.api.response.ApiZoneSpeciesResponse;
 import com.geosis.app.exception.EmptyException;
 import com.geosis.app.exception.InputException;
 import com.interactivemesh.jfx.importer.ImportException;
 import com.interactivemesh.jfx.importer.obj.ObjModelImporter;
+import com.ludovic.vimont.GeoHashHelper;
+import com.ludovic.vimont.Location;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -36,6 +40,7 @@ import javafx.scene.shape.*;
 
 import javafx.geometry.Point2D;
 import javafx.scene.transform.Rotate;
+import javafx.stage.Stage;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -47,6 +52,9 @@ import static com.geosis.app.GeometryTools.*;
 import com.geosis.app.exception.InputException;
 
 public class Controller implements Initializable {
+
+    @FXML
+    private BorderPane root;
 
     @FXML
     private AnchorPane anchorPane;
@@ -78,6 +86,17 @@ public class Controller implements Initializable {
     ArrayList<String> nameSearch = new ArrayList<>();
     boolean nameExist = false;
 
+    private SubScene subScene;
+
+    private boolean search;
+
+    /**
+     * Permet de savoir si on es dans un état où il faut afficher les observations
+     */
+    private boolean searchObservation;
+
+    private ArrayList<Observation> observations;
+
     // Create Graph
     private final LineChart.Series series = new LineChart.Series<>();
     private NumberAxis xAxis = new NumberAxis(0, 0, 5);
@@ -91,12 +110,14 @@ public class Controller implements Initializable {
 
 
     public Controller() {
+        search = false;
+        searchObservation = false;
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resource) {
 
-        listView.setVisible(false);
+        //listView.setVisible(false);
 
         //Create a Pane et graph scene root for the 3D content
         Group root3D = new Group();
@@ -166,8 +187,40 @@ public class Controller implements Initializable {
                 sphere.setTranslateZ(spaceCoord.getZ());
 
                 earth.getChildren().add(sphere);
+                Point2D point = GeometryTools.spaceCoordToGeoCoord(spaceCoord);
+                Location loc = new Location("selected",point.getX(),point.getY());
 
+                System.out.println(GeoHashHelper.getGeohash(loc));
+
+                if(search){
+                    ApiObservationResponse response = loader.getObservations(GeoHashHelper.getGeohash(loc),scientificName.getText());
+
+                    observations = response.getData();
+                   
+                    if(response.getCode() == 200){
+                        ArrayList<String> names = new ArrayList<>();
+                        for (Observation ob: observations) {
+                            names.add(ob.getScientificName());
+                            nameSearch.add(ob.getScientificName());
+                        }
+                        listView.setItems(FXCollections.observableArrayList(names));
+                    }
+                    searchObservation = true;
+                }else{
+                    ApiObservationResponse response = loader.getObservations(GeoHashHelper.getGeohash(loc),null);
+
+                    if(response.getCode() == 200){
+                        ArrayList<String> names = new ArrayList<>();
+                        System.out.println(response.getData().size());
+                        for (Observation ob: response.getData()) {
+                            names.add(ob.getScientificName());
+                            nameSearch.add(ob.getScientificName());
+                        }
+                        listView.setItems(FXCollections.observableArrayList(names));
+                    }
+                }
             }
+
             if (event.getEventType() == MouseEvent.MOUSE_PRESSED && event.isShiftDown()) {
                 PickResult pickResult = event.getPickResult();
                 Point3D spaceCoord = pickResult.getIntersectedPoint();
@@ -194,9 +247,7 @@ public class Controller implements Initializable {
                 box.setTranslateX(spaceCoord.getX());
                 box.setTranslateY(spaceCoord.getY());
                 box.setTranslateZ(spaceCoord.getZ());
-
                 earth.getChildren().add(box);
-
             }
         });
 
@@ -209,9 +260,11 @@ public class Controller implements Initializable {
                     final PhongMaterial sphereMaterial = new PhongMaterial();
                     sphereMaterial.setDiffuseColor(new Color(1, 0, 0, 0.3));
                     box.setMaterial(sphereMaterial);
-
                     box.setRotationAxis(new Point3D(1, 0, 0));
                     box.setRotate(lat);
+
+
+
 
                     box.setRotationAxis(new Point3D(0, 1, 0));
                     box.setRotate(lon);
@@ -228,8 +281,19 @@ public class Controller implements Initializable {
                 }
 
             }
-
         });
+
+
+        listView.setOnMouseClicked(mouseEvent -> {
+            try {
+                afficheZoneByName(listView.getSelectionModel().getSelectedItem());
+                scientificName.setText(listView.getSelectionModel().getSelectedItem());
+                search = true;
+            } catch (EmptyException e) {
+                e.printStackTrace();
+            }
+        });
+
 
         btnReset.setOnAction(actionEvent -> {
             actionBtnReset();
@@ -244,11 +308,11 @@ public class Controller implements Initializable {
             String s = scientificName.getText();
 
             try {
+                search = true;
                 actionBtnSearch(s);
             } catch (InputException | EmptyException e) {
                 // todo faire qqch ?
             }
-
         });
 
         btnStop.setOnAction(actionEvent -> {
@@ -470,6 +534,10 @@ public class Controller implements Initializable {
      */
     public void actionBtnSearch(String name) throws InputException, EmptyException {
 
+        while (earth.getChildren().size() > 1) {
+            earth.getChildren().remove(1);
+        }
+
         // vérifie si le contenu du textfield existe dans les data
         for (String n : nameSearch) {
             if (n.equalsIgnoreCase(name)) {
@@ -508,7 +576,7 @@ public class Controller implements Initializable {
      * Affiche zone
      * @throws EmptyException
      * @see #afficheZoneByName(String)
-     * @see #afficheZoneByTime(String, int, int) 
+     * @see #afficheZoneByTime(String, int, int)
      * @param apiZoneSpeciesResponse
      */
     public void displayZone(ApiZoneSpeciesResponse apiZoneSpeciesResponse) throws EmptyException{
@@ -532,8 +600,7 @@ public class Controller implements Initializable {
     /**
      * Affiche les zones d'une espèce
      * @throws EmptyException
-     * @see #displayZone(ApiZoneSpeciesResponse) 
-     * @see com.geosis.api.loader.HttpLoaderZoneSpecies#getZoneSpeciesByName(String)
+     * @see #displayZone(ApiZoneSpeciesResponse)
      * @param name
      */
     public void afficheZoneByName (String name) throws EmptyException {
@@ -546,9 +613,10 @@ public class Controller implements Initializable {
 
     /**
      * Affiche les zones d'une espèce entre 2 années
+     * @see com.geosis.api.loader.LoaderZoneSpecies#getZoneSpeciesByTime(String, int, int)
+     *
      * @throws EmptyException
-     * @see #displayZone(ApiZoneSpeciesResponse) 
-     * @see com.geosis.api.loader.HttpLoaderZoneSpecies#getZoneSpeciesByTime(String, int, int)
+     * @see #displayZone(ApiZoneSpeciesResponse)
      * @param name
      * @param anneeStart
      * @param anneeEnd
@@ -678,11 +746,29 @@ public class Controller implements Initializable {
         ambientLight.getScope().addAll(root3D);
         root3D.getChildren().add(ambientLight);
 
-        SubScene subScene = new SubScene(root3D, 500, 500, true, SceneAntialiasing.BALANCED);
+        subScene = new SubScene(root3D, 500, 500, true, SceneAntialiasing.BALANCED);
         subScene.setCamera(camera);
-        //subScene.setFill(Color.GRAY);
         subScene.translateXProperty().setValue(25);
         subScene.translateYProperty().setValue(25);
+
         anchorPane.getChildren().addAll(subScene);
+    }
+
+    /**
+     * Méthode qui change la position de la planète en fonction d'un écart
+     * @param width la différence de largeur
+     */
+    public void setSizeDiffX(int width){
+        subScene.translateXProperty().setValue(subScene.translateXProperty().getValue() + width);
+    }
+
+    /**
+     * Méthode qui change la position de la planète
+     * @param height La différence de longueur
+     */
+    public void setSizeDiffY(int height){
+        System.out.println("issou");
+        System.out.println(height);
+        subScene.translateYProperty().setValue(subScene.translateYProperty().getValue() + height);
     }
 }
