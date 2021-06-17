@@ -60,7 +60,7 @@ public class Controller implements Initializable {
     private AnchorPane anchorPane;
 
     @FXML
-    private VBox vbox;
+    private VBox vbox, vboxResults;
 
     @FXML
     private TextField scientificName;
@@ -149,7 +149,7 @@ public class Controller implements Initializable {
                     labelName1.setText("Results");
                 }
 
-                System.out.println(apiNameResponse.getData());
+                //System.out.println(apiNameResponse.getData());
             }
         });
 
@@ -398,6 +398,11 @@ public class Controller implements Initializable {
 
         Legend.setInvisible(colorsPane, labels);
 
+        // supprimer la progressBar
+        if (!vboxResults.getChildren().isEmpty()){
+            vboxResults.getChildren().remove(vboxResults.getChildren().size() - 1);
+        }
+
         // Todo suppr les résultats
 
     }
@@ -455,7 +460,7 @@ public class Controller implements Initializable {
     /**
      * Affiche zone
      * @throws EmptyException
-     * @see ProgressBarWindow#createProgressBarWindow(Task)
+     * @see ProgressBarWindow#createProgressBarWindow(Pane, Task)
      * @see #afficheZoneByName(String)
      * @see #afficheZoneByTime(String, int, int)
      * @param apiZoneSpeciesResponse
@@ -496,7 +501,7 @@ public class Controller implements Initializable {
             }
         };
 
-        ProgressBarWindow.createProgressBarWindow(task);
+        ProgressBarWindow.createProgressBarWindow((Pane)vboxResults, task);
 
         final Thread thread = new Thread(task);
         thread.setDaemon(true);
@@ -593,7 +598,7 @@ public class Controller implements Initializable {
 
         subScene = new SubScene(root3D, 492, 497, true, SceneAntialiasing.BALANCED);
         subScene.setCamera(camera);
-        subScene.setFill(Color.GREY);
+        //subScene.setFill(Color.GREY);
         subScene.translateYProperty().setValue(25);
 
         anchorPane.getChildren().addAll(subScene);

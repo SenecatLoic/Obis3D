@@ -3,9 +3,11 @@ package com.geosis.app;
 import com.geosis.api.response.ApiZoneSpeciesResponse;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
@@ -14,14 +16,14 @@ public class ProgressBarWindow {
     private static ProgressBar progressBar = new ProgressBar();
     private static Label progressLabel = new Label();
     private static final double EPSILON = 0.005;
-    private static Stage newWindow = new Stage();
+    //private static Stage newWindow = new Stage();
 
     /**
      * Création de la fenêtre progressBar
      * @see com.geosis.app.Controller#displayZone(ApiZoneSpeciesResponse)
      * @param task
      */
-    public static void createProgressBarWindow(Task task){
+    public static void createProgressBarWindow(Pane parent, Task task){
 
         progressBar.progressProperty().bind(task.progressProperty());
         progressLabel.textProperty().bind(task.progressProperty().asString());
@@ -46,17 +48,24 @@ public class ProgressBarWindow {
 
         // créer la nouvelle fenêtre
         StackPane loadingPane = new StackPane();
+        loadingPane.setPrefWidth(240);
+        loadingPane.setTranslateY(-45);
 
-        progressBar.setPrefSize(150, 30);
+        progressBar.setPrefSize(170, 30);
 
         loadingPane.getChildren().addAll(progressBar, progressLabel);
 
+        parent.getChildren().add(loadingPane);
+
+        //TODO virer newWindow si plus besoin
+        /*
         Scene secondScene = new Scene(loadingPane, 270, 80);
 
         newWindow.setTitle("Loading");
         newWindow.setScene(secondScene);
 
         newWindow.show();
+         */
 
     }
 
