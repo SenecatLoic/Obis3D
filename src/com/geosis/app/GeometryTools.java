@@ -18,7 +18,7 @@ public class GeometryTools {
     private static final float TEXTURE_OFFSET = 1.01f;
 
     private static float[] heightsBox = {0.15f, 0.3f, 0.45f, 0.60f, 0.75f, 0.90f, 1.05f , 1.2f};
-    private Box barreHistogramme;
+    private static Box barreHistogramme;
 
     /**
      * Convertir des Coordonnées (lat, lon) en Point3D (méthode du tutoriel)
@@ -117,13 +117,13 @@ public class GeometryTools {
      */
     public static void addBoxHistogramme(Group parent, Point2D[] from2D, float height, Color color){
 
-        Box box = new Box(0.01f,0.01f,height);
+        barreHistogramme = new Box(0.01f,0.01f,height);
 
         Color colorTrans = new Color(color.getRed(), color.getGreen(), color.getBlue(), 0.2);
 
         final PhongMaterial material = new PhongMaterial();
         material.setDiffuseColor(colorTrans);
-        box.setMaterial(material);
+        barreHistogramme.setMaterial(material);
 
         double x = 0;
         double y = 0;
@@ -144,7 +144,7 @@ public class GeometryTools {
         Affine affine = new Affine();
         affine.append( lookAt(from,to,yDir));
         group.getTransforms().setAll(affine);
-        group.getChildren().addAll(box);
+        group.getChildren().addAll(barreHistogramme);
 
         parent.getChildren().addAll(group);
 
