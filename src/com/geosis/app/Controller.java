@@ -3,6 +3,7 @@ package com.geosis.app;
 import com.geosis.api.loader.LoaderSpecies;
 import com.geosis.api.loader.LoaderZoneSpecies;
 import com.geosis.api.object.Observation;
+import com.geosis.api.object.Zone;
 import com.geosis.api.object.ZoneSpecies;
 import com.geosis.api.response.ApiNameResponse;
 import com.geosis.api.response.ApiObservationResponse;
@@ -117,11 +118,13 @@ public class Controller implements Initializable {
     private int minY = 0;
     private int maxY = 0;
     private int tickUnit = 0;
-
+    private ZoneControls zoneControls;
 
     public Controller() {
         search = false;
         searchObservation = false;
+
+        zoneControls = new ZoneControls();
     }
 
     @Override
@@ -150,33 +153,32 @@ public class Controller implements Initializable {
             @Override
             public void changed(ObservableValue<? extends String> observable,
                                 String oldValue, String newValue) {
-
-
-
                 //System.out.println(apiNameResponse.getData());
+                ApiNameResponse apiNameResponse = loader.getNames(scientificName.getText());
+
+                nameSearch = apiNameResponse.getData();
+
+                ObservableList<String> names = FXCollections.observableArrayList(nameSearch);
+
+                listView.setVisible(true);
+
+                listView.setItems(names);
+
+                labelName1.setText("Scientific names");
+
+
+                System.out.println(scientificName.getText());
+
+                if(scientificName.getText().isEmpty()){
+                    listView.setVisible(false);
+                    labelName1.setText("Results");
+                }
             }
         });
 
 
+
         scientificName.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
-
-            ApiNameResponse apiNameResponse = loader.getNames(scientificName.getText());
-
-            nameSearch = apiNameResponse.getData();
-
-            ObservableList<String> names = FXCollections.observableArrayList(nameSearch);
-
-            listView.setVisible(true);
-
-            listView.setItems(names);
-
-            labelName1.setText("Scientific names");
-
-            if(scientificName.getText().isEmpty()){
-                listView.setVisible(false);
-                labelName1.setText("Results");
-            }
-
             if(keyEvent.getCode() == KeyCode.ENTER){
                 String s = scientificName.getText();
 
@@ -226,11 +228,6 @@ public class Controller implements Initializable {
                 PickResult pickResult = event.getPickResult();
                 Point3D spaceCoord = pickResult.getIntersectedPoint();
 
-                Point2D point2D = GeometryTools.spaceCoordToGeoCoord(spaceCoord);
-
-                Point3D space = geoCoordTo3dCoord((float) point2D.getX(), (float) point2D.getY());
-
-
                 Sphere sphere = new Sphere(0.05);
                 final PhongMaterial sphereMaterial = new PhongMaterial();
                 sphereMaterial.setSpecularColor(Color.RED);
@@ -245,11 +242,8 @@ public class Controller implements Initializable {
                 Point2D point = GeometryTools.spaceCoordToGeoCoord(spaceCoord);
                 Location loc = new Location("selected",point.getX(),point.getY());
 
-                System.out.println(point.getX());
-                System.out.println(point.getY());
-                System.out.println(GeoHashHelper.getGeohash(loc));
-
-                if(search){
+                listView.setVisible(true);
+                if(zoneControls.isInEarth(point.getX(),point.getY())){
                     ApiObservationResponse response = loader.getObservations(GeoHashHelper.getGeohash(loc),scientificName.getText());
 
                     observations = response.getData();
@@ -269,13 +263,14 @@ public class Controller implements Initializable {
 
                     if(response.getCode() == 200){
                         ArrayList<String> names = new ArrayList<>();
-                        System.out.println(response.getData().size());
+
                         for (Observation ob: response.getData()) {
                             names.add(ob.getScientificName());
                             nameSearch.add(ob.getScientificName());
                         }
                         listView.setItems(FXCollections.observableArrayList(names));
                     }
+                    labelName1.setText("Scientific names");
                 }
             }
 
@@ -551,13 +546,16 @@ public class Controller implements Initializable {
      * @param apiZoneSpeciesResponse
      */
     public void displayZone(ApiZoneSpeciesResponse apiZoneSpeciesResponse) throws EmptyException{
-
         int minNbSignals = apiZoneSpeciesResponse.getNbSignalsMin();
         int maxNbSignals = apiZoneSpeciesResponse.getNbSignalsMax();
-
+        zoneControls.clear();
         // défini les paramètres pour la progressBar
         float pas = (float) apiZoneSpeciesResponse.getData().size() / 100;
         finalProgression = 1;
+
+        while (earth.getChildren().size() > 1) {
+            earth.getChildren().remove(1);
+        }
 
         final Task<Void> task = new Task<Void>() {
             @Override
@@ -569,7 +567,7 @@ public class Controller implements Initializable {
                     });
 
                     for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponse.getData()) {
-
+                        zoneControls.addZone(zoneSpecies.getZone());
                         Platform.runLater(() -> {
                             GeometryTools.addPolygon(earth, zoneSpecies.getZone().getCoords(), Legend.setColor(zoneSpecies, minNbSignals, maxNbSignals, colorsPane));
                             updateProgress(finalProgression, apiZoneSpeciesResponse.getData().size());

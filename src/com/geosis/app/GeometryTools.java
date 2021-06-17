@@ -61,11 +61,11 @@ public class GeometryTools {
 
         final TriangleMesh triangleMesh = new TriangleMesh();
 
-        Point3D coord1 = geoCoordTo3dCoord((float)coords[0].getX(), (float)coords[0].getY());
-        Point3D coord2 = geoCoordTo3dCoord((float)coords[1].getX(), (float)coords[1].getY());
-        Point3D coord3 = geoCoordTo3dCoord((float)coords[2].getX(), (float)coords[2].getY());
-        Point3D coord4 = geoCoordTo3dCoord((float)coords[3].getX(), (float)coords[3].getY());
-        Point3D coord5 = geoCoordTo3dCoord((float)coords[4].getX(), (float)coords[4].getY());
+        Point3D coord1 = geoCoordTo3dCoord((float)coords[0].getY(), (float)coords[0].getX());
+        Point3D coord2 = geoCoordTo3dCoord((float)coords[1].getY(), (float)coords[1].getX());
+        Point3D coord3 = geoCoordTo3dCoord((float)coords[2].getY(), (float)coords[2].getX());
+        Point3D coord4 = geoCoordTo3dCoord((float)coords[3].getY(), (float)coords[3].getX());
+        Point3D coord5 = geoCoordTo3dCoord((float)coords[4].getY(), (float)coords[4].getX());
 
         final float[] points = {
                 (float)coord1.getX(), (float) coord1.getY(), (float)coord1.getZ(),
