@@ -9,7 +9,6 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.*;
 import javafx.scene.transform.Affine;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class GeometryTools {
@@ -109,7 +108,14 @@ public class GeometryTools {
         parent.getChildren().addAll(meshView);
     }
 
-    public static void addBoxHistogramme(Group parent, Point2D from2D, float height, Color color){
+    /**
+     * Crée une barre dé l'histogramme 3D au milieu de chaque polygon
+     * @param parent
+     * @param from2D
+     * @param height
+     * @param color
+     */
+    public static void addBoxHistogramme(Group parent, Point2D[] from2D, float height, Color color){
 
         Box box = new Box(0.01f,0.01f,height);
 
@@ -119,7 +125,18 @@ public class GeometryTools {
         material.setDiffuseColor(colorTrans);
         box.setMaterial(material);
 
-        Point3D from = geoCoordTo3dCoord((float) from2D.getX(), (float) from2D.getY());
+        double x = 0;
+        double y = 0;
+
+        for (Point2D point : from2D) {
+            x += point.getX();
+            y += point.getY();
+        }
+
+        x = (double) x / from2D.length;
+        y = (double) y / from2D.length;
+
+        Point3D from = geoCoordTo3dCoord((float) y, (float) x);
         Point3D to = Point3D.ZERO;
         Point3D yDir = new Point3D(0, 1, 0);
 
@@ -133,6 +150,14 @@ public class GeometryTools {
 
     }
 
+    /**
+     * Détermine la hauteur de la box selon sa couleur
+     * @param zoneSpecies
+     * @param minNbSignals
+     * @param maxNbSignals
+     * @param colorsPane
+     * @return float Height d'une box
+     */
     public static float getHeightBox(ZoneSpecies zoneSpecies, int minNbSignals, int maxNbSignals, List<Rectangle > colorsPane){
 
         Color colorBox = Legend.getColor(zoneSpecies, minNbSignals, maxNbSignals, colorsPane);
@@ -145,7 +170,6 @@ public class GeometryTools {
         return 0;
 
     }
-
 
     /**
      * Crée l'axe selon lequel on veut créer l'objet

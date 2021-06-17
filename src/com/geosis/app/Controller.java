@@ -159,14 +159,11 @@ public class Controller implements Initializable {
 
             ObservableList<String> names = FXCollections.observableArrayList(nameSearch);
 
-            listView.setVisible(true);
-
             listView.setItems(names);
 
             labelName1.setText("Scientific names");
 
             if(scientificName.getText().isEmpty()){
-                listView.setVisible(false);
                 labelName1.setText("Results");
             }
 
@@ -225,7 +222,6 @@ public class Controller implements Initializable {
                 /*System.out.println(point.getX());
                 System.out.println(point.getY());
                 System.out.println(GeoHashHelper.getGeohash(loc));*/
-                listView.setVisible(true);
                 if(zoneControls.isInEarth(point2D.getX(),point2D.getY())){
                     ApiObservationResponse response = loader.getObservations(GeoHashHelper.getGeohash(loc),scientificName.getText());
 
@@ -400,6 +396,7 @@ public class Controller implements Initializable {
         scientificName.setText("");
         yearStart.setText("");
         yearEnd.setText("");
+        labelName1.setText("Results");
 
         // supprime tous les anciens polygones sur le globe
         while (earth.getChildren().size() > 1) {
@@ -505,7 +502,7 @@ public class Controller implements Initializable {
                         zoneControls.addZone(zoneSpecies.getZone());
                         Platform.runLater(() -> {
                             GeometryTools.addPolygon(earth, zoneSpecies.getZone().getCoords(), Legend.getColor(zoneSpecies, minNbSignals, maxNbSignals, colorsPane));
-                            GeometryTools.addBoxHistogramme(earth, zoneSpecies.getZone().getCoords()[0],GeometryTools.getHeightBox(zoneSpecies, minNbSignals, maxNbSignals, colorsPane), Legend.getColor(zoneSpecies, minNbSignals, maxNbSignals, colorsPane));
+                            GeometryTools.addBoxHistogramme(earth, zoneSpecies.getZone().getCoords(),GeometryTools.getHeightBox(zoneSpecies, minNbSignals, maxNbSignals, colorsPane), Legend.getColor(zoneSpecies, minNbSignals, maxNbSignals, colorsPane));
                             updateProgress(finalProgression, apiZoneSpeciesResponse.getData().size());
                             finalProgression += 1;
                         });
