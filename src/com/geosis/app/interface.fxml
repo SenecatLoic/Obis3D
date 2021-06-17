@@ -15,7 +15,7 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="670.0" prefWidth="1021.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="670.0" prefWidth="1021.0" style="-fx-background-color: #AEAFB0;" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1">
 
    <center>
       <AnchorPane fx:id="anchorPane" prefHeight="497.0" prefWidth="492.0">
@@ -26,7 +26,7 @@
             <Insets />
          </opaqueInsets>
          <children>
-            <FlowPane fx:id="legFlowPane" prefHeight="160.0" prefWidth="326.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0">
+            <FlowPane fx:id="legFlowPane" layoutX="14.0" layoutY="502.0" prefHeight="160.0" prefWidth="326.0" AnchorPane.bottomAnchor="8.399999999999977" AnchorPane.leftAnchor="14.0">
                <children>
                   <HBox fx:id="hbox1" prefHeight="20.0" prefWidth="335.0">
                      <children>
@@ -143,7 +143,7 @@
       </AnchorPane>
    </center>
    <left>
-      <HBox BorderPane.alignment="CENTER">
+      <HBox style="-fx-background-color: white;" BorderPane.alignment="CENTER">
          <children>
             <VBox fx:id="vbox" prefHeight="626.0" prefWidth="276.0">
                <children>

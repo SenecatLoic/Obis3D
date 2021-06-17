@@ -1,7 +1,8 @@
-/* Style sheet pour le graphique */
+/* Style sheet */
 
 .chart-area-symbol { -fx-background-color : #59BAFF; }
  
 .chart-series-area-line { -fx-stroke-width: 2px; -fx-stroke: #59BAFF; }
 
 .chart-series-area-fill { -fx-fill: rgba(89,186,255,0.5); }
+
