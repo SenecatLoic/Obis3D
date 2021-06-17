@@ -1,6 +1,7 @@
-package com.geosis.app;
+package com.geosis.app.geometryTools;
 
 import com.geosis.api.object.ZoneSpecies;
+import com.geosis.app.controlTools.Legend;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import javafx.scene.Group;
@@ -114,6 +115,7 @@ public class GeometryTools {
 
     /**
      * Crée une barre dé l'histogramme 3D au milieu de chaque polygon
+     * @see #lookAt(Point3D, Point3D, Point3D) 
      * @param parent
      * @param from2D
      * @param height
@@ -129,6 +131,7 @@ public class GeometryTools {
         material.setDiffuseColor(colorTrans);
         barreHistogramme.setMaterial(material);
 
+        // Calcul du barycentre du polygone
         double x = 0;
         double y = 0;
 
@@ -156,6 +159,7 @@ public class GeometryTools {
 
     /**
      * Détermine la hauteur de la box selon sa couleur
+     * @see #addPolygon(Group, Point2D[], Color) 
      * @param zoneSpecies
      * @param minNbSignals
      * @param maxNbSignals

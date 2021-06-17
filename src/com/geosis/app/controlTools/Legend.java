@@ -1,4 +1,4 @@
-package com.geosis.app;
+package com.geosis.app.controlTools;
 
 import com.geosis.api.object.ZoneSpecies;
 import javafx.scene.control.Label;

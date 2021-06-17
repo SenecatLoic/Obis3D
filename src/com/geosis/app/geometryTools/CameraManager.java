@@ -1,4 +1,4 @@
-package com.geosis.app;
+package com.geosis.app.geometryTools;
 
 import javafx.event.EventHandler;
 import javafx.scene.*;

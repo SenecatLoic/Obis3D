@@ -1,4 +1,4 @@
-package com.geosis.app;
+package com.geosis.app.geometryTools;
 
 import com.geosis.api.object.Zone;
 import javafx.geometry.Point2D;

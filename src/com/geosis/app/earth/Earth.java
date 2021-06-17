@@ -1,6 +1,6 @@
 package com.geosis.app.earth;
 
-import com.geosis.app.CameraManager;
+import com.geosis.app.geometryTools.CameraManager;
 import com.geosis.app.Controller;
 import com.interactivemesh.jfx.importer.ImportException;
 import com.interactivemesh.jfx.importer.obj.ObjModelImporter;

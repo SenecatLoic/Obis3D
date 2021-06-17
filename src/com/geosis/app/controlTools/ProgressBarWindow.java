@@ -1,4 +1,4 @@
-package com.geosis.app;
+package com.geosis.app.controlTools;
 
 import com.geosis.api.response.ApiZoneSpeciesResponse;
 import javafx.application.Platform;

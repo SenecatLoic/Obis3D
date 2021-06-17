@@ -1,5 +1,6 @@
-package com.geosis.app;
+package com.geosis.app.controlTools;
 
+import com.geosis.app.Controller;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Point3D;
