@@ -1,6 +1,6 @@
-.chart-area-symbol { 
-    -fx-background-color : #59BAFF;
-}
+/* Style sheet pour le graphique */
+
+.chart-area-symbol { -fx-background-color : #59BAFF; }
  
 .chart-series-area-line { -fx-stroke-width: 2px; -fx-stroke: #59BAFF; }
 

@@ -11,6 +11,10 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
+/**
+ * ProgressBar selon l'avancement de la création des polygones/ boxHistogramme
+ */
+
 public class ProgressBarWindow {
 
     private static ProgressBar progressBar = new ProgressBar();
@@ -35,14 +39,6 @@ public class ProgressBarWindow {
                 progressLabel.textProperty().unbind();
                 progressLabel.setText("DONE");
                 progressBar.setStyle("-fx-accent: forestgreen;");
-                /*Platform.runLater(() -> {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    newWindow.close();
-                });*/
             }
         });
 

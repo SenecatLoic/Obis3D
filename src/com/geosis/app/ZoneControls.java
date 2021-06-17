@@ -1,10 +1,7 @@
 package com.geosis.app;
 
 import com.geosis.api.object.Zone;
-import com.geosis.api.object.ZoneSpecies;
 import javafx.geometry.Point2D;
-
-import sample.ludovic.vimont.*;
 
 import java.util.ArrayList;
 import java.util.List;

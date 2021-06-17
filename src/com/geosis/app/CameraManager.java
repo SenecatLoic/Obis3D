@@ -7,6 +7,10 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.transform.Rotate;
 
+/**
+ * Camera de la Terre
+ */
+
 public class CameraManager {
 
     private static final double CAMERA_MIN_DISTANCE = -4;

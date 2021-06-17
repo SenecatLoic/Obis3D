@@ -3,10 +3,12 @@ package com.geosis.app;
 import com.geosis.api.object.ZoneSpecies;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
-
-
 import javafx.scene.shape.Rectangle;
 import java.util.List;
+
+/**
+ * Légende selon la recherche
+ */
 
 public class Legend {
 

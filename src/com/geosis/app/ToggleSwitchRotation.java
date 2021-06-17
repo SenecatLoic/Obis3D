@@ -12,6 +12,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
 /**
+ * Toggle Switch pour rotate ou non un objet
  * @see <a href="https://gist.github.com/TheItachiUchiha/12e40a6f3af6e1eb6f75">Code initial</a>
  */
 

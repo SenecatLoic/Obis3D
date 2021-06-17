@@ -2,6 +2,10 @@ package com.geosis.app.exception;
 
 import javafx.scene.control.Alert;
 
+/**
+ * Exeption si la recherche est valide mais qu'il n'y a aucune donnée disponible
+ */
+
 public class EmptyException extends Exception{
 
     public EmptyException(){

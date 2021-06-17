@@ -11,6 +11,11 @@ import javafx.scene.shape.MeshView;
 
 import java.net.URL;
 
+/**
+ * Terre
+ * @see CameraManager
+ */
+
 public class Earth {
 
     private static Group earth;

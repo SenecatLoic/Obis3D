@@ -11,6 +11,10 @@ import javafx.scene.transform.Affine;
 
 import java.util.List;
 
+/**
+ * Regroupe les outils géomtriques
+ */
+
 public class GeometryTools {
 
     private static final float TEXTURE_LAT_OFFSET = -0.2f;

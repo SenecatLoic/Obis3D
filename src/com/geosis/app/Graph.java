@@ -9,6 +9,10 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.layout.Pane;
 
+/**
+ * Graphique selon la recherche
+ */
+
 public class Graph {
 
     private static LineChart.Series series;
