@@ -8,12 +8,11 @@ import com.geosis.api.object.ZoneSpecies;
 import com.geosis.api.response.ApiNameResponse;
 import com.geosis.api.response.ApiObservationResponse;
 import com.geosis.api.response.ApiZoneSpeciesResponse;
+import com.geosis.app.earth.Earth;
 import com.geosis.app.exception.EmptyException;
 import com.geosis.app.exception.InputException;
 import com.interactivemesh.jfx.importer.ImportException;
 import com.interactivemesh.jfx.importer.obj.ObjModelImporter;
-import com.ludovic.vimont.GeoHashHelper;
-import com.ludovic.vimont.Location;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -23,7 +22,6 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
 import javafx.geometry.Point3D;
 import javafx.scene.*;
 import javafx.scene.chart.*;
@@ -34,12 +32,10 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.*;
 
 import javafx.geometry.Point2D;
 
-import java.lang.reflect.Array;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,11 +44,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import javafx.scene.transform.Affine;
 import sample.ludovic.vimont.*;
-import static com.geosis.app.GeometryTools.*;
-import com.geosis.api.loader.*;
-import javafx.stage.Stage;
 
 public class Controller implements Initializable {
 
@@ -97,7 +89,6 @@ public class Controller implements Initializable {
 
     private int finalCurrentYear;
     private float finalProgression;
-    private SubScene subScene;
 
     private boolean search;
 
@@ -125,7 +116,7 @@ public class Controller implements Initializable {
 
         //Create a Pane et graph scene root for the 3D content
         Group root3D = new Group();
-        createEarth(root3D);
+        earth = Earth.createEarth(this, root3D, anchorPane);
 
         //Rotate the earth
         ToggleSwitchRotation toggleSwitchRotation = new ToggleSwitchRotation(earth, 25);
@@ -590,62 +581,5 @@ public class Controller implements Initializable {
 
         return animationTimer;
     }
-
-    /**
-     * Crée l'objet Earth
-     * @see com.geosis.app.Earth
-     * @see CameraManager
-     * @param root3D
-     */
-    public void createEarth (Group root3D){
-        // Load geometry
-        ObjModelImporter objImporter = new ObjModelImporter();
-        try {
-            URL modelUrl = this.getClass().getResource("Earth/earth.obj");
-            objImporter.read(modelUrl);
-        } catch (
-                ImportException e) {
-            // handle exception
-            System.out.println(e.getMessage());
-        }
-        MeshView[] meshViews = objImporter.getImport();
-        earth = new Group(meshViews);
-
-        root3D.getChildren().add(earth);
-        root3D.setFocusTraversable(true);
-
-        // Add a camera group
-        PerspectiveCamera camera = new PerspectiveCamera(true);
-        new CameraManager(camera, anchorPane, root3D);
-
-        // Add ambient light
-        AmbientLight ambientLight = new AmbientLight(Color.WHITE);
-        ambientLight.getScope().addAll(root3D);
-        root3D.getChildren().add(ambientLight);
-
-        subScene = new SubScene(root3D, 492, 497, true, SceneAntialiasing.BALANCED);
-        subScene.setCamera(camera);
-        //subScene.setFill(Color.GREY);
-        subScene.translateYProperty().setValue(25);
-
-        anchorPane.getChildren().addAll(subScene);
-    }
-
-    /**
-     * Méthode qui change la position de la planète en fonction d'un écart
-     * @param width la différence de largeur
-     */
-    public void setSizeDiffX(int width){
-        subScene.translateXProperty().setValue(subScene.translateXProperty().getValue() + width);
-    }
-
-    /**
-     * Méthode qui change la position de la planète
-     * @param height La différence de longueur
-     */
-    public void setSizeDiffY(int height){
-        subScene.translateYProperty().setValue(subScene.translateYProperty().getValue() + height);
-    }
-
 
 }

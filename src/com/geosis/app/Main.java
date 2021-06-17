@@ -1,5 +1,6 @@
 package com.geosis.app;
 
+import com.geosis.app.earth.Earth;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.*;
@@ -31,11 +32,11 @@ public class Main extends Application {
             scene.getStylesheets().add("com/geosis/app/styleSheet.css");
             primaryStage.show();
             primaryStage.widthProperty().addListener((old,oldVal,newVal)->{
-                controller.setSizeDiffX((newVal.intValue() - oldVal.intValue())/2);
+                Earth.setSizeDiffX((newVal.intValue() - oldVal.intValue())/2);
             });
 
             primaryStage.heightProperty().addListener((old,oldVal,newVal)->{
-                controller.setSizeDiffY((newVal.intValue() - oldVal.intValue())/2);
+                Earth.setSizeDiffY((newVal.intValue() - oldVal.intValue())/2);
             });
         } catch (Exception e){
             e.printStackTrace();
