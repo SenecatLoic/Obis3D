@@ -4,7 +4,6 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -16,7 +15,7 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="670.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="670.0" prefWidth="1021.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1">
 
    <center>
       <AnchorPane fx:id="anchorPane" prefHeight="497.0" prefWidth="492.0">
@@ -135,16 +134,6 @@
                   </HBox>
                </children>
             </FlowPane>
-            <Button fx:id="btnClose" mnemonicParsing="false" prefWidth="60.0" text="Close" AnchorPane.bottomAnchor="20.0" AnchorPane.rightAnchor="20.0">
-               <font>
-                  <Font name="Leelawadee" size="14.0" />
-               </font>
-            </Button>
-            <Button fx:id="btnReset" mnemonicParsing="false" prefHeight="25.0" prefWidth="60.0" text="Reset" AnchorPane.bottomAnchor="20.0" AnchorPane.rightAnchor="100.0">
-               <font>
-                  <Font name="Leelawadee" size="14.0" />
-               </font>
-            </Button>
             <Label layoutX="7.0" layoutY="4.0" text="Earth rotation" AnchorPane.topAnchor="15.0">
                <font>
                   <Font name="Leelawadee" size="16.0" />
@@ -290,22 +279,37 @@
       </HBox>
    </left>
    <right>
-      <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="422.0" prefWidth="240.0">
+      <VBox fx:id="vboxResults" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="671.0" prefWidth="240.0">
          <children>
-            <AnchorPane>
+            <Label fx:id="labelName1" alignment="CENTER" prefHeight="30.0" prefWidth="242.0" style="-fx-background-color: #59BAFF;" text="Results" textAlignment="CENTER">
+               <font>
+                  <Font size="20.0" />
+               </font>
+            </Label>
+            <ListView fx:id="listView" prefHeight="528.0" prefWidth="240.0" style="-fx-font-size: 14px; -fx-font-family: 'Consolas'; -fx-background-insets: 0; -fx-selection-bar: #59BAFF ;" />
+            <HBox prefHeight="62.0" prefWidth="240.0" translateY="50.0">
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
                <children>
-                  <Label fx:id="labelName1" alignment="CENTER" prefHeight="30.0" prefWidth="248.0" style="-fx-background-color: #59BAFF;" text="Results" textAlignment="CENTER" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                  <Button fx:id="btnReset" mnemonicParsing="false" prefHeight="25.0" prefWidth="60.0" text="Reset">
                      <font>
-                        <Font size="20.0" />
+                        <Font name="Leelawadee" size="14.0" />
                      </font>
-                  </Label>
+                     <HBox.margin>
+                        <Insets left="45.0" top="15.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button fx:id="btnClose" mnemonicParsing="false" prefWidth="60.0" text="Close">
+                     <font>
+                        <Font name="Leelawadee" size="14.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets left="30.0" top="15.0" />
+                     </HBox.margin>
+                  </Button>
                </children>
-            </AnchorPane>
-            <ScrollPane>
-               <content>
-                  <ListView fx:id="listView" prefHeight="390.0" prefWidth="237.0" />
-               </content>
-            </ScrollPane>
+            </HBox>
          </children>
       </VBox>
    </right>

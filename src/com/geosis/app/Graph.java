@@ -95,7 +95,7 @@ public class Graph {
 
         chart.setTitle(name);
         chart.setLegendVisible(false);
-        chart.setMaxHeight(290);
+        chart.setMaxHeight(280);
 
         chart.getData().setAll(series);
 

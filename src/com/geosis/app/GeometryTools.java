@@ -1,19 +1,25 @@
 package com.geosis.app;
 
+import com.geosis.api.object.ZoneSpecies;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
-import javafx.scene.shape.CullFace;
-import javafx.scene.shape.MeshView;
-import javafx.scene.shape.TriangleMesh;
+import javafx.scene.shape.*;
+import javafx.scene.transform.Affine;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class GeometryTools {
 
     private static final float TEXTURE_LAT_OFFSET = -0.2f;
     private static final float TEXTURE_LON_OFFSET = 2.8f;
     private static final float TEXTURE_OFFSET = 1.01f;
+
+    private static float[] heightsBox = {0.15f, 0.3f, 0.45f, 0.60f, 0.75f, 0.90f, 1.05f , 1.2f};
+    private Box barreHistogramme;
 
     /**
      * Convertir des Coordonnées (lat, lon) en Point3D (méthode du tutoriel)
@@ -102,4 +108,59 @@ public class GeometryTools {
         meshView.setCullFace(CullFace.NONE);
         parent.getChildren().addAll(meshView);
     }
+
+    public static void addBoxHistogramme(Group parent, Point2D from2D, float height, Color color){
+
+        Box box = new Box(0.01f,0.01f,height);
+
+        Color colorTrans = new Color(color.getRed(), color.getGreen(), color.getBlue(), 0.2);
+
+        final PhongMaterial material = new PhongMaterial();
+        material.setDiffuseColor(colorTrans);
+        box.setMaterial(material);
+
+        Point3D from = geoCoordTo3dCoord((float) from2D.getX(), (float) from2D.getY());
+        Point3D to = Point3D.ZERO;
+        Point3D yDir = new Point3D(0, 1, 0);
+
+        Group group = new Group();
+        Affine affine = new Affine();
+        affine.append( lookAt(from,to,yDir));
+        group.getTransforms().setAll(affine);
+        group.getChildren().addAll(box);
+
+        parent.getChildren().addAll(group);
+
+    }
+
+    public static float getHeightBox(ZoneSpecies zoneSpecies, int minNbSignals, int maxNbSignals, List<Rectangle > colorsPane){
+
+        Color colorBox = Legend.getColor(zoneSpecies, minNbSignals, maxNbSignals, colorsPane);
+
+        for(int i = 0; i < heightsBox.length; i++){
+            if(colorBox.equals((Color) colorsPane.get(i).getFill())) {
+                return heightsBox[i];
+            }
+        }
+        return 0;
+
+    }
+
+
+    /**
+     * Crée l'axe selon lequel on veut créer l'objet
+     * @param from
+     * @param to
+     * @param ydir
+     * @return Affine
+     */
+    public static Affine lookAt(Point3D from, Point3D to, Point3D ydir) {
+        Point3D zVec = to.subtract(from).normalize();
+        Point3D xVec = ydir.normalize().crossProduct(zVec).normalize();
+        Point3D yVec = zVec.crossProduct(xVec).normalize();
+        return new Affine(xVec.getX(), yVec.getX(), zVec.getX(), from.getX(),
+                xVec.getY(), yVec.getY(), zVec.getY(), from.getY(),
+                xVec.getZ(), yVec.getZ(), zVec.getZ(), from.getZ());
+    }
+
 }

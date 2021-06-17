@@ -38,13 +38,9 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.*;
 
 import javafx.geometry.Point2D;
-import javafx.scene.transform.Rotate;
-import javafx.stage.Stage;
 
 import java.lang.reflect.Array;
 import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -52,6 +48,8 @@ import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import javafx.scene.transform.Affine;
+import sample.ludovic.vimont.*;
 import static com.geosis.app.GeometryTools.*;
 import com.geosis.api.loader.*;
 import javafx.stage.Stage;
@@ -65,7 +63,7 @@ public class Controller implements Initializable {
     private AnchorPane anchorPane;
 
     @FXML
-    private VBox vbox;
+    private VBox vbox, vboxResults;
 
     @FXML
     private TextField scientificName;
@@ -104,20 +102,11 @@ public class Controller implements Initializable {
     private boolean search;
 
     /**
-     * Permet de savoir si on es dans un état où il faut afficher les observations
+     * Permet de savoir si on est dans un état où il faut afficher les observations
      */
     private boolean searchObservation;
 
     private ArrayList<Observation> observations;
-
-    // Create Graph
-    private final LineChart.Series series = new LineChart.Series<>();
-    private NumberAxis xAxis = new NumberAxis(0, 0, 5);
-    private NumberAxis yAxis = new NumberAxis(0, 0, 0);
-    private AreaChart chart = new AreaChart(xAxis, yAxis);
-    private int minY = 0;
-    private int maxY = 0;
-    private int tickUnit = 0;
     private ZoneControls zoneControls;
 
     public Controller() {
@@ -129,8 +118,6 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resource) {
-
-        //listView.setVisible(false);
 
         //Create lists for the legend
         colorsPane = Arrays.asList(color1, color2, color3, color4, color5, color6, color7, color8);
@@ -153,32 +140,46 @@ public class Controller implements Initializable {
             @Override
             public void changed(ObservableValue<? extends String> observable,
                                 String oldValue, String newValue) {
-                //System.out.println(apiNameResponse.getData());
+
                 ApiNameResponse apiNameResponse = loader.getNames(scientificName.getText());
 
                 nameSearch = apiNameResponse.getData();
 
                 ObservableList<String> names = FXCollections.observableArrayList(nameSearch);
 
-                listView.setVisible(true);
-
                 listView.setItems(names);
 
                 labelName1.setText("Scientific names");
 
-
-                System.out.println(scientificName.getText());
-
                 if(scientificName.getText().isEmpty()){
-                    listView.setVisible(false);
                     labelName1.setText("Results");
                 }
+
+                //System.out.println(apiNameResponse.getData());
             }
         });
 
 
-
         scientificName.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
+
+            ApiNameResponse apiNameResponse = loader.getNames(scientificName.getText());
+
+            nameSearch = apiNameResponse.getData();
+
+            ObservableList<String> names = FXCollections.observableArrayList(nameSearch);
+
+            listView.setVisible(true);
+
+            listView.setItems(names);
+
+            labelName1.setText("Scientific names");
+
+            if(scientificName.getText().isEmpty()){
+                listView.setVisible(false);
+                labelName1.setText("Results");
+            }
+
+
             if(keyEvent.getCode() == KeyCode.ENTER){
                 String s = scientificName.getText();
 
@@ -197,53 +198,44 @@ public class Controller implements Initializable {
             if(keyEvent.getCode() == KeyCode.ENTER){
                 String nameClicked = listView.getSelectionModel().getSelectedItem();
                 scientificName.setText(nameClicked);
-                listView.setVisible(false);
                 labelName1.setText("Results");
             }
         });
 
         listView.setOnMouseClicked(event -> {
-            String nameClicked = listView.getSelectionModel().getSelectedItem();
-            if(nameClicked != null){
-                scientificName.setText(nameClicked );
-                // mettre à jour le Textfield scientificName en double cliquant
-                if(event.getClickCount() == 2){
 
-                    scientificName.setText(nameClicked);
-                    listView.setVisible(false);
-                    labelName1.setText("Results");
-                    try {
-                        afficheZoneByName(nameClicked);
+            scientificName.setText(listView.getSelectionModel().getSelectedItem());
+            // mettre à jour le Textfield scientificName en double cliquant
+            if(event.getClickCount() == 2){
+                String nameClicked = listView.getSelectionModel().getSelectedItem();
+                scientificName.setText(nameClicked);
+                labelName1.setText("Results");
+                try {
+                    afficheZoneByName(listView.getSelectionModel().getSelectedItem());
 
-                        search = true;
-                    } catch (EmptyException e) {
-                        e.printStackTrace();
-                    }
+                    search = true;
+                } catch (EmptyException e) {
+                    e.printStackTrace();
                 }
             }
+
         });
 
         root3D.addEventHandler(MouseEvent.ANY, event -> {
             if (event.getEventType() == MouseEvent.MOUSE_PRESSED && event.isControlDown()) {
+
+                // Récupérer les coordonnées à l'endroit du clic
                 PickResult pickResult = event.getPickResult();
                 Point3D spaceCoord = pickResult.getIntersectedPoint();
 
-                Sphere sphere = new Sphere(0.05);
-                final PhongMaterial sphereMaterial = new PhongMaterial();
-                sphereMaterial.setSpecularColor(Color.RED);
-                sphereMaterial.setDiffuseColor(Color.YELLOW);
-                sphere.setMaterial(sphereMaterial);
+                Point2D point2D = GeometryTools.spaceCoordToGeoCoord(spaceCoord);
+                Location loc = new Location("selected",point2D.getX(),point2D.getY());
 
-                sphere.setTranslateX(spaceCoord.getX());
-                sphere.setTranslateY(spaceCoord.getY());
-                sphere.setTranslateZ(spaceCoord.getZ());
-
-                //earth.getChildren().add(sphere);
-                Point2D point = GeometryTools.spaceCoordToGeoCoord(spaceCoord);
-                Location loc = new Location("selected",point.getX(),point.getY());
-
+                /*System.out.println(point.getX());
+                System.out.println(point.getY());
+                System.out.println(GeoHashHelper.getGeohash(loc));*/
                 listView.setVisible(true);
-                if(zoneControls.isInEarth(point.getX(),point.getY())){
+                if(zoneControls.isInEarth(point2D.getX(),point2D.getY())){
                     ApiObservationResponse response = loader.getObservations(GeoHashHelper.getGeohash(loc),scientificName.getText());
 
                     observations = response.getData();
@@ -273,65 +265,6 @@ public class Controller implements Initializable {
                     labelName1.setText("Scientific names");
                 }
             }
-
-            if (event.getEventType() == MouseEvent.MOUSE_PRESSED && event.isShiftDown()) {
-                PickResult pickResult = event.getPickResult();
-                Point3D spaceCoord = pickResult.getIntersectedPoint();
-                System.out.println(spaceCoord);
-                Point2D point2D = GeometryTools.spaceCoordToGeoCoord(spaceCoord);
-                System.out.println(point2D.getX() + "    " + point2D.getY());
-                Point3D space = geoCoordTo3dCoord((float)point2D.getX(), (float) point2D.getY());
-                System.out.println(space);
-
-                Box box = new Box(0.1, 2, 0.1);
-                final PhongMaterial sphereMaterial = new PhongMaterial();
-                sphereMaterial.setDiffuseColor(new Color(1, 0, 0, 0.3));
-                box.setMaterial(sphereMaterial);
-
-
-                //box.setRotationAxis(new Point3D(1, 1, (Math.cos(Math.toRadians(point2D.getY())) + Math.sin(Math.toRadians(point2D.getY()))) / -Math.tan(Math.toRadians(point2D.getX()))));
-                box.setRotationAxis(new Point3D(0, 1, 0));
-                box.setRotate(point2D.getY());
-
-                box.setRotationAxis(new Point3D(1, 0, 0));
-                box.setRotate(point2D.getX());
-
-
-                box.setTranslateX(spaceCoord.getX());
-                box.setTranslateY(spaceCoord.getY());
-                box.setTranslateZ(spaceCoord.getZ());
-                earth.getChildren().add(box);
-            }
-        });
-
-        btnBreak.setOnAction(actionEvent -> {
-
-            for(int lat = -90; lat <= 90; lat+=30){
-                for(int lon = -180; lon <= 180; lon+=30) {
-
-                    Box box = new Box(0.1, 0.1, 0.5);
-                    final PhongMaterial sphereMaterial = new PhongMaterial();
-                    sphereMaterial.setDiffuseColor(new Color(1, 0, 0, 0.3));
-                    box.setMaterial(sphereMaterial);
-                    box.setRotationAxis(new Point3D(1, 0, 0));
-                    box.setRotate(lat);
-
-                    box.setRotationAxis(new Point3D(0, 1, 0));
-                    box.setRotate(lon);
-
-
-
-                    Point3D spaceCoord = geoCoordTo3dCoord(lat, lon);
-
-                    box.setTranslateX(spaceCoord.getX());
-                    box.setTranslateY(spaceCoord.getY());
-                    box.setTranslateZ(spaceCoord.getZ());
-
-                    earth.getChildren().add(box);
-                }
-
-            }
-
         });
 
         btnReset.setOnAction(actionEvent -> {
@@ -357,12 +290,6 @@ public class Controller implements Initializable {
 
         });
 
-        btnStop.setOnAction(actionEvent -> {
-
-
-
-        });
-
         btnStart.setOnAction(actionEvent -> {
 
             String s = scientificName.getText();
@@ -374,6 +301,18 @@ public class Controller implements Initializable {
             } catch (EmptyException e){
                 e.sendAlert();
             }
+
+        });
+
+        btnBreak.setOnAction(actionEvent -> {
+
+            //TODO actionBtnBreak()
+
+        });
+
+        btnStop.setOnAction(actionEvent -> {
+
+            //TODO actionBtnStop()
 
         });
 
@@ -483,6 +422,11 @@ public class Controller implements Initializable {
 
         Legend.setInvisible(colorsPane, labels);
 
+        // supprimer la progressBar
+        if (!vboxResults.getChildren().isEmpty()){
+            vboxResults.getChildren().remove(vboxResults.getChildren().size() - 1);
+        }
+
         // Todo suppr les résultats
 
     }
@@ -540,7 +484,7 @@ public class Controller implements Initializable {
     /**
      * Affiche zone
      * @throws EmptyException
-     * @see ProgressBarWindow#createProgressBarWindow(Task)
+     * @see ProgressBarWindow#createProgressBarWindow(Pane, Task)
      * @see #afficheZoneByName(String)
      * @see #afficheZoneByTime(String, int, int)
      * @param apiZoneSpeciesResponse
@@ -569,7 +513,8 @@ public class Controller implements Initializable {
                     for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponse.getData()) {
                         zoneControls.addZone(zoneSpecies.getZone());
                         Platform.runLater(() -> {
-                            GeometryTools.addPolygon(earth, zoneSpecies.getZone().getCoords(), Legend.setColor(zoneSpecies, minNbSignals, maxNbSignals, colorsPane));
+                            GeometryTools.addPolygon(earth, zoneSpecies.getZone().getCoords(), Legend.getColor(zoneSpecies, minNbSignals, maxNbSignals, colorsPane));
+                            GeometryTools.addBoxHistogramme(earth, zoneSpecies.getZone().getCoords()[0],GeometryTools.getHeightBox(zoneSpecies, minNbSignals, maxNbSignals, colorsPane), Legend.getColor(zoneSpecies, minNbSignals, maxNbSignals, colorsPane));
                             updateProgress(finalProgression, apiZoneSpeciesResponse.getData().size());
                             finalProgression += 1;
                         });
@@ -583,7 +528,7 @@ public class Controller implements Initializable {
             }
         };
 
-        ProgressBarWindow.createProgressBarWindow(task);
+        ProgressBarWindow.createProgressBarWindow((Pane)vboxResults, task);
 
         final Thread thread = new Thread(task);
         thread.setDaemon(true);
@@ -678,9 +623,9 @@ public class Controller implements Initializable {
         ambientLight.getScope().addAll(root3D);
         root3D.getChildren().add(ambientLight);
 
-        subScene = new SubScene(root3D, 500, 500, true, SceneAntialiasing.BALANCED);
+        subScene = new SubScene(root3D, 492, 497, true, SceneAntialiasing.BALANCED);
         subScene.setCamera(camera);
-        subScene.translateXProperty().setValue(25);
+        //subScene.setFill(Color.GREY);
         subScene.translateYProperty().setValue(25);
 
         anchorPane.getChildren().addAll(subScene);
@@ -701,4 +646,6 @@ public class Controller implements Initializable {
     public void setSizeDiffY(int height){
         subScene.translateYProperty().setValue(subScene.translateYProperty().getValue() + height);
     }
+
+
 }
