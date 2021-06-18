@@ -4,6 +4,7 @@ import com.geosis.api.response.ApiZoneSpeciesResponse;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.Group;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
@@ -19,19 +20,21 @@ public class ProgressBarWindow {
 
     private static ProgressBar progressBar = new ProgressBar();
     private static Label progressLabel = new Label();
+    private static StackPane loadingPane;
     private static final double EPSILON = 0.005;
+    private static Pane parent;
     //private static Stage newWindow = new Stage();
 
     /**
      * Création de la fenêtre progressBar
-     * @see com.geosis.app.Controller#displayZone(ApiZoneSpeciesResponse)
+     * @see com.geosis.app.Controller#displayZone(ApiZoneSpeciesResponse,boolean)
      * @param task
      */
     public static void createProgressBarWindow(Pane parent, Task task){
 
         progressBar.progressProperty().bind(task.progressProperty());
         progressLabel.textProperty().bind(task.progressProperty().asString());
-
+        ProgressBarWindow.parent = parent;
         progressBar.progressProperty().addListener(observable -> {
             progressBar.setStyle("-fx-accent: #59BAFF;");
             // change la couleur quand la progressBar est complétée puis la fermer automatiquement
@@ -43,7 +46,7 @@ public class ProgressBarWindow {
         });
 
         // créer la nouvelle fenêtre
-        StackPane loadingPane = new StackPane();
+        loadingPane = new StackPane();
         loadingPane.setPrefWidth(240);
         loadingPane.setTranslateY(-45);
 
@@ -63,6 +66,14 @@ public class ProgressBarWindow {
         newWindow.show();
          */
 
+    }
+
+    public static void pause(){
+        progressBar.setStyle("-fx-accent: orange;");
+    }
+
+    public static void delete(){
+        parent.getChildren().remove(loadingPane);
     }
 
 }

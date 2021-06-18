@@ -1,7 +1,7 @@
 package com.geosis.api;
 
-import sample.ludovic.vimont.GeoHashHelper;
-import sample.ludovic.vimont.Location;
+import com.ludovic.vimont.GeoHashHelper;
+import com.ludovic.vimont.Location;
 
 public class GPSConvert {
 

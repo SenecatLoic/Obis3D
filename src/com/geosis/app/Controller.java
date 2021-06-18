@@ -7,15 +7,15 @@ import com.geosis.api.object.ZoneSpecies;
 import com.geosis.api.response.ApiNameResponse;
 import com.geosis.api.response.ApiObservationResponse;
 import com.geosis.api.response.ApiZoneSpeciesResponse;
-import com.geosis.app.controlTools.Graph;
-import com.geosis.app.controlTools.Legend;
-import com.geosis.app.controlTools.ProgressBarWindow;
-import com.geosis.app.controlTools.ToggleSwitchRotation;
+import com.geosis.app.component.TooltipObservation;
+import com.geosis.app.controlTools.*;
 import com.geosis.app.earth.Earth;
 import com.geosis.app.exception.EmptyException;
 import com.geosis.app.exception.InputException;
 import com.geosis.app.geometryTools.GeometryTools;
 import com.geosis.app.geometryTools.ZoneControls;
+import com.ludovic.vimont.GeoHashHelper;
+import com.ludovic.vimont.Location;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -44,9 +44,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-
-import sample.ludovic.vimont.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Controller implements Initializable {
 
@@ -89,10 +88,13 @@ public class Controller implements Initializable {
     private ArrayList<String> nameSearch = new ArrayList<>();
     private boolean nameExist = false;
 
-    private int finalCurrentYear;
+    private AtomicInteger finalCurrentYear;
     private float finalProgression;
 
-    private boolean search;
+    /**
+     * Permet de savoir si on a arrêté des threads
+     */
+    private boolean isStop = false;
 
     /**
      * Permet de savoir si on est dans un état où il faut afficher les observations
@@ -100,13 +102,25 @@ public class Controller implements Initializable {
     private boolean searchObservation;
 
     private ArrayList<Observation> observations;
-    private ZoneControls zoneControls;
+    private final ZoneControls zoneControls;
+    private Thread graphThread;
+    private AtomicBoolean isExit;
+
+    private final LoaderZoneSpecies loaderZoneSpecies;
+
+    private LoaderSpecies loader;
+
+
 
     public Controller() {
-        search = false;
+
         searchObservation = false;
 
         zoneControls = new ZoneControls();
+
+        loader = LoaderSpecies.createLoaderSpecies();
+        loaderZoneSpecies = LoaderZoneSpecies.createLoaderSpecies();
+        isExit = new AtomicBoolean(false);
     }
 
     @Override
@@ -129,6 +143,23 @@ public class Controller implements Initializable {
         LoaderSpecies loader = LoaderSpecies.createLoaderSpecies();
         LoaderZoneSpecies loaderZoneSpecies = LoaderZoneSpecies.createLoaderSpecies();
 
+        listView.setCellFactory(cell -> new ListCell<>(){
+            @Override
+            protected void updateItem(String s, boolean b) {
+                super.updateItem(s, b);
+
+                    setText(s);
+
+                    if(searchObservation && s != null){
+
+                        Tooltip tooltip = new TooltipObservation(observations.get(getIndex()));
+
+                        setTooltip(tooltip);
+                    }
+
+            }
+        });
+
         scientificName.textProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable,
@@ -139,7 +170,7 @@ public class Controller implements Initializable {
                 nameSearch = apiNameResponse.getData();
 
                 ObservableList<String> names = FXCollections.observableArrayList(nameSearch);
-
+                listView.getItems().clear();
                 listView.setItems(names);
 
                 labelName1.setText("Scientific names");
@@ -147,7 +178,7 @@ public class Controller implements Initializable {
                 if(scientificName.getText().isEmpty()){
                     labelName1.setText("Results");
                 }
-
+                searchObservation = false;
                 //System.out.println(apiNameResponse.getData());
             }
         });
@@ -161,6 +192,8 @@ public class Controller implements Initializable {
 
             ObservableList<String> names = FXCollections.observableArrayList(nameSearch);
 
+            listView.setVisible(true);
+            listView.getItems().clear();
             listView.setItems(names);
 
             labelName1.setText("Scientific names");
@@ -193,8 +226,12 @@ public class Controller implements Initializable {
         });
 
         listView.setOnMouseClicked(event -> {
+            if(!searchObservation){
+                scientificName.setText(listView.getSelectionModel().getSelectedItem());
+            }else{
+                //todo search obs
+            }
 
-            scientificName.setText(listView.getSelectionModel().getSelectedItem());
             // mettre à jour le Textfield scientificName en double cliquant
             if(event.getClickCount() == 2){
                 String nameClicked = listView.getSelectionModel().getSelectedItem();
@@ -202,8 +239,6 @@ public class Controller implements Initializable {
                 labelName1.setText("Results");
                 try {
                     afficheZoneByName(listView.getSelectionModel().getSelectedItem());
-
-                    search = true;
                 } catch (EmptyException e) {
                     e.printStackTrace();
                 }
@@ -221,9 +256,7 @@ public class Controller implements Initializable {
                 Point2D point2D = GeometryTools.spaceCoordToGeoCoord(spaceCoord);
                 Location loc = new Location("selected",point2D.getX(),point2D.getY());
 
-                /*System.out.println(point.getX());
-                System.out.println(point.getY());
-                System.out.println(GeoHashHelper.getGeohash(loc));*/
+                listView.setVisible(true);
                 if(zoneControls.isInEarth(point2D.getX(),point2D.getY())){
                     ApiObservationResponse response = loader.getObservations(GeoHashHelper.getGeohash(loc),scientificName.getText());
 
@@ -235,11 +268,12 @@ public class Controller implements Initializable {
                             names.add(ob.getScientificName());
                             nameSearch.add(ob.getScientificName());
                         }
+                        listView.getItems().clear();
                         listView.setItems(FXCollections.observableArrayList(names));
                     }
-                    labelName1.setText("Observations");
                     searchObservation = true;
                 }else{
+                    searchObservation = false;
                     ApiObservationResponse response = loader.getObservations(GeoHashHelper.getGeohash(loc),null);
 
                     if(response.getCode() == 200){
@@ -249,6 +283,7 @@ public class Controller implements Initializable {
                             names.add(ob.getScientificName());
                             nameSearch.add(ob.getScientificName());
                         }
+                        listView.getItems().clear();
                         listView.setItems(FXCollections.observableArrayList(names));
                     }
                     labelName1.setText("Scientific names");
@@ -269,7 +304,6 @@ public class Controller implements Initializable {
             String s = scientificName.getText();
 
             try {
-                search = true;
                 actionBtnSearch(s);
             } catch (InputException e) {
                 e.sendAlert();
@@ -293,32 +327,43 @@ public class Controller implements Initializable {
 
         });
 
+        /**
+         * Action button break
+         */
         btnBreak.setOnAction(actionEvent -> {
-
-            //TODO actionBtnBreak()
-
+            isExit.set(true);
         });
 
+        /**
+         * Action button stop
+         */
         btnStop.setOnAction(actionEvent -> {
-
-            //TODO actionBtnStop()
-
+            isStop = true;
+            ProgressBarWindow.pause();
+            isExit.set(true);
         });
+    }
 
+    public void drawGraph(ApiZoneSpeciesResponse zoneSpeciesResponse,ApiZoneSpeciesResponse second,String name,int currentYear){
+        try {
+            displayZone(second,false);
+        } catch (EmptyException e) {
+            // on ne veut pas créer d'alerte
+        }
+        Graph.createPoint(vbox, second, name, currentYear, yearStartInt, yearEndInt);
     }
 
     /**
      * Début de l'affiche d'une évolution
      * @see Graph#initGraph()
      * @see Graph#createPoint(Pane, LoaderZoneSpecies, String, int, int, int)
-     * @see #displayZone(ApiZoneSpeciesResponse)
+     * @see #displayZone(ApiZoneSpeciesResponse,boolean)
      * @see com.geosis.api.loader.LoaderZoneSpecies#getZoneSpeciesByInterval(String, int, int, int, int)
      * @param loaderZoneSpecies
      * @param name
      * @throws InputException
      */
     public void actionBtnStart(LoaderZoneSpecies loaderZoneSpecies, String name) throws InputException, EmptyException{
-
         nameExist = false;
 
         // vérifie si le contenu du textfield existe dans les data
@@ -335,51 +380,28 @@ public class Controller implements Initializable {
                 yearStartInt = Integer.parseInt(yearStart.getText());
                 yearEndInt = Integer.parseInt(yearEnd.getText());
 
-                finalCurrentYear = 0;
-                Graph.initGraph();
+                int tmpStartYear;
+                if(isStop){
+                    tmpStartYear = yearStartInt + 5 * finalCurrentYear.get();
+                    ProgressBarWindow.delete();
+                    isStop = false;
+                }else{
+                    tmpStartYear = yearStartInt;
+                    finalCurrentYear = new AtomicInteger(0);
+                    Graph.initGraph();
+                }
 
                 double nbRep = (((double) yearEndInt - (double) yearStartInt) / 5);
 
-                ArrayList<CompletableFuture<Object>> completableFutures = loaderZoneSpecies.getZoneSpeciesByInterval(name, 3, yearStartInt, 5, (int) Math.ceil(nbRep));
+                ArrayList<CompletableFuture<Object>> completableFutures = loaderZoneSpecies.getZoneSpeciesByInterval(name, 3, tmpStartYear, 5, (int) Math.ceil(nbRep));
 
-                for (CompletableFuture<Object> zone : completableFutures) {
+                TaskGraph taskGraph = new TaskGraph(finalCurrentYear,yearStartInt,this,name,isExit);
+                taskGraph.setCompletableFutures(completableFutures);
 
-                    Task<ApiZoneSpeciesResponse> pollDatabaseTask = new Task<>() {
-                        @Override
-                        public ApiZoneSpeciesResponse call() {
-                            ApiZoneSpeciesResponse zoneSpeciesResponse = null;
-
-                            try {
-                                zoneSpeciesResponse = (ApiZoneSpeciesResponse) zone.get(10, TimeUnit.SECONDS);
-                                ApiZoneSpeciesResponse finalZoneSpeciesResponse = zoneSpeciesResponse;
-
-                                //nécessaire pour modifier un element javafx
-                                Platform.runLater(() -> {
-                                    int currentYear = yearStartInt + 5 * finalCurrentYear;
-                                    while (earth.getChildren().size() > 1) {
-                                        earth.getChildren().remove(1);
-                                    }
-                                    try {
-                                        displayZone(finalZoneSpeciesResponse);
-                                    } catch (EmptyException e) {
-                                        // on ne veut pas créer d'alerte
-                                    }
-                                    Graph.createPoint(vbox, loaderZoneSpecies, name, currentYear, yearStartInt, yearEndInt);
-                                    finalCurrentYear +=1;
-                                });
-
-                            } catch (Exception e) {
-                                System.err.println(e.getMessage());
-                            }
-                            return zoneSpeciesResponse;
-                        }
-                    };
-                    Graph.createPoint(vbox, loaderZoneSpecies, name, yearEndInt, yearStartInt, yearEndInt);
-
-                    Thread getItemsThread = new Thread(pollDatabaseTask);
-                    getItemsThread.setDaemon(true);
-                    getItemsThread.start();
-                }
+                Thread getItemsThread = new Thread(taskGraph);
+                getItemsThread.setDaemon(true);
+                graphThread = getItemsThread;
+                getItemsThread.start();
 
             } catch (NumberFormatException e) {
                 throw new InputException("L'année n'est pas valide");
@@ -430,7 +452,7 @@ public class Controller implements Initializable {
      * @see #afficheZoneByTime(String, int, int)
      */
     public void actionBtnSearch(String name) throws InputException, EmptyException {
-
+        searchObservation = false;
         nameExist = false;
 
         while (earth.getChildren().size() > 1) {
@@ -479,7 +501,7 @@ public class Controller implements Initializable {
      * @see #afficheZoneByTime(String, int, int)
      * @param apiZoneSpeciesResponse
      */
-    public void displayZone(ApiZoneSpeciesResponse apiZoneSpeciesResponse) throws EmptyException{
+    public void displayZone(ApiZoneSpeciesResponse apiZoneSpeciesResponse,boolean clear) throws EmptyException{
         int minNbSignals = apiZoneSpeciesResponse.getNbSignalsMin();
         int maxNbSignals = apiZoneSpeciesResponse.getNbSignalsMax();
         zoneControls.clear();
@@ -487,8 +509,10 @@ public class Controller implements Initializable {
         float pas = (float) apiZoneSpeciesResponse.getData().size() / 100;
         finalProgression = 1;
 
-        while (earth.getChildren().size() > 1) {
-            earth.getChildren().remove(1);
+        if(clear){
+            while (earth.getChildren().size() > 1) {
+                earth.getChildren().remove(1);
+            }
         }
 
         final Task<Void> task = new Task<Void>() {
@@ -504,13 +528,11 @@ public class Controller implements Initializable {
                         zoneControls.addZone(zoneSpecies.getZone());
                         Platform.runLater(() -> {
                             GeometryTools.addPolygon(earth, zoneSpecies.getZone().getCoords(), Legend.getColor(zoneSpecies, minNbSignals, maxNbSignals, colorsPane));
-                            //GeometryTools.addBoxHistogramme(earth, zoneSpecies.getZone().getCoords(),GeometryTools.getHeightBox(zoneSpecies, minNbSignals, maxNbSignals, colorsPane), Legend.getColor(zoneSpecies, minNbSignals, maxNbSignals, colorsPane));
-                            updateProgress(finalProgression, apiZoneSpeciesResponse.getData().size());
-                            finalProgression += 1;
+                            //GeometryTools.addBoxHistogramme(earth, zoneSpecies.getZone().getCoords()[0],GeometryTools.getHeightBox(zoneSpecies, minNbSignals, maxNbSignals, colorsPane), Legend.getColor(zoneSpecies, minNbSignals, maxNbSignals, colorsPane));
                         });
-                        Thread.sleep((long)0.05);
+                        updateProgress(finalProgression, apiZoneSpeciesResponse.getData().size());
+                        finalProgression += 1;
                     }
-
                 } else {
                     throw new EmptyException();
                 }
@@ -518,7 +540,7 @@ public class Controller implements Initializable {
             }
         };
 
-        ProgressBarWindow.createProgressBarWindow((Pane)vboxResults, task);
+        ProgressBarWindow.createProgressBarWindow(vboxResults, task);
 
         final Thread thread = new Thread(task);
         thread.setDaemon(true);
@@ -529,7 +551,7 @@ public class Controller implements Initializable {
     /**
      * Affiche les zones d'une espèce
      * @throws EmptyException
-     * @see #displayZone(ApiZoneSpeciesResponse) 
+     * @see #displayZone(ApiZoneSpeciesResponse,boolean)
      * @see com.geosis.api.loader.LoaderZoneSpecies#getZoneSpeciesByName(String)
      * @param name
      */
@@ -538,7 +560,7 @@ public class Controller implements Initializable {
         LoaderZoneSpecies loaderZoneSpecies = LoaderZoneSpecies.createLoaderSpecies();
 
         ApiZoneSpeciesResponse apiZoneSpeciesResponse = loaderZoneSpecies.getZoneSpeciesByName(name);
-        displayZone(apiZoneSpeciesResponse);
+        displayZone(apiZoneSpeciesResponse,true);
     }
 
     /**
@@ -546,7 +568,7 @@ public class Controller implements Initializable {
      * @see com.geosis.api.loader.LoaderZoneSpecies#getZoneSpeciesByTime(String, int, int)
      *
      * @throws EmptyException
-     * @see #displayZone(ApiZoneSpeciesResponse)
+     * @see #displayZone(ApiZoneSpeciesResponse,boolean)
      * @see com.geosis.api.loader.LoaderZoneSpecies#getZoneSpeciesByTime(String, int, int)
      * @param name
      * @param anneeStart
@@ -557,7 +579,7 @@ public class Controller implements Initializable {
         LoaderZoneSpecies loaderZoneSpecies = LoaderZoneSpecies.createLoaderSpecies();
 
         ApiZoneSpeciesResponse apiZoneSpeciesResponse = loaderZoneSpecies.getZoneSpeciesByTime(name, anneeStart, anneeEnd);
-        displayZone(apiZoneSpeciesResponse);
+        displayZone(apiZoneSpeciesResponse,true);
     }
 
     /**
@@ -580,5 +602,4 @@ public class Controller implements Initializable {
 
         return animationTimer;
     }
-
 }

@@ -114,7 +114,7 @@ class HttpLoaderZoneSpecies extends LoaderZoneSpecies{
 
         try {
             //on fait toute les requêtes
-            for (int i = 1; i <= nbIntervals; i++) {
+            for (int i = 0; i <= nbIntervals; i++) {
                 ApiZoneSpeciesResponse response = new ApiZoneSpeciesResponse();
                 end = c.getTime();
 

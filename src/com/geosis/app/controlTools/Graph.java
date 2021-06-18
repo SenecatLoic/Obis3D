@@ -66,6 +66,26 @@ public class Graph {
 
     }
 
+    public static void createPoint(Pane parent, ApiZoneSpeciesResponse apiZoneSpeciesResponse, String name, int currentYear, int yearStart, int yearEnd){
+
+        int value = 0;
+        for (ZoneSpecies zoneSpecies : apiZoneSpeciesResponse.getData()) {
+            value += zoneSpecies.getNbSignals();
+        }
+        if (value > maxY) {
+            maxY = value;
+        }
+        if (value < minY) {
+            minY = value;
+        }
+
+        final LineChart.Data data = new LineChart.Data(currentYear, value);
+        series.getData().add(data);
+
+        createGraph(parent, name, yearStart, yearEnd);
+
+    }
+
     /**
      * Crée le graphique
      * @see #createPoint(Pane, LoaderZoneSpecies, String, int, int, int) 

@@ -64,7 +64,10 @@ class HttpLoaderSpecies extends LoaderSpecies{
             for (int i = 0; i < array.length(); i++) {
                 Observation observation = new Observation();
 
-                observation.setScientificName(array.getJSONObject(i).getString("scientificName"));
+                if(array.getJSONObject(i).has("scientificName")){
+                    observation.setScientificName(array.getJSONObject(i).getString("scientificName"));
+                }
+
                 if(array.getJSONObject(i).has("order")) {
                     observation.setOrder(array.getJSONObject(i).getString("order"));
                 }
