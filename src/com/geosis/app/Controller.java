@@ -151,7 +151,7 @@ public class Controller implements Initializable {
                 super.updateItem(s, b);
 
                 setText(s);
-
+                //affichage de la popup des observations
                 if(searchObservation && s != null){
 
                     Tooltip tooltip = new TooltipObservation(observations.get(getIndex()));
@@ -182,7 +182,6 @@ public class Controller implements Initializable {
                             if(scientificName.getText().isEmpty()){
                                 labelName1.setText("Results");
                             }
-                            searchObservation = false;
                         });
                         return null;
                     }
@@ -190,6 +189,7 @@ public class Controller implements Initializable {
 
                 Thread getNames = new Thread(task);
                 getNames.start();
+                searchObservation = false;
             }
         });
 
@@ -220,8 +220,6 @@ public class Controller implements Initializable {
         listView.setOnMouseClicked(event -> {
             if(!searchObservation){
                 scientificName.setText(listView.getSelectionModel().getSelectedItem());
-            }else{
-                //todo search obs
             }
 
             // mettre à jour le Textfield scientificName en double cliquant
@@ -235,7 +233,6 @@ public class Controller implements Initializable {
                     e.printStackTrace();
                 }
             }
-
         });
 
         root3D.addEventHandler(MouseEvent.ANY, event -> {
@@ -249,6 +246,8 @@ public class Controller implements Initializable {
                 Location loc = new Location("selected",point2D.getX(),point2D.getY());
 
                 listView.setVisible(true);
+                System.out.println(point2D.getX()+" " + point2D.getY());
+                System.out.println(zoneControls.isInEarth(point2D.getX(),point2D.getY()));
                 if(zoneControls.isInEarth(point2D.getX(),point2D.getY())){
 
                     ApiObservationResponse response = loader.getObservations(GeoHashHelper.getGeohash(loc),scientificName.getText());
@@ -265,11 +264,13 @@ public class Controller implements Initializable {
                         listView.getItems().clear();
                         listView.setItems(FXCollections.observableArrayList(names));
                     }
+                    labelName1.setText("Observations");
+
                     searchObservation = true;
                 }else{
                     searchObservation = false;
                     ApiObservationResponse response = loader.getObservations(GeoHashHelper.getGeohash(loc),null);
-
+                    System.out.println(response.getData().size());
                     if(response.getCode() == 200){
                         ArrayList<String> names = new ArrayList<>();
 
