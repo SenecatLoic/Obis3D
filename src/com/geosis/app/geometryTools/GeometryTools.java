@@ -155,7 +155,7 @@ public class GeometryTools {
         affine.append( lookAt(from,to,yDir));
         group.getTransforms().setAll(affine);
         group.getChildren().addAll(barreHistogramme);
-
+        group.setMouseTransparent(true);
         parent.getChildren().addAll(group);
 
     }
