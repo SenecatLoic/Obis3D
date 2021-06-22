@@ -6,18 +6,29 @@ import static org.junit.Assert.*;
 import com.geosis.api.response.ApiObservationResponse;
 import org.junit.Test;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
 public class TestHttpLoaderSpecies {
 
     @Test
-    public void testGetNames(){
+    public void testGetNames() {
         LoaderSpecies loader = LoaderSpecies.createLoaderSpecies();
 
-        ApiNameResponse names = loader.getNames("Delp");
+        CompletableFuture<Object> names = loader.getNames("Delp");
 
-        assertEquals(names.getCode(),200);
-        assertEquals(19,names.getData().size());
+        try{
+            ApiNameResponse response = (ApiNameResponse) names.get(10, TimeUnit.SECONDS);
 
-        assertEquals("Delphacidae",names.getData().get(0));
+            assertEquals(response.getCode(),200);
+            assertEquals(19,response.getData().size());
+
+            assertEquals("Delphacidae",response.getData().get(0));
+        }catch (Exception e){
+
+        }
+
     }
 
     @Test

@@ -14,7 +14,7 @@ import com.geosis.app.exception.EmptyException;
 import com.geosis.app.exception.InputException;
 import com.geosis.app.geometryTools.GeometryTools;
 import com.geosis.app.geometryTools.ZoneControls;
-import sample.ludovic.vimont.*;
+import com.ludovic.vimont.*;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -43,6 +43,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -163,44 +166,34 @@ public class Controller implements Initializable {
             @Override
             public void changed(ObservableValue<? extends String> observable,
                                 String oldValue, String newValue) {
+                Task task = new Task() {
+                    @Override
+                    protected Object call() throws Exception {
+                        CompletableFuture<Object> response = loader.getNames(scientificName.getText());
+                        ApiNameResponse apiNameResponse = (ApiNameResponse) response.get(10, TimeUnit.SECONDS);
+                        Platform.runLater(()->{
+                            nameSearch = apiNameResponse.getData();
+                            ObservableList<String> names = FXCollections.observableArrayList(nameSearch);
+                            listView.getItems().clear();
+                            listView.setItems(names);
+                            listView.setVisible(true);
+                            labelName1.setText("Scientific names");
 
-                ApiNameResponse apiNameResponse = loader.getNames(scientificName.getText());
+                            if(scientificName.getText().isEmpty()){
+                                labelName1.setText("Results");
+                            }
+                            searchObservation = false;
+                        });
+                        return null;
+                    }
+                };
 
-                nameSearch = apiNameResponse.getData();
-
-                ObservableList<String> names = FXCollections.observableArrayList(nameSearch);
-                listView.getItems().clear();
-                listView.setItems(names);
-
-                labelName1.setText("Scientific names");
-
-                if(scientificName.getText().isEmpty()){
-                    labelName1.setText("Results");
-                }
-                searchObservation = false;
-                //System.out.println(apiNameResponse.getData());
+                Thread getNames = new Thread(task);
+                getNames.start();
             }
         });
 
-
         scientificName.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
-
-            ApiNameResponse apiNameResponse = loader.getNames(scientificName.getText());
-
-            nameSearch = apiNameResponse.getData();
-
-            ObservableList<String> names = FXCollections.observableArrayList(nameSearch);
-
-            listView.setVisible(true);
-            listView.getItems().clear();
-            listView.setItems(names);
-
-            labelName1.setText("Scientific names");
-
-            if(scientificName.getText().isEmpty()){
-                labelName1.setText("Results");
-            }
-
 
             if(keyEvent.getCode() == KeyCode.ENTER){
                 String s = scientificName.getText();

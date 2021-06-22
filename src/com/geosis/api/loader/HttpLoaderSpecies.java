@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 class HttpLoaderSpecies extends LoaderSpecies{
@@ -16,29 +17,25 @@ class HttpLoaderSpecies extends LoaderSpecies{
     private final String url = "https://api.obis.org/v3/";
 
     @Override
-    public ApiNameResponse getNames(String name) {
+    public CompletableFuture<Object> getNames(String name) {
 
         ApiNameResponse response = new ApiNameResponse();
-
+        CompletableFuture<Object> result = null;
         try{
-            String json = Request.readJsonFromUrl(url + "taxon/complete/verbose/" +
-                    name.replace(" ","%20"),response).get(10, TimeUnit.SECONDS);
+            result = Request.readJsonFromUrl(url + "taxon/complete/verbose/" +
+                name.replace(" ","%20"),response).thenApply(rest ->{
+                    JSONArray array = new JSONArray(rest);
+                    for (int i = 0; i < array.length(); i++) {
 
-            if(response.getCode() == 404){
-                return response;
-            }
-
-            JSONArray result = new JSONArray(json);
-
-            for (int i = 0; i < result.length(); i++) {
-
-                response.addName(result.getJSONObject(i).getString("scientificName"));
-            }
+                        response.addName(array.getJSONObject(i).getString("scientificName"));
+                    }
+                    return response;
+            });
         }catch (Exception e){
             response.setMessage(e.getMessage());
         }
 
-        return response;
+        return result;
     }
 
     @Override
