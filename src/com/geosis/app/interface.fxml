@@ -15,7 +15,7 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="670.0" prefWidth="1021.0" style="-fx-background-color: #AEAFB0;" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="670.0" prefWidth="1021.0" style="-fx-background-color: #AEAFB0;" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
 
    <center>
       <AnchorPane fx:id="anchorPane" prefHeight="497.0" prefWidth="492.0">
@@ -31,7 +31,7 @@
                   <HBox fx:id="hbox1" prefHeight="20.0" prefWidth="335.0">
                      <children>
                         <Rectangle fx:id="color1" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #F9E79F;" visible="false" width="20.0" />
-                        <Label fx:id="labelColor1" prefHeight="20.0" prefWidth="306.0">
+                        <Label fx:id="labelColor1" prefHeight="20.0" prefWidth="306.0" style="-fx-font-weight: bold;">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -44,7 +44,7 @@
                   <HBox fx:id="hbox2" prefHeight="20.0" prefWidth="336.0">
                      <children>
                         <Rectangle fx:id="color2" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #F7DC6F;" visible="false" width="20.0" />
-                        <Label fx:id="labelColor2" prefHeight="20.0" prefWidth="305.0">
+                        <Label fx:id="labelColor2" prefHeight="20.0" prefWidth="305.0" style="-fx-font-weight: bold;">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -57,7 +57,7 @@
                   <HBox fx:id="hbox3" prefHeight="20.0" prefWidth="337.0">
                      <children>
                         <Rectangle fx:id="color3" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #F5B041;" visible="false" width="20.0" />
-                        <Label fx:id="labelColor3" prefHeight="20.0" prefWidth="314.0">
+                        <Label fx:id="labelColor3" prefHeight="20.0" prefWidth="314.0" style="-fx-font-weight: bold;">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -70,7 +70,7 @@
                   <HBox fx:id="hbox4" prefHeight="20.0" prefWidth="338.0">
                      <children>
                         <Rectangle fx:id="color4" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #F39C12;" visible="false" width="20.0" />
-                        <Label fx:id="labelColor4" prefHeight="20.0" prefWidth="320.0">
+                        <Label fx:id="labelColor4" prefHeight="20.0" prefWidth="320.0" style="-fx-font-weight: bold;">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -83,7 +83,7 @@
                   <HBox fx:id="hbox5" prefHeight="20.0" prefWidth="300.0">
                      <children>
                         <Rectangle fx:id="color5" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #E67E22;" visible="false" width="20.0" />
-                        <Label fx:id="labelColor5" prefHeight="18.0" prefWidth="282.0">
+                        <Label fx:id="labelColor5" prefHeight="18.0" prefWidth="282.0" style="-fx-font-weight: bold;">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -96,7 +96,7 @@
                   <HBox fx:id="hbox6" prefHeight="20.0" prefWidth="337.0">
                      <children>
                         <Rectangle fx:id="color6" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #D35400;" visible="false" width="20.0" />
-                        <Label fx:id="labelColor6" prefHeight="20.0" prefWidth="322.0">
+                        <Label fx:id="labelColor6" prefHeight="20.0" prefWidth="322.0" style="-fx-font-weight: bold;">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -109,7 +109,7 @@
                   <HBox fx:id="hbox7" prefHeight="20.0" prefWidth="337.0">
                      <children>
                         <Rectangle fx:id="color7" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #A93226;" visible="false" width="20.0" />
-                        <Label fx:id="labelColor7" prefHeight="20.0" prefWidth="314.0">
+                        <Label fx:id="labelColor7" prefHeight="20.0" prefWidth="314.0" style="-fx-font-weight: bold;">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -122,7 +122,7 @@
                   <HBox fx:id="hbox8" prefHeight="20.0" prefWidth="338.0">
                      <children>
                         <Rectangle fx:id="color8" arcHeight="5.0" arcWidth="5.0" height="20.0" style="-fx-fill: #7B241C;" visible="false" width="20.0" />
-                        <Label fx:id="labelColor8" prefHeight="20.0" prefWidth="312.0">
+                        <Label fx:id="labelColor8" prefHeight="20.0" prefWidth="312.0" style="-fx-font-weight: bold;">
                            <font>
                               <Font size="14.0" />
                            </font>
@@ -134,7 +134,7 @@
                   </HBox>
                </children>
             </FlowPane>
-            <Label layoutX="7.0" layoutY="4.0" text="Earth rotation" AnchorPane.topAnchor="15.0">
+            <Label layoutX="7.0" layoutY="4.0" style="-fx-font-weight: bold;" text="Earth rotation" AnchorPane.topAnchor="15.0">
                <font>
                   <Font name="Leelawadee" size="16.0" />
                </font>

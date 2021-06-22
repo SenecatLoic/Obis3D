@@ -327,6 +327,8 @@ public class Controller implements Initializable {
          * Action button break
          */
         btnBreak.setOnAction(actionEvent -> {
+            isStop = true;
+            ProgressBarWindow.pause();
             isExit.set(true);
         });
 
@@ -334,8 +336,6 @@ public class Controller implements Initializable {
          * Action button stop
          */
         btnStop.setOnAction(actionEvent -> {
-            isStop = true;
-            ProgressBarWindow.pause();
             isExit.set(true);
         });
     }
@@ -548,7 +548,7 @@ public class Controller implements Initializable {
      * Affiche les zones d'une espèce
      * @throws EmptyException
      * @see #displayZone(ApiZoneSpeciesResponse,boolean)
-     * @see com.geosis.api.loader.LoaderZoneSpecies#getZoneSpeciesByName(String,String)
+     * @see com.geosis.api.loader.LoaderZoneSpecies#getZoneSpeciesByName(String)
      * @param name
      */
     public void afficheZoneByName (String name) throws EmptyException {

@@ -7,9 +7,12 @@ import com.geosis.app.exception.EmptyException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.*;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
+
+import java.io.File;
 
 public class Main extends Application {
 
@@ -32,6 +35,10 @@ public class Main extends Application {
             primaryStage.setMinHeight(670);
             primaryStage.setTitle("OBIS 3D");
             primaryStage.setScene(scene);
+            //icon
+            File file = new File("resources/icon.jpg");
+            primaryStage.getIcons().add(new Image(file.toURI().toURL().toString()));
+
             scene.getStylesheets().add("com/geosis/app/styleSheet.css");
             primaryStage.show();
             primaryStage.widthProperty().addListener((old,oldVal,newVal)->{
