@@ -14,7 +14,7 @@ import com.geosis.app.exception.EmptyException;
 import com.geosis.app.exception.InputException;
 import com.geosis.app.geometryTools.GeometryTools;
 import com.geosis.app.geometryTools.ZoneControls;
-import com.ludovic.vimont.*;
+import sample.ludovic.vimont.*;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -245,6 +245,8 @@ public class Controller implements Initializable {
                 Point2D point2D = GeometryTools.spaceCoordToGeoCoord(spaceCoord);
                 Location loc = new Location("selected",point2D.getX(),point2D.getY());
 
+                System.out.println(point2D);
+
                 listView.setVisible(true);
                 System.out.println(point2D.getX()+" " + point2D.getY());
                 System.out.println(zoneControls.isInEarth(point2D.getX(),point2D.getY()));
@@ -268,6 +270,7 @@ public class Controller implements Initializable {
 
                     searchObservation = true;
                 }else{
+
                     searchObservation = false;
                     ApiObservationResponse response = loader.getObservations(GeoHashHelper.getGeohash(loc),null);
                     System.out.println(response.getData().size());
@@ -430,7 +433,7 @@ public class Controller implements Initializable {
         Legend.setInvisible(colorsPane, labels);
 
         // supprimer la progressBar
-        if (!vboxResults.getChildren().isEmpty()){
+        if (vboxResults.getChildren().get(vboxResults.getChildren().size() - 1) instanceof StackPane){
             vboxResults.getChildren().remove(vboxResults.getChildren().size() - 1);
         }
 
@@ -523,7 +526,7 @@ public class Controller implements Initializable {
                         zoneControls.addZone(zoneSpecies.getZone());
                         Platform.runLater(() -> {
                             GeometryTools.addPolygon(earth, zoneSpecies.getZone().getCoords(), Legend.getColor(zoneSpecies, minNbSignals, maxNbSignals, colorsPane));
-                            GeometryTools.addBoxHistogramme(earth, zoneSpecies.getZone().getCoords(),GeometryTools.getHeightBox(zoneSpecies, minNbSignals, maxNbSignals, colorsPane), Legend.getColor(zoneSpecies, minNbSignals, maxNbSignals, colorsPane));
+                            //GeometryTools.addBoxHistogramme(earth, zoneSpecies.getZone().getCoords(),GeometryTools.getHeightBox(zoneSpecies, minNbSignals, maxNbSignals, colorsPane), Legend.getColor(zoneSpecies, minNbSignals, maxNbSignals, colorsPane));
                         });
                         updateProgress(finalProgression, apiZoneSpeciesResponse.getData().size());
                         finalProgression += 1;
