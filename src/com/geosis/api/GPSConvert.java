@@ -1,6 +1,6 @@
 package com.geosis.api;
 
-import sample.ludovic.vimont.*;
+import com.ludovic.vimont.*;
 
 public class GPSConvert {
 
