@@ -7,10 +7,10 @@ import com.geosis.api.response.ApiObservationResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 class HttpLoaderSpecies extends LoaderSpecies{
 
@@ -49,9 +49,9 @@ class HttpLoaderSpecies extends LoaderSpecies{
         }
 
         try {
-            String json = Request.readJsonFromUrl(url + param,response).get(10, TimeUnit.SECONDS);
+            String json = Request.readJsonFromUrl(url + param, response).get(30, TimeUnit.SECONDS);
 
-            if(response.getCode() == 404){
+            if (response.getCode() == 404) {
                 return response;
             }
             JSONObject result = new JSONObject(json);
@@ -61,31 +61,34 @@ class HttpLoaderSpecies extends LoaderSpecies{
             for (int i = 0; i < array.length(); i++) {
                 Observation observation = new Observation();
 
-                if(array.getJSONObject(i).has("scientificName")){
+                if (array.getJSONObject(i).has("scientificName")) {
                     observation.setScientificName(array.getJSONObject(i).getString("scientificName"));
                 }
 
-                if(array.getJSONObject(i).has("order")) {
+                if (array.getJSONObject(i).has("order")) {
                     observation.setOrder(array.getJSONObject(i).getString("order"));
                 }
 
-                if(array.getJSONObject(i).has("species")) {
+                if (array.getJSONObject(i).has("species")) {
                     observation.setSpecies(array.getJSONObject(i).getString("species"));
                 }
-                if(array.getJSONObject(i).has("recordedBy")){
+                if (array.getJSONObject(i).has("recordedBy")) {
                     observation.setRecordedBy(array.getJSONObject(i).getString("recordedBy"));
                 }
 
-                if(array.getJSONObject(i).has("superclass")) {
+                if (array.getJSONObject(i).has("superclass")) {
                     observation.setSuperClass(array.getJSONObject(i).getString("superclass"));
                 }
 
                 response.addObservation(observation);
 
             }
-        }catch (Exception e){
-            System.out.println(e.getMessage());
-            response.setMessage(e.getMessage());
+        }catch (InterruptedException e ){
+            response.setMessage("interupt " + e.getMessage());
+        }catch (ExecutionException v){
+            response.setMessage("excec " + v.getMessage());
+        }catch(TimeoutException t){
+            response.setMessage("timeout " + t.getMessage());
         }
 
         return response;

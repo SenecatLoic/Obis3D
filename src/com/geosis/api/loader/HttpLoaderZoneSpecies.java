@@ -24,8 +24,12 @@ class HttpLoaderZoneSpecies extends LoaderZoneSpecies{
         ApiZoneSpeciesResponse response = new ApiZoneSpeciesResponse();
 
         try{
+            /*System.out.println(url + "occurrence/grid/3?scientificname="
+                    + name.replace(" ","%20"));*/
             String json = Request.readJsonFromUrl(url + "occurrence/grid/3?scientificname="
                     + name.replace(" ","%20"),response).get(10, TimeUnit.SECONDS);
+
+            //System.out.println(json);
 
             if(response.getCode() == 404){
                 return response;

@@ -35,7 +35,11 @@ public class TestHttpLoaderSpecies {
     public void testGetObservations(){
         LoaderSpecies loader = LoaderSpecies.createLoaderSpecies();
 
-        ApiObservationResponse observations = loader.getObservations("spd","Manta birostris");
+        ApiObservationResponse observations = loader.getObservations("x1c",null);
+
+        assertEquals(1000,observations.getData().size());
+
+        observations = loader.getObservations("spd","Manta birostris");
 
         assertEquals(observations.getCode(),200);
         assertEquals(3,observations.getData().size());

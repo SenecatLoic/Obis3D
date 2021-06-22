@@ -29,6 +29,7 @@ public class Request {
                 .GET()
                 .build();
         try{
+
             json = client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                     .thenApplyAsync(resp -> {
                         response.setCode(resp.statusCode());
