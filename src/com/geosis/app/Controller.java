@@ -14,8 +14,7 @@ import com.geosis.app.exception.EmptyException;
 import com.geosis.app.exception.InputException;
 import com.geosis.app.geometryTools.GeometryTools;
 import com.geosis.app.geometryTools.ZoneControls;
-import com.ludovic.vimont.GeoHashHelper;
-import com.ludovic.vimont.Location;
+import sample.ludovic.vimont.*;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -148,14 +147,14 @@ public class Controller implements Initializable {
             protected void updateItem(String s, boolean b) {
                 super.updateItem(s, b);
 
-                    setText(s);
+                setText(s);
 
-                    if(searchObservation && s != null){
+                if(searchObservation && s != null){
 
-                        Tooltip tooltip = new TooltipObservation(observations.get(getIndex()));
+                    Tooltip tooltip = new TooltipObservation(observations.get(getIndex()));
 
-                        setTooltip(tooltip);
-                    }
+                    setTooltip(tooltip);
+                }
 
             }
         });
@@ -258,11 +257,13 @@ public class Controller implements Initializable {
 
                 listView.setVisible(true);
                 if(zoneControls.isInEarth(point2D.getX(),point2D.getY())){
+
                     ApiObservationResponse response = loader.getObservations(GeoHashHelper.getGeohash(loc),scientificName.getText());
 
                     observations = response.getData();
 
                     if(response.getCode() == 200){
+
                         ArrayList<String> names = new ArrayList<>();
                         for (Observation ob: observations) {
                             names.add(ob.getScientificName());
@@ -528,7 +529,7 @@ public class Controller implements Initializable {
                         zoneControls.addZone(zoneSpecies.getZone());
                         Platform.runLater(() -> {
                             GeometryTools.addPolygon(earth, zoneSpecies.getZone().getCoords(), Legend.getColor(zoneSpecies, minNbSignals, maxNbSignals, colorsPane));
-                            //GeometryTools.addBoxHistogramme(earth, zoneSpecies.getZone().getCoords()[0],GeometryTools.getHeightBox(zoneSpecies, minNbSignals, maxNbSignals, colorsPane), Legend.getColor(zoneSpecies, minNbSignals, maxNbSignals, colorsPane));
+                            GeometryTools.addBoxHistogramme(earth, zoneSpecies.getZone().getCoords(),GeometryTools.getHeightBox(zoneSpecies, minNbSignals, maxNbSignals, colorsPane), Legend.getColor(zoneSpecies, minNbSignals, maxNbSignals, colorsPane));
                         });
                         updateProgress(finalProgression, apiZoneSpeciesResponse.getData().size());
                         finalProgression += 1;

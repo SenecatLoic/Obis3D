@@ -22,7 +22,6 @@ public class TaskGraph extends Task {
      */
     private ArrayList<CompletableFuture<Object>> completableFutures;
 
-
     private int yearStartInt;
     /**
      * Permet de connaitre ou on en es dans le calcul

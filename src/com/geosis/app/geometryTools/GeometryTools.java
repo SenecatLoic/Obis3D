@@ -104,7 +104,7 @@ public class GeometryTools {
         triangleMesh.getFaces().setAll(faces);
 
         // TODO couleur translucide
-        Color colorTrans = Color.color(color.getRed(), color.getGreen(), color.getBlue(), 1);
+        Color colorTrans = Color.color(color.getRed() / 2, color.getGreen() / 2, color.getBlue() / 2, 0.5);
 
         final PhongMaterial material = new PhongMaterial();
         material.setDiffuseColor(colorTrans);
@@ -128,7 +128,7 @@ public class GeometryTools {
 
         barreHistogramme = new Box(0.01f,0.01f,height);
 
-        Color colorTrans = new Color(color.getRed(), color.getGreen(), color.getBlue(), 0.3);
+        Color colorTrans = Color.color(color.getRed() / 2, color.getGreen() / 2, color.getBlue() / 2, 0.3);
 
         final PhongMaterial material = new PhongMaterial();
         material.setDiffuseColor(colorTrans);
