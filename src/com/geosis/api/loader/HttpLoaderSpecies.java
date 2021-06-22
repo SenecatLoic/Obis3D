@@ -5,6 +5,7 @@ import com.geosis.api.object.Observation;
 import com.geosis.api.response.ApiNameResponse;
 import com.geosis.api.response.ApiObservationResponse;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.concurrent.CompletableFuture;
@@ -41,7 +42,7 @@ class HttpLoaderSpecies extends LoaderSpecies{
     @Override
     public ApiObservationResponse getObservations(String geoHash, String name) {
         ApiObservationResponse response = new ApiObservationResponse();
-        String param = "occurrence?size=1000&geometry=" + geoHash;
+        String param = "occurrence?size=1000&geometry=" + geoHash.substring(0,3);
 
 
         if(name != null){
@@ -59,29 +60,32 @@ class HttpLoaderSpecies extends LoaderSpecies{
             JSONArray array = result.getJSONArray("results");
 
             for (int i = 0; i < array.length(); i++) {
-                Observation observation = new Observation();
+                try{
+                    Observation observation = new Observation();
 
-                if (array.getJSONObject(i).has("scientificName")) {
-                    observation.setScientificName(array.getJSONObject(i).getString("scientificName"));
+                    if (array.getJSONObject(i).has("scientificName")) {
+                        observation.setScientificName(array.getJSONObject(i).getString("scientificName"));
+                    }
+
+                    if (array.getJSONObject(i).has("order")) {
+                        observation.setOrder(array.getJSONObject(i).getString("order"));
+                    }
+
+                    if (array.getJSONObject(i).has("species")) {
+                        observation.setSpecies(array.getJSONObject(i).getString("species"));
+                    }
+                    if (array.getJSONObject(i).has("recordedBy")) {
+                        observation.setRecordedBy(array.getJSONObject(i).getString("recordedBy"));
+                    }
+
+                    if (array.getJSONObject(i).has("superclass")) {
+                        observation.setSuperClass(array.getJSONObject(i).getString("superclass"));
+                    }
+
+                    response.addObservation(observation);
+                }catch (JSONException e){
+                    //on continue de cahrger les données
                 }
-
-                if (array.getJSONObject(i).has("order")) {
-                    observation.setOrder(array.getJSONObject(i).getString("order"));
-                }
-
-                if (array.getJSONObject(i).has("species")) {
-                    observation.setSpecies(array.getJSONObject(i).getString("species"));
-                }
-                if (array.getJSONObject(i).has("recordedBy")) {
-                    observation.setRecordedBy(array.getJSONObject(i).getString("recordedBy"));
-                }
-
-                if (array.getJSONObject(i).has("superclass")) {
-                    observation.setSuperClass(array.getJSONObject(i).getString("superclass"));
-                }
-
-                response.addObservation(observation);
-
             }
         }catch (InterruptedException e ){
             response.setMessage("interupt " + e.getMessage());
