@@ -1,5 +1,6 @@
 package com.geosis.app;
 
+import com.geosis.api.loader.JsonLoaderZoneSpecies;
 import com.geosis.api.loader.LoaderSpecies;
 import com.geosis.api.loader.LoaderZoneSpecies;
 import com.geosis.api.object.Observation;
@@ -14,7 +15,7 @@ import com.geosis.app.exception.EmptyException;
 import com.geosis.app.exception.InputException;
 import com.geosis.app.geometryTools.GeometryTools;
 import com.geosis.app.geometryTools.ZoneControls;
-import sample.ludovic.vimont.*;
+import com.ludovic.vimont.*;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -245,11 +246,8 @@ public class Controller implements Initializable {
                 Point2D point2D = GeometryTools.spaceCoordToGeoCoord(spaceCoord);
                 Location loc = new Location("selected",point2D.getX(),point2D.getY());
 
-                System.out.println(point2D);
-
                 listView.setVisible(true);
-                System.out.println(point2D.getX()+" " + point2D.getY());
-                System.out.println(zoneControls.isInEarth(point2D.getX(),point2D.getY()));
+
                 if(zoneControls.isInEarth(point2D.getX(),point2D.getY())){
 
                     ApiObservationResponse response = loader.getObservations(GeoHashHelper.getGeohash(loc),scientificName.getText());
@@ -273,7 +271,7 @@ public class Controller implements Initializable {
 
                     searchObservation = false;
                     ApiObservationResponse response = loader.getObservations(GeoHashHelper.getGeohash(loc),null);
-                    System.out.println(response.getData().size());
+
                     if(response.getCode() == 200){
                         ArrayList<String> names = new ArrayList<>();
 
@@ -526,7 +524,7 @@ public class Controller implements Initializable {
                         zoneControls.addZone(zoneSpecies.getZone());
                         Platform.runLater(() -> {
                             GeometryTools.addPolygon(earth, zoneSpecies.getZone().getCoords(), Legend.getColor(zoneSpecies, minNbSignals, maxNbSignals, colorsPane));
-                            //GeometryTools.addBoxHistogramme(earth, zoneSpecies.getZone().getCoords(),GeometryTools.getHeightBox(zoneSpecies, minNbSignals, maxNbSignals, colorsPane), Legend.getColor(zoneSpecies, minNbSignals, maxNbSignals, colorsPane));
+                            GeometryTools.addBoxHistogramme(earth, zoneSpecies.getZone().getCoords(),GeometryTools.getHeightBox(zoneSpecies, minNbSignals, maxNbSignals, colorsPane), Legend.getColor(zoneSpecies, minNbSignals, maxNbSignals, colorsPane));
                         });
                         updateProgress(finalProgression, apiZoneSpeciesResponse.getData().size());
                         finalProgression += 1;
@@ -550,7 +548,7 @@ public class Controller implements Initializable {
      * Affiche les zones d'une espèce
      * @throws EmptyException
      * @see #displayZone(ApiZoneSpeciesResponse,boolean)
-     * @see com.geosis.api.loader.LoaderZoneSpecies#getZoneSpeciesByName(String)
+     * @see com.geosis.api.loader.LoaderZoneSpecies#getZoneSpeciesByName(String,String)
      * @param name
      */
     public void afficheZoneByName (String name) throws EmptyException {
@@ -599,5 +597,9 @@ public class Controller implements Initializable {
         };
 
         return animationTimer;
+    }
+
+    public void setTextFieldSearch(String name){
+        scientificName.setText(name);
     }
 }

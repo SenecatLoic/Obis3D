@@ -1,6 +1,9 @@
 package com.geosis.app;
 
+import com.geosis.api.loader.JsonLoaderZoneSpecies;
+import com.geosis.api.response.ApiZoneSpeciesResponse;
 import com.geosis.app.earth.Earth;
+import com.geosis.app.exception.EmptyException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.*;
@@ -25,7 +28,7 @@ public class Main extends Application {
 
             Scene scene = new Scene(root, 1000, 670, false,SceneAntialiasing.BALANCED);
 
-            primaryStage.setMinWidth(1021);
+            primaryStage.setMinWidth(1071);
             primaryStage.setMinHeight(670);
             primaryStage.setTitle("OBIS 3D");
             primaryStage.setScene(scene);
@@ -38,6 +41,15 @@ public class Main extends Application {
             primaryStage.heightProperty().addListener((old,oldVal,newVal)->{
                 Earth.setSizeDiffY((newVal.intValue() - oldVal.intValue())/2);
             });
+
+            JsonLoaderZoneSpecies jsonLoaderZoneSpecies = new JsonLoaderZoneSpecies("resources/Selachii.json");
+            ApiZoneSpeciesResponse response = jsonLoaderZoneSpecies.getZoneSpeciesByName("Selachii");
+            try{
+                controller.displayZone(response,false);
+                controller.setTextFieldSearch("Selachii");
+            }catch (EmptyException e){
+                //on fait rien
+            }
         } catch (Exception e){
             e.printStackTrace();
         }
